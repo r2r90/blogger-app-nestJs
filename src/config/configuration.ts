@@ -1,0 +1,11 @@
+import * as process from "node:process";
+
+export default () => ({
+  port: process.env.PORT || 3003,
+  username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  host: process.env.DB_HOST,
+  dbName: process.env.DB_NAME,
+  localEnv:process.env.NODE_ENV
+  // mongoUri: process.env.MONGODB_DB_URI,
+});
