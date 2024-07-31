@@ -12,7 +12,6 @@ export class BlogController {
 
   @Get()
   getAll() {
-    return 'Hello';
-    // return this.blogService.getAll();
+    return this.blogService.getAll();
   }
 }
