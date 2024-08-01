@@ -5,6 +5,8 @@ import { BlogModule } from '../blog/blog.module';
 import configuration from '../config/configuration';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from '../db/database.module';
+import { MongooseModule } from '@nestjs/mongoose';
+import forFeatureDb from '../db/for-feature.db';
 
 @Module({
   imports: [
@@ -12,6 +14,7 @@ import { DatabaseModule } from '../db/database.module';
       load: [configuration],
       isGlobal: true,
     }),
+    MongooseModule.forFeature(forFeatureDb),
     DatabaseModule,
     BlogModule,
   ],

@@ -1,22 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, ObjectId } from 'mongoose';
+import { HydratedDocument, now } from 'mongoose';
 
-export type BlogDocument = Blog & Document;
+export type BlogDocument = HydratedDocument<Blog>;
 
-@Schema({
-  toJSON: {
-    getters: true,
-    virtuals: true,
-  },
-  timestamps: true,
-})
+@Schema()
 export class Blog {
-  @Prop({
-    type: String,
-    unique: true,
-  })
-  id: ObjectId;
-
   @Prop({
     type: String,
     required: true,
@@ -35,10 +23,10 @@ export class Blog {
   })
   websiteUrl: string;
 
-  @Prop()
-  createdAt: string;
+  @Prop({ default: now() })
+  createdAt: Date;
 
-  @Prop()
+  @Prop({ default: false })
   isMembership: boolean;
 }
 

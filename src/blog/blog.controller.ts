@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { BlogService } from './blog.service';
 import { CreateBlogDto } from './dto /createBlog.dto';
 
@@ -8,6 +16,7 @@ export class BlogController {
 
   @Post()
   create(@Body() blogDto: CreateBlogDto) {
+
     return this.blogService.createBlog(blogDto);
   }
 
@@ -15,4 +24,16 @@ export class BlogController {
   getAll() {
     return this.blogService.getAll();
   }
+
+  @Get(':id')
+  getOne(@Param('id') id: string) {
+    return this.blogService.getOne(id);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string) {
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {}
 }
