@@ -6,9 +6,13 @@ import {
   Param,
   Patch,
   Post,
+  Query,
+  UsePipes,
 } from '@nestjs/common';
 import { BlogService } from './blog.service';
 import { CreateBlogDto } from './dto /createBlog.dto';
+import { BlogQueryPipe } from './pipes/blogQuery.pipe';
+import { BlogQueryInputModel } from './models/blogQuery.input.model';
 
 @Controller('blogs')
 export class BlogController {
@@ -16,13 +20,13 @@ export class BlogController {
 
   @Post()
   create(@Body() blogDto: CreateBlogDto) {
-
     return this.blogService.createBlog(blogDto);
   }
 
   @Get()
-  getAll() {
-    return this.blogService.getAll();
+  @UsePipes(BlogQueryPipe)
+  getAll(@Query() query: BlogQueryInputModel) {
+    return this.blogService.getAll(query);
   }
 
   @Get(':id')
@@ -31,8 +35,7 @@ export class BlogController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string) {
-  }
+  update(@Param('id') id: string) {}
 
   @Delete(':id')
   remove(@Param('id') id: string) {}
