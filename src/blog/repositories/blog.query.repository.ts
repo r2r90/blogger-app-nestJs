@@ -12,8 +12,13 @@ export class BlogQueryRepository {
   ) {}
 
   async getAll(query: BlogQueryInputModel) {
-    const { searchNameTerm, sortBy, sortDirection, pageNumber, pageSize } =
-      query;
+    const {
+      searchNameTerm = null,
+      sortBy = 'createdAt',
+      sortDirection = 'desc',
+      pageNumber = 1,
+      pageSize = 10,
+    } = query;
 
     let filter = {};
     if (searchNameTerm) {
@@ -40,6 +45,8 @@ export class BlogQueryRepository {
   }
 
   async findOne(id: string) {
-    return this.blogModel.findById(id);
+    const findedBlog = await this.blogModel.findById(id);
+    if (!findedBlog) return null;
+    return blogMapper(findedBlog);
   }
 }

@@ -3,9 +3,10 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
-  Patch,
   Post,
+  Put,
   Query,
   UsePipes,
 } from '@nestjs/common';
@@ -34,9 +35,14 @@ export class BlogController {
     return this.blogService.getOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string) {}
+  @Put(':id')
+  @HttpCode(204)
+  update(@Param('id') id: string, @Body() createBlogDto: CreateBlogDto) {
+    return this.blogService.updateBlog(id, createBlogDto);
+  }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {}
+  remove(@Param('id') id: string) {
+    return this.blogService.removeBlog(id);
+  }
 }

@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Req } from "@nestjs/common";
+import { Controller, Delete, Get, HttpCode } from '@nestjs/common';
 import { AppService } from './app.service';
 
 @Controller()
@@ -11,7 +11,8 @@ export class AppController {
   }
 
   @Delete('testing/all-data')
+  @HttpCode(204)
   testing() {
-    return this.appService.deleteAllData()
+    return this.appService.deleteAllData();
   }
 }
