@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Blog, BlogDocument } from '../schemas/blog.schema';
 import { Model } from 'mongoose';
-import { BlogQueryInputModel } from '../models/blogQuery.input.model';
-import { blogMapper } from '../mapper/blog.mapper';
+import { PaginationInputModel } from '../../common/models/pagination.input.model';
+import { blogMapper } from '../../mapper/blog.mapper';
 
 @Injectable()
 export class BlogQueryRepository {
@@ -11,7 +11,7 @@ export class BlogQueryRepository {
     @InjectModel(Blog.name) private readonly blogModel: Model<BlogDocument>,
   ) {}
 
-  async getAll(query: BlogQueryInputModel) {
+  async getAll(query: PaginationInputModel) {
     const {
       searchNameTerm = null,
       sortBy = 'createdAt',
@@ -36,9 +36,9 @@ export class BlogQueryRepository {
     const totalCount = await this.blogModel.countDocuments(filter);
     const pagesCount = Math.ceil(totalCount / pageSize);
     return {
-      pageSize,
-      page: pageNumber,
       pagesCount,
+      page: pageNumber,
+      pageSize: pageSize,
       totalCount,
       items: blogs.map(blogMapper),
     };

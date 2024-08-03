@@ -1,14 +1,14 @@
 import {
-  PipeTransform,
-  Injectable,
   ArgumentMetadata,
   BadRequestException,
+  Injectable,
+  PipeTransform,
 } from '@nestjs/common';
-import { BlogQueryInputModel } from '../models/blogQuery.input.model';
+import { PaginationInputModel } from '../models/pagination.input.model';
 
 @Injectable()
-export class BlogQueryPipe implements PipeTransform {
-  transform(value: any, metadata: ArgumentMetadata): BlogQueryInputModel {
+export class PaginationQueryPipe implements PipeTransform {
+  transform(value: any, metadata: ArgumentMetadata): PaginationInputModel {
     const { searchNameTerm, sortBy, sortDirection, pageNumber, pageSize } =
       value;
 

@@ -1,4 +1,4 @@
-export class BlogQueryInputModel {
+export class PaginationInputModel {
   searchNameTerm?: string;
   sortBy?: string;
   sortDirection?: 'asc' | 'desc';

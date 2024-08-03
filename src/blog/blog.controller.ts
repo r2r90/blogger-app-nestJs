@@ -12,8 +12,9 @@ import {
 } from '@nestjs/common';
 import { BlogService } from './blog.service';
 import { CreateBlogDto } from './dto /createBlog.dto';
-import { BlogQueryPipe } from './pipes/blogQuery.pipe';
-import { BlogQueryInputModel } from './models/blogQuery.input.model';
+import { PaginationQueryPipe } from '../common/pipes/paginationQuery.pipe';
+import { PaginationInputModel } from '../common/models/pagination.input.model';
+import { MongoIdValidationPipe } from '../common/pipes/mongoId.validation.pipe';
 
 @Controller('blogs')
 export class BlogController {
@@ -25,23 +26,26 @@ export class BlogController {
   }
 
   @Get()
-  @UsePipes(BlogQueryPipe)
-  getAll(@Query() query: BlogQueryInputModel) {
+  @UsePipes(PaginationQueryPipe)
+  getAll(@Query() query: PaginationInputModel) {
     return this.blogService.getAll(query);
   }
 
   @Get(':id')
+  @UsePipes(MongoIdValidationPipe)
   getOne(@Param('id') id: string) {
     return this.blogService.getOne(id);
   }
 
   @Put(':id')
+  @UsePipes(MongoIdValidationPipe)
   @HttpCode(204)
   update(@Param('id') id: string, @Body() createBlogDto: CreateBlogDto) {
     return this.blogService.updateBlog(id, createBlogDto);
   }
 
   @Delete(':id')
+  @UsePipes(MongoIdValidationPipe)
   remove(@Param('id') id: string) {
     return this.blogService.removeBlog(id);
   }
