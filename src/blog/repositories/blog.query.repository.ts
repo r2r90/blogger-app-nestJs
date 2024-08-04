@@ -12,14 +12,8 @@ export class BlogQueryRepository {
   ) {}
 
   async getAll(query: PaginationInputModel) {
-    const {
-      searchNameTerm = null,
-      sortBy = 'createdAt',
-      sortDirection = 'desc',
-      pageNumber = 1,
-      pageSize = 10,
-    } = query;
-
+    const { searchNameTerm, pageNumber, pageSize, sortDirection, sortBy } =
+      query;
     let filter = {};
     if (searchNameTerm) {
       filter = {

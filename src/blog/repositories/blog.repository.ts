@@ -9,7 +9,8 @@ export class BlogRepository {
   constructor(@InjectModel(Blog.name) private blogModel: Model<Blog>) {}
 
   async create(createBlogDto: CreateBlogDto): Promise<any> {
-    const createdBlog = new this.blogModel(createBlogDto);
+    const createdAt = new Date().toISOString();
+    const createdBlog = new this.blogModel({ ...createBlogDto, createdAt });
     const savedBlog = await createdBlog.save();
     return {
       id: savedBlog._id,

@@ -17,7 +17,7 @@ export class BlogService {
     return this.blogQueryRepository.getAll(query);
   }
 
-  async getOne(id: string) {
+  async getOne(id) {
     const finded = await this.blogQueryRepository.findOne(id);
     if (!finded) throw new NotFoundException();
     return finded;
@@ -34,6 +34,8 @@ export class BlogService {
   }
 
   async removeBlog(id: string) {
+    const blogToDelete = await this.blogQueryRepository.findOne(id);
+    if (!blogToDelete) throw new NotFoundException();
     const isDeleted = await this.blogRepository.removeBlog(id);
     if (!isDeleted) throw new NotFoundException();
     return true;

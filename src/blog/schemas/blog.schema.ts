@@ -25,7 +25,7 @@ export class Blog {
   })
   websiteUrl: string;
 
-  @Prop({ type: String, default: new Date().toISOString() })
+  @Prop({ type: String })
   createdAt: string;
 
   @Prop({ default: false })
