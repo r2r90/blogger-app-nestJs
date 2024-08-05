@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 import { PostDocument } from '../schemas/post.schema';
 
-export type PostOutputModel = {
+export type PostOutputType = {
   id: Types.ObjectId;
   title: string;
   shortDescription: string;
@@ -11,7 +11,7 @@ export type PostOutputModel = {
   createdAt: string;
 };
 
-export const blogMapper = (post: PostDocument): PostOutputModel => {
+export const postMapper = (post: PostDocument): PostOutputType => {
   return {
     id: post.id,
     title: post.title,
