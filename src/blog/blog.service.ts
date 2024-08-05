@@ -1,10 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BlogRepository } from './repositories/blog.repository';
-import { CreateBlogDto } from './dto /createBlog.dto';
+import { CreateBlogDto } from './dto /create.blog.dto';
 import { BlogQueryRepository } from './repositories/blog.query.repository';
-import { PaginationInputModel } from '../common/models/pagination.input.model';
-import { BlogPaginationType } from '../mapper/blog.mapper';
-import { Blog } from './schemas/blog.schema';
+import { BlogOutputType } from '../common/mappers/blog.mapper';
+import {
+  PaginationInputType,
+  PaginationType,
+} from '../common/pagination/pagination.types';
 
 @Injectable()
 export class BlogService {
@@ -13,11 +15,13 @@ export class BlogService {
     private readonly blogQueryRepository: BlogQueryRepository,
   ) {}
 
-  async getAll(query: PaginationInputModel): Promise<BlogPaginationType<Blog>> {
+  async getAll(
+    query: PaginationInputType,
+  ): Promise<PaginationType<BlogOutputType>> {
     return this.blogQueryRepository.getAll(query);
   }
 
-  async getOne(id) {
+  async getOne(id: string): Promise<BlogOutputType> {
     const finded = await this.blogQueryRepository.findOne(id);
     if (!finded) throw new NotFoundException();
     return finded;

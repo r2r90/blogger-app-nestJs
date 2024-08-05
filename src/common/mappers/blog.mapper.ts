@@ -1,5 +1,5 @@
-import { BlogDocument } from '../blog/schemas/blog.schema';
 import { Types } from 'mongoose';
+import { BlogDocument } from '../schemas/blog.schema';
 
 export type BlogOutputType = {
   id: Types.ObjectId;
@@ -8,14 +8,6 @@ export type BlogOutputType = {
   createdAt: string;
   websiteUrl: string;
   isMembership: boolean;
-};
-
-export type BlogPaginationType<I> = {
-  pagesCount: number;
-  page: number;
-  pageSize: number;
-  totalCount: number;
-  items: I[];
 };
 
 export const blogMapper = (blog: BlogDocument): BlogOutputType => {

@@ -4,11 +4,11 @@ import {
   Injectable,
   PipeTransform,
 } from '@nestjs/common';
-import { PaginationInputModel } from '../models/pagination.input.model';
+import { PaginationInputType } from '../pagination/pagination.types';
 
 @Injectable()
 export class PaginationQueryPipe implements PipeTransform {
-  transform(value: any, metadata: ArgumentMetadata): PaginationInputModel {
+  transform(value: any, metadata: ArgumentMetadata): PaginationInputType {
     const { searchNameTerm, sortBy, sortDirection, pageNumber, pageSize } =
       value;
 

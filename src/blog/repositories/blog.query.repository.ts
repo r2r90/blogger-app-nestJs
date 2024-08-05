@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Blog, BlogDocument } from '../schemas/blog.schema';
+import { Blog, BlogDocument } from '../../common/schemas/blog.schema';
 import { Model } from 'mongoose';
-import { PaginationInputModel } from '../../common/models/pagination.input.model';
-import { blogMapper } from '../../mapper/blog.mapper';
+import {
+  PaginationInputType,
+  PaginationType,
+} from '../../common/pagination/pagination.types';
+import { blogMapper, BlogOutputType } from '../../common/mappers/blog.mapper';
 
 @Injectable()
 export class BlogQueryRepository {
@@ -11,7 +14,9 @@ export class BlogQueryRepository {
     @InjectModel(Blog.name) private readonly blogModel: Model<BlogDocument>,
   ) {}
 
-  async getAll(query: PaginationInputModel) {
+  async getAll(
+    query: PaginationInputType,
+  ): Promise<PaginationType<BlogOutputType>> {
     const { searchNameTerm, pageNumber, pageSize, sortDirection, sortBy } =
       query;
     let filter = {};

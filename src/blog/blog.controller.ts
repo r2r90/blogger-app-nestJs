@@ -12,11 +12,11 @@ import {
   UsePipes,
 } from '@nestjs/common';
 import { BlogService } from './blog.service';
-import { CreateBlogDto } from './dto /createBlog.dto';
+import { CreateBlogDto } from './dto /create.blog.dto';
 import { PaginationQueryPipe } from '../common/pipes/paginationQuery.pipe';
-import { PaginationInputModel } from '../common/models/pagination.input.model';
 import mongoose from 'mongoose';
 import { IsObjectIdPipe } from 'nestjs-object-id';
+import { PaginationInputType } from '../common/pagination/pagination.types';
 
 @Controller('blogs')
 export class BlogController {
@@ -29,8 +29,7 @@ export class BlogController {
 
   @Get()
   @UsePipes(PaginationQueryPipe)
-  getAll(@Query() query: PaginationInputModel) {
-    console.log(query, '     666666');
+  getAll(@Query() query: PaginationInputType) {
     return this.blogService.getAll(query);
   }
 

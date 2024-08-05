@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from '../db/database.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import forFeatureDb from '../db/for-feature.db';
+import { PostModule } from '../post/post.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import forFeatureDb from '../db/for-feature.db';
     MongooseModule.forFeature(forFeatureDb),
     DatabaseModule,
     BlogModule,
+    PostModule,
   ],
   controllers: [AppController],
   providers: [AppService],
