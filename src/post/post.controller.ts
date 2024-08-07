@@ -20,7 +20,6 @@ export class PostController {
   @Get()
   @UsePipes(PaginationQueryPipe)
   getAll(@Query() query: PaginationInputType) {
-    console.log('hello');
     return this.postService.getAllPosts(query);
   }
 

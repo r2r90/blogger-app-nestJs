@@ -45,6 +45,7 @@ export class PostQueryRepository {
 
   async findOne(id: string) {
     const findedPost = await this.postModel.findById(id);
+    console.log('hello');
     if (!findedPost) return null;
     return findedPost;
   }

@@ -3,12 +3,13 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Blog } from '../../common/schemas/blog.schema';
 import { Model } from 'mongoose';
 import { CreateBlogDto } from '../dto /create.blog.dto';
+import { BlogOutputType } from '../../common/mappers/blog.mapper';
 
 @Injectable()
 export class BlogRepository {
   constructor(@InjectModel(Blog.name) private blogModel: Model<Blog>) {}
 
-  async create(createBlogDto: CreateBlogDto): Promise<any> {
+  async create(createBlogDto: CreateBlogDto): Promise<BlogOutputType> {
     const createdAt = new Date().toISOString();
     const createdBlog = new this.blogModel({ ...createBlogDto, createdAt });
     const savedBlog = await createdBlog.save();
