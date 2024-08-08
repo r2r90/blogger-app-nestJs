@@ -77,9 +77,9 @@ export class BlogController {
     return await this.postService.createPost(createPostFromBlogData);
   }
 
-  @Get(':id/posts')
+  @Get(':blogId/posts')
   async getPostsByBlogId(
-    @Param('id', ParseObjectIdPipe) blogId: string,
+    @Param('blogId', IsObjectIdPipe) blogId: string,
     @Query(PaginationQueryPipe) query: PaginationInputType,
   ) {
     const blogToGet = await this.blogService.getOne(blogId);

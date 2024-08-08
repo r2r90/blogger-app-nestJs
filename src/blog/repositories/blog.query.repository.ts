@@ -52,7 +52,7 @@ export class BlogQueryRepository {
     return blogMapper(findedBlog);
   }
 
-  async findPostsByBlogId(id: string, query: PaginationInputType) {
+  async findPostsByBlogId(blogId: string, query: PaginationInputType) {
     const { searchNameTerm, pageNumber, pageSize, sortDirection, sortBy } =
       query;
     let filter = {};
@@ -65,12 +65,11 @@ export class BlogQueryRepository {
     }
 
     const posts = await this.postModel
-      .find({ blogId: id })
-      .find(filter)
+      .find({ blogId })
       .sort({ [sortBy]: sortDirection })
       .skip((pageNumber - 1) * pageSize)
       .limit(pageSize);
-    const totalCount = await this.postModel.countDocuments(filter);
+    const totalCount = await this.postModel.countDocuments({ blogId }, filter);
     const pagesCount = Math.ceil(totalCount / pageSize);
     return {
       pagesCount,
