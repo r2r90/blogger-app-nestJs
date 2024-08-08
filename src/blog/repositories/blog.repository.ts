@@ -24,7 +24,6 @@ export class BlogRepository {
   }
 
   async update(id: string, updateBlogDto: CreateBlogDto): Promise<any> {
-    console.log(id);
     const res = await this.blogModel.findOneAndUpdate(
       { _id: id },
       updateBlogDto,

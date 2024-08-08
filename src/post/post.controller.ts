@@ -18,8 +18,7 @@ export class PostController {
   constructor(private postService: PostService) {}
 
   @Get()
-  @UsePipes(PaginationQueryPipe)
-  getAll(@Query() query: PaginationInputType) {
+  getAll(@Query(PaginationQueryPipe) query: PaginationInputType) {
     return this.postService.getAllPosts(query);
   }
 

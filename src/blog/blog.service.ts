@@ -23,7 +23,8 @@ export class BlogService {
 
   async getOne(id: string): Promise<BlogOutputType> {
     const finded = await this.blogQueryRepository.findOne(id);
-    if (!finded) throw new NotFoundException();
+
+    if (!finded) throw new NotFoundException('Cannot find blog by id');
     return finded;
   }
 
@@ -43,5 +44,9 @@ export class BlogService {
     const isDeleted = await this.blogRepository.removeBlog(id);
     if (!isDeleted) throw new NotFoundException();
     return true;
+  }
+
+  async getPostsByBlogId(id: string, query: PaginationInputType) {
+    return await this.blogQueryRepository.findPostsByBlogId(id, query);
   }
 }

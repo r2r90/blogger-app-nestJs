@@ -19,7 +19,7 @@ export class Post {
   @Prop({ type: Types.ObjectId, ref: 'Blog', required: true })
   blogId: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'Blog' })
+  @Prop({ type: String })
   blogName: string;
 
   @Prop({ type: String })

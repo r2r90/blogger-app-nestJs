@@ -5,6 +5,7 @@ import {
   PipeTransform,
 } from '@nestjs/common';
 import { PaginationInputType } from '../pagination/pagination.types';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class PaginationQueryPipe implements PipeTransform {

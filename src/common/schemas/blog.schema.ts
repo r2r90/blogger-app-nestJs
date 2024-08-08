@@ -32,7 +32,7 @@ export class Blog {
   @Prop({ default: false })
   isMembership: boolean;
 
-  @Prop({ type: [Types.ObjectId], ref: Post.name })
+  @Prop({ type: [Types.ObjectId], ref: Post.name, required: false })
   posts: Post[];
 }
 

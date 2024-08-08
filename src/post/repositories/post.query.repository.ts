@@ -6,7 +6,7 @@ import {
   PaginationInputType,
   PaginationType,
 } from '../../common/pagination/pagination.types';
-import { postMapper, PostOutputType } from '../../common/mappers/post.mapper.';
+import { postMapper, PostOutputType } from '../../common/mappers/post.mapper';
 
 @Injectable()
 export class PostQueryRepository {
@@ -45,8 +45,7 @@ export class PostQueryRepository {
 
   async findOne(id: string) {
     const findedPost = await this.postModel.findById(id);
-    console.log('hello');
     if (!findedPost) return null;
-    return findedPost;
+    return postMapper(findedPost);
   }
 }
