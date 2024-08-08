@@ -10,17 +10,17 @@ export type PostInputModel = {
 };
 
 export class CreatePostDto extends CreatePostFromBlogDto {
-  // @IsString()
-  // @MaxLength(30)
-  // name: string;
-  //
-  // @IsString()
-  // @MaxLength(100)
-  // shortDescription: string;
-  //
-  // @IsString()
-  // @MaxLength(1000)
-  // content: string;
+  @IsString()
+  @MaxLength(30)
+  name: string;
+
+  @IsString()
+  @MaxLength(100)
+  shortDescription: string;
+
+  @IsString()
+  @MaxLength(1000)
+  content: string;
 
   @IsString()
   @IsObjectId()

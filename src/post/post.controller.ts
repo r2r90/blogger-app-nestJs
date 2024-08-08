@@ -1,11 +1,13 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   Param,
   Post,
+  Put,
   Query,
-  UsePipes,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create.post.dto';
@@ -30,5 +32,20 @@ export class PostController {
   @Post()
   create(@Body() createPostDto: CreatePostDto) {
     return this.postService.createPost(createPostDto);
+  }
+
+  @Put(':id')
+  @HttpCode(204)
+  update(
+    @Param('id', IsObjectIdPipe) id: string,
+    @Body() updatePostData: CreatePostDto,
+  ) {
+    return this.postService.updatePost(id, updatePostData);
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  remove(@Param('id', IsObjectIdPipe) id: string) {
+    return this.postService.deletePost(id);
   }
 }

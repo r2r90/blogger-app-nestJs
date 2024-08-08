@@ -2,6 +2,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Post } from '../../common/schemas/post.schema';
 import { CreatePostDto } from '../dto/create.post.dto';
+import { NotFoundException } from '@nestjs/common';
 
 export class PostRepository {
   constructor(
@@ -31,5 +32,19 @@ export class PostRepository {
         newestLikes: [],
       },
     };
+  }
+
+  async update(id: string, data: CreatePostDto) {
+    const res = await this.postModel.findOneAndUpdate({ _id: id }, data, {
+      new: true,
+    });
+    if (!res) throw new NotFoundException();
+    return res;
+  }
+
+  async remove(id: string) {
+    const res = await this.postModel.findByIdAndDelete(id);
+    if (!res) return null;
+    return res;
   }
 }

@@ -22,9 +22,17 @@ export class PostService {
     return await this.postRepository.createPost(createPostDto, findedBlog.name);
   }
 
-  async deletePost(id: string) {}
+  async deletePost(id: string) {
+    const postToDelete = await this.getOnePost(id);
+    if (!postToDelete) throw new NotFoundException();
+    const isDeleted = await this.postRepository.remove(id);
+    if (!isDeleted) throw new NotFoundException('Cannot delete blog id');
+    return true;
+  }
 
-  async updatePost(id: string): Promise<void> {}
+  async updatePost(id: string, updateBlogData: CreatePostDto) {
+    return this.postRepository.update(id, updateBlogData);
+  }
 
   async getOnePost(id: string) {
     const finded = await this.postQueryRepository.findOne(id);
