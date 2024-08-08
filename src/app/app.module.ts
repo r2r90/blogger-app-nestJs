@@ -8,6 +8,7 @@ import { DatabaseModule } from '../db/database.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import forFeatureDb from '../db/for-feature.db';
 import { PostModule } from '../post/post.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { PostModule } from '../post/post.module';
     DatabaseModule,
     BlogModule,
     PostModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
