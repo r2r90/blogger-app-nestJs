@@ -24,4 +24,10 @@ export class UsersRepository {
       login: savedUser.login,
     };
   }
+
+  async remove(id: string) {
+    const res = await this.userModel.findByIdAndDelete(id);
+    if (!res) return null;
+    return res;
+  }
 }

@@ -5,13 +5,19 @@ import {
   PipeTransform,
 } from '@nestjs/common';
 import { PaginationInputType } from '../pagination/pagination.types';
-import { Types } from 'mongoose';
 
 @Injectable()
 export class PaginationQueryPipe implements PipeTransform {
   transform(value: any, metadata: ArgumentMetadata): PaginationInputType {
-    const { searchNameTerm, sortBy, sortDirection, pageNumber, pageSize } =
-      value;
+    const {
+      searchNameTerm,
+      searchLoginTerm,
+      searchEmailTerm,
+      sortBy,
+      sortDirection,
+      pageNumber,
+      pageSize,
+    } = value;
 
     const validSortDirections = ['asc', 'desc'];
     if (
@@ -23,6 +29,8 @@ export class PaginationQueryPipe implements PipeTransform {
 
     return {
       searchNameTerm: searchNameTerm ?? null,
+      searchLoginTerm: searchLoginTerm ?? null,
+      searchEmailTerm: searchEmailTerm ?? null,
       sortBy: sortBy ?? 'createdAt',
       sortDirection: (sortDirection ?? 'desc').toLowerCase() as 'asc' | 'desc',
       pageNumber: pageNumber ? +pageNumber : 1,

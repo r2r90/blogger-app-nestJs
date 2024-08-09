@@ -10,14 +10,12 @@ import {
   Post,
   Put,
   Query,
-  Req,
-  UsePipes,
 } from '@nestjs/common';
 import { BlogService } from './blog.service';
 import { CreateBlogDto } from './dto /create.blog.dto';
 import { PaginationQueryPipe } from '../common/pipes/paginationQuery.pipe';
 import mongoose from 'mongoose';
-import { IsObjectIdPipe, ParseObjectIdPipe } from 'nestjs-object-id';
+import { IsObjectIdPipe } from 'nestjs-object-id';
 import { PaginationInputType } from '../common/pagination/pagination.types';
 import { PostService } from '../post/post.service';
 import { CreatePostFromBlogDto } from '../post/dto/create.post.from.blog.dto';

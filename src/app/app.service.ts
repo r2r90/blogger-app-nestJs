@@ -3,12 +3,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Blog } from '../common/schemas/blog.schema';
 import { Post } from '../common/schemas/post.schema';
 import { Model } from 'mongoose';
+import { User } from '../common/schemas/users.schema';
 
 @Injectable()
 export class AppService {
   constructor(
     @InjectModel(Blog.name) private blogModel: Model<Blog>,
     @InjectModel(Post.name) private postModel: Model<Post>,
+    @InjectModel(User.name) private userModel: Model<User>,
   ) {}
 
   getHello(): string {
@@ -18,5 +20,6 @@ export class AppService {
   async deleteAllData() {
     await this.blogModel.deleteMany({});
     await this.postModel.deleteMany({});
+    await this.userModel.deleteMany({});
   }
 }
