@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { BlogDocument } from '../schemas/blog.schema';
+import { BlogDocument } from '../../db/schemas/blog.schema';
 
 export type BlogOutputType = {
   id: Types.ObjectId;

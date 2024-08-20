@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Post, PostDocument } from '../../common/schemas/post.schema';
+import { Post, PostDocument } from '../../db/schemas/post.schema';
 import {
   PaginationInputType,
   PaginationType,
 } from '../../common/pagination/pagination.types';
-import { postMapper, PostOutputType } from '../../common/mappers/post.mapper';
+import { postMapper, PostOutputType } from '../mapper/post.mapper';
 
 @Injectable()
 export class PostQueryRepository {

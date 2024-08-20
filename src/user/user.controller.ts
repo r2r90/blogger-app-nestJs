@@ -8,19 +8,19 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { UserService } from './user.service';
 import { IsObjectIdPipe } from 'nestjs-object-id';
 import { CreateUserDto } from './dto/create.user.dto';
 import { PaginationInputType } from '../common/pagination/pagination.types';
 import { PaginationQueryPipe } from '../common/pipes/paginationQuery.pipe';
 
 @Controller('users')
-export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+export class UserController {
+  constructor(private readonly usersService: UserService) {}
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.createUser(createUserDto);
+    return this.usersService.save(createUserDto);
   }
 
   @Get()

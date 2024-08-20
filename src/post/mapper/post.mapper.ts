@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { PostDocument } from '../schemas/post.schema';
+import { PostDocument } from '../../db/schemas/post.schema';
 
 export type LikeDetails = {
   description?: 'None' | 'Like' | 'Dislike';

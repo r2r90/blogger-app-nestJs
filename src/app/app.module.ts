@@ -8,7 +8,9 @@ import { DatabaseModule } from '../db/database.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import forFeatureDb from '../db/for-feature.db';
 import { PostModule } from '../post/post.module';
-import { UsersModule } from '../users/users.module';
+import { UserModule } from '../user/user.module';
+import { AuthModule } from '../auth/auth.module';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
@@ -20,7 +22,9 @@ import { UsersModule } from '../users/users.module';
     DatabaseModule,
     BlogModule,
     PostModule,
-    UsersModule,
+    UserModule,
+    AuthModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

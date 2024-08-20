@@ -1,6 +1,6 @@
-import { Blog, BlogSchema } from '../common/schemas/blog.schema';
-import { Post, PostSchema } from '../common/schemas/post.schema';
-import { User, UserSchema } from '../common/schemas/users.schema';
+import { Blog, BlogSchema } from './schemas/blog.schema';
+import { Post, PostSchema } from './schemas/post.schema';
+import { User, UserSchema } from './schemas/users.schema';
 
 export default [
   { name: Blog.name, schema: BlogSchema },

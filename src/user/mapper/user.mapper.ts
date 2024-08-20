@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { UserDocument } from '../schemas/users.schema';
+import { UserDocument } from '../../db/schemas/users.schema';
 
 export type UserOutputType = {
   id: Types.ObjectId;

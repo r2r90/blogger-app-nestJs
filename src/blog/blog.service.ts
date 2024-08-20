@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { BlogRepository } from './repositories/blog.repository';
 import { CreateBlogDto } from './dto /create.blog.dto';
 import { BlogQueryRepository } from './repositories/blog.query.repository';
-import { BlogOutputType } from '../common/mappers/blog.mapper';
+import { BlogOutputType } from './mapper/blog.mapper';
 import {
   PaginationInputType,
   PaginationType,

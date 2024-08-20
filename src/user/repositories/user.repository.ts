@@ -1,18 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from '../dto/create.user.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from '../../common/schemas/users.schema';
+import { User } from '../../db/schemas/users.schema';
 import { Model } from 'mongoose';
+import { UserEmailConfirmation } from '../types';
 
 @Injectable()
-export class UsersRepository {
+export class UserRepository {
   @InjectModel(User.name) private readonly userModel: Model<User>;
 
-  async create(createUserDto: CreateUserDto) {
-    const createdAt = new Date().toISOString();
+  async create(data: {
+    login: string;
+    email: string;
+    password: string;
+    emailConfirmation: UserEmailConfirmation;
+    createdAt: string;
+  }) {
     const createdUser = new this.userModel({
-      ...createUserDto,
-      createdAt,
+      ...data,
     });
 
     const savedUser = await createdUser.save();
@@ -22,6 +26,7 @@ export class UsersRepository {
       createdAt: savedUser.createdAt,
       email: savedUser.email,
       login: savedUser.login,
+      emailConfirmation: savedUser.emailConfirmation,
     };
   }
 

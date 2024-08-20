@@ -1,14 +1,9 @@
-import {
-  ArgumentMetadata,
-  BadRequestException,
-  Injectable,
-  PipeTransform,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
 import { PaginationInputType } from '../pagination/pagination.types';
 
 @Injectable()
 export class PaginationQueryPipe implements PipeTransform {
-  transform(value: any, metadata: ArgumentMetadata): PaginationInputType {
+  transform(value: any): PaginationInputType {
     const {
       searchNameTerm,
       searchLoginTerm,

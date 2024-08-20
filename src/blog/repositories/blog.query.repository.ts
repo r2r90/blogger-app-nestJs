@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Blog, BlogDocument } from '../../common/schemas/blog.schema';
+import { Blog, BlogDocument } from '../../db/schemas/blog.schema';
 import { Model } from 'mongoose';
 import {
   PaginationInputType,
   PaginationType,
 } from '../../common/pagination/pagination.types';
-import { blogMapper, BlogOutputType } from '../../common/mappers/blog.mapper';
-import { Post, PostDocument } from '../../common/schemas/post.schema';
-import { postMapper } from '../../common/mappers/post.mapper';
+import { blogMapper, BlogOutputType } from '../mapper/blog.mapper';
+import { Post, PostDocument } from '../../db/schemas/post.schema';
+import { postMapper } from '../../post/mapper/post.mapper';
 
 @Injectable()
 export class BlogQueryRepository {

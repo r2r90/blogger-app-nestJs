@@ -1,10 +1,10 @@
-import { User } from '../../common/schemas/users.schema';
+import { User } from '../../db/schemas/users.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { PaginationInputType } from '../../common/pagination/pagination.types';
-import { userMapper } from '../../common/mappers/user.mapper';
+import { userMapper } from '../mapper/user.mapper';
 
-export class UsersQueryRepository {
+export class UserQueryRepository {
   @InjectModel(User.name) private readonly userModel: Model<User>;
 
   async getAll(query: PaginationInputType) {
@@ -59,5 +59,13 @@ export class UsersQueryRepository {
     const findUser = await this.userModel.findById(id);
     if (!findUser) return null;
     return true;
+  }
+
+  async findByLoginOrEmail(loginOrEmail: string) {
+    const user = await this.userModel.findOne({
+      $or: [{ login: loginOrEmail }, { email: loginOrEmail }],
+    });
+    if (!user) return null;
+    return user;
   }
 }
