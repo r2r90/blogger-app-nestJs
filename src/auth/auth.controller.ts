@@ -3,33 +3,34 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   Param,
   Post,
-  Query,
 } from '@nestjs/common';
-import { LoginUserDto, RegisterUserDto } from './dto';
+import { ConfirmCodeDto, LoginUserDto, RegisterUserDto } from './dto';
 import { AuthService } from './auth.service';
-import { MailService } from '../mail/mail.service';
+import { SkipThrottle } from '@nestjs/throttler';
 
+@SkipThrottle()
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly mailService: MailService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('registration')
+  @HttpCode(204)
   async register(@Body() dto: RegisterUserDto) {
     const user = await this.authService.register(dto);
     if (!user)
       throw new BadRequestException(
         `Can't register user with data: ${JSON.stringify(dto)}`,
       );
+    return user;
   }
 
   @Post('registration-confirmation')
-  confirmRegisterCode(@Query('code') code: string) {
-    console.log(code);
+  @HttpCode(204)
+  async confirmRegisterCode(@Body() code: ConfirmCodeDto) {
+    return await this.authService.confirmCode(code);
   }
 
   @Post('registration-email-resending')

@@ -11,6 +11,8 @@ import { PostModule } from '../post/post.module';
 import { UserModule } from '../user/user.module';
 import { AuthModule } from '../auth/auth.module';
 import { MailModule } from '../mail/mail.module';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -18,6 +20,13 @@ import { MailModule } from '../mail/mail.module';
       load: [configuration],
       isGlobal: true,
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 10000,
+        limit: 5,
+      },
+    ]),
+
     MongooseModule.forFeature(forFeatureDb),
     DatabaseModule,
     BlogModule,
@@ -27,6 +36,12 @@ import { MailModule } from '../mail/mail.module';
     MailModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

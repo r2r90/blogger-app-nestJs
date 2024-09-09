@@ -58,7 +58,7 @@ export class UserQueryRepository {
   async findOne(id: string) {
     const findUser = await this.userModel.findById(id);
     if (!findUser) return null;
-    return true;
+    return findUser;
   }
 
   async findByLoginOrEmail(loginOrEmail: string) {
@@ -66,6 +66,15 @@ export class UserQueryRepository {
       $or: [{ login: loginOrEmail }, { email: loginOrEmail }],
     });
     if (!user) return null;
+    return user;
+  }
+
+  async getUserByConfirmationCode(confirmCodeDto: string) {
+    const user = await this.userModel.findOne({
+      'emailConfirmation.confirmationCode': confirmCodeDto,
+    });
+    if (!user) return null;
+
     return user;
   }
 }

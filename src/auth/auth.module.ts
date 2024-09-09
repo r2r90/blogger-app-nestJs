@@ -10,16 +10,20 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { options } from './config';
 import { MailService } from '../mail/mail.service';
+import { AuthRepository } from './repositories/auth.repository';
+import { BasicStrategy } from './basic-auth.strategy';
 
 @Module({
   controllers: [AuthController],
   providers: [
     AuthService,
+    AuthRepository,
     AuthQueryRepository,
-    UserService,
+    BasicStrategy,
+    MailService,
     UserQueryRepository,
     UserRepository,
-    MailService
+    UserService,
   ],
   imports: [PassportModule, JwtModule.registerAsync(options()), UserModule],
 })

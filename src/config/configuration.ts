@@ -7,6 +7,7 @@ export default () => ({
   host: process.env.DB_HOST,
   dbName: process.env.DB_NAME,
   localEnv: process.env.NODE_ENV,
+  localDb: process.env.MONGO_DB_URI_LOCAL,
   jwtSecret: process.env.JWT_SECRET,
   jwtExpiration: process.env.JWT_EXPIRE_IN,
 

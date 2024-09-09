@@ -18,8 +18,11 @@ export class MongooseConfigService implements MongooseOptionsFactory {
     const port = this.config.get('port');
     const dbName = this.config.get('dbName');
     const isLocal = this.config.get('NODE_ENV') === 'LOCAL';
+    const localDB = this.config.get('localDb');
 
-    const uri = `mongodb+srv://${username}:${password}@${host}/${dbName}?retryWrites=true&w=majority&appName=blog-app-nest`;
+
+    //const uri = `mongodb+srv://${username}:${password}@${host}/${dbName}?retryWrites=true&w=majority&appName=blog-app-nest`;
+    const uri = `mongodb://localhost:27017/${dbName}`;
     return { uri };
   }
 }

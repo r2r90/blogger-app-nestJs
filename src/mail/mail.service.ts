@@ -15,7 +15,8 @@ export class MailService {
         subject: 'Registration Confirmation Code',
         html: `<h1>Thank you for your registration</h1>
  <p>To finish registration please follow the link below:
-     <a href="https://blogger-app-nest-js.vercel.app/auth/registration-confirmation?code=${confirmCode}">complete registration</a>
+     <a href="https://localhost:3000/auth/registration-confirmation?code=${confirmCode}" methods="POST">complete registration</a>
+    
  </p>`,
       });
 
