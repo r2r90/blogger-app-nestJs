@@ -14,22 +14,27 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
 
-    if (status >= 400 && status < 500) {
+    if (status > 399 && status < 500) {
       const errorResponse = {
-        errorMessages: [],
+        errorsMessages: [],
       };
 
       const responseBody: any = exception.getResponse();
-      responseBody.message.forEach((m: any) =>
-        errorResponse.errorMessages.push(m),
-      );
+      if (Array.isArray(responseBody.message)) {
+        responseBody.message.forEach((m: any) =>
+          errorResponse.errorsMessages.push(m),
+        );
+      } else {
+        errorResponse.errorsMessages = responseBody.message;
+      }
 
       response.status(status).send(errorResponse);
+    } else {
+      response.status(status).json({
+        statusCode: status,
+        timestamp: new Date().toISOString(),
+        path: request.url,
+      });
     }
-    response.status(status).json({
-      statusCode: status,
-      timestamp: new Date().toISOString(),
-      path: request.url,
-    });
   }
 }

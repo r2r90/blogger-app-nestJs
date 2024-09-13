@@ -10,11 +10,6 @@ import forFeatureDb from '../db/for-feature.db';
   controllers: [UserController],
   providers: [UserService, UserRepository, UserQueryRepository],
   imports: [MongooseModule.forFeature(forFeatureDb)],
-  exports: [
-    UserService,
-    UserRepository,
-    UserQueryRepository,
-    MongooseModule,
-  ],
+  exports: [UserService, UserRepository, UserQueryRepository, MongooseModule],
 })
 export class UserModule {}

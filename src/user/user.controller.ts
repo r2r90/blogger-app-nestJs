@@ -22,7 +22,7 @@ export class UserController {
   constructor(private readonly usersService: UserService) {}
 
   @Post()
-  // @UseGuards(AuthGuard('basic'))
+  @UseGuards(AuthGuard('basic'))
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.createUser(createUserDto);
   }

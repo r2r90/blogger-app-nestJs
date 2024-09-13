@@ -65,8 +65,16 @@ export class UserQueryRepository {
     const user = await this.userModel.findOne({
       $or: [{ login: loginOrEmail }, { email: loginOrEmail }],
     });
+
     if (!user) return null;
     return user;
+  }
+
+  isEmailExist(email: string) {
+
+    return this.userModel.findOne({
+      email: email,
+    });
   }
 
   async getUserByConfirmationCode(confirmCodeDto: string) {

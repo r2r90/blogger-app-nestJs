@@ -38,4 +38,6 @@ export class User {
   recoveryCode: string | null;
 }
 
+export type CreateUserDto = Omit<User, '_id'>;
+
 export const UserSchema = SchemaFactory.createForClass(User);

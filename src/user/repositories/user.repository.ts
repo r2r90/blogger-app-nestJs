@@ -1,17 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from '../../db/schemas/users.schema';
+import { CreateUserDto, User } from '../../db/schemas/users.schema';
 import { Model } from 'mongoose';
-import { CreateUserDto } from '../dto/create.user.dto';
 
 @Injectable()
 export class UserRepository {
   @InjectModel(User.name) private readonly userModel: Model<User>;
 
-  async create(createUserDto: CreateUserDto) {
+  async create(data: CreateUserDto) {
     const createdAt = new Date().toISOString();
     const createdUser = new this.userModel({
-      ...createUserDto,
+      ...data,
       createdAt,
     });
 
@@ -30,6 +29,7 @@ export class UserRepository {
     if (!res) return null;
     return res;
   }
+
 
 
 }

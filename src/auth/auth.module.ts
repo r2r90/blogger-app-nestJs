@@ -7,11 +7,12 @@ import { UserService } from '../user/user.service';
 import { UserQueryRepository } from '../user/repositories/user.query.repository';
 import { UserModule } from '../user/user.module';
 import { PassportModule } from '@nestjs/passport';
-import { JwtModule } from '@nestjs/jwt';
-import { options } from './config';
 import { MailService } from '../mail/mail.service';
 import { AuthRepository } from './repositories/auth.repository';
-import { BasicStrategy } from './basic-auth.strategy';
+import { BasicStrategy } from './strategies/basic-auth.strategy';
+import { LocalStrategy } from './strategies/local.strategy';
+import { JwtModule } from '@nestjs/jwt';
+import { options } from './config';
 
 @Module({
   controllers: [AuthController],
@@ -24,7 +25,8 @@ import { BasicStrategy } from './basic-auth.strategy';
     UserQueryRepository,
     UserRepository,
     UserService,
+    LocalStrategy,
   ],
-  imports: [PassportModule, JwtModule.registerAsync(options()), UserModule],
+  imports: [PassportModule, UserModule, JwtModule.registerAsync(options())],
 })
 export class AuthModule {}

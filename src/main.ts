@@ -3,12 +3,17 @@ import { AppModule } from './app/app.module';
 import { ConfigService } from '@nestjs/config';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './common/filters/custom.exception.filter';
+import { useContainer, Validator } from 'class-validator';
+
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  useContainer(app.select(AppModule), { fallbackOnErrors: true });
   // app.setGlobalPrefix('/api');
   app.useGlobalPipes(
     new ValidationPipe({
+      stopAtFirstError: true,
       exceptionFactory: (errors) => {
         const responseErrors = [];
 

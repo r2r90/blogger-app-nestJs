@@ -4,12 +4,16 @@ import {
   Controller,
   Get,
   HttpCode,
+  HttpStatus,
   Param,
   Post,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
-import { ConfirmCodeDto, LoginUserDto, RegisterUserDto } from './dto';
+import { ConfirmCodeDto, EmailValidationDto, RegisterUserDto } from './dto';
 import { AuthService } from './auth.service';
 import { SkipThrottle } from '@nestjs/throttler';
+import { PassportLocalGuard } from './guards/passport.local.guard';
 
 @SkipThrottle()
 @Controller('auth')
@@ -27,19 +31,30 @@ export class AuthController {
     return user;
   }
 
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Post('registration-confirmation')
-  @HttpCode(204)
   async confirmRegisterCode(@Body() code: ConfirmCodeDto) {
     return await this.authService.confirmCode(code);
   }
 
-  @Post('registration-email-resending')
-  @Post('password-recovery')
-  @Post('new-password')
+  @HttpCode(HttpStatus.OK)
   @Post('login')
-  async login(@Body() dto: LoginUserDto) {
-    const user = await this.authService.login(dto);
+  @UseGuards(PassportLocalGuard)
+  async login(@Request() request: any) {
+    return this.authService.signIn(request.user);
   }
+
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post('registration-email-resending')
+  async registerEmailResend(@Body() email: EmailValidationDto) {
+    return this.authService.resendValidationEmail(email);
+  }
+
+  @Post('password-recovery')
+  async passwordRecoveryRequest() {}
+
+  @Post('new-password')
+  async newPasswordCreate() {}
 
   @Get('me')
   async getMe(@Param() id: string) {}

@@ -5,22 +5,7 @@ import { Model } from 'mongoose';
 
 @Injectable()
 export class AuthRepository {
-  constructor(
-    @InjectModel(User.name) private userModel: Model<User>
-
-  ) {}
-
-  async create(data) {
-    try {
-      const createdUser = new this.userModel({
-        ...data,
-      });
-      await createdUser.save();
-      return true;
-    } catch (e) {
-      console.log('Cannot create user in database: ', e);
-    }
-  }
+  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async confirmUser(id: string) {
     const confirmUser = await this.userModel.findByIdAndUpdate(
@@ -32,5 +17,13 @@ export class AuthRepository {
     return !!confirmUser;
   }
 
+  async updateConfirmationCode(id: string, newCode: string) {
+    const updateCode = await this.userModel.findByIdAndUpdate(
+      { _id: id },
+      { $set: { 'emailConfirmation.confirmationCode': newCode } },
+      { new: true },
+    );
 
+    return !!updateCode;
+  }
 }

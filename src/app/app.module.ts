@@ -13,6 +13,7 @@ import { AuthModule } from '../auth/auth.module';
 import { MailModule } from '../mail/mail.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { NameIsExistConstraint } from '../shared/decorators/validate/name-is-exist.decorator';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { APP_GUARD } from '@nestjs/core';
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
+    NameIsExistConstraint,
   ],
 })
 export class AppModule {}
