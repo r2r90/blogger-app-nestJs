@@ -21,8 +21,8 @@ export class MongooseConfigService implements MongooseOptionsFactory {
     const localDB = this.config.get('localDb');
 
 
-    //const uri = `mongodb+srv://${username}:${password}@${host}/${dbName}?retryWrites=true&w=majority&appName=blog-app-nest`;
-    const uri = `mongodb://localhost:27017/${dbName}`;
+    const uri = `mongodb+srv://${username}:${password}@${host}/${dbName}?retryWrites=true&w=majority&appName=blog-app-nest`;
+   // const uri = `mongodb://localhost:27017/${dbName}`;
     return { uri };
   }
 }
