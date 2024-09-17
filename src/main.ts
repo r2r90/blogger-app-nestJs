@@ -36,18 +36,18 @@ async function bootstrap() {
   // app.useGlobalFilters(new HttpExceptionFilter());
   const configService = app.get(ConfigService);
   const port = configService.get<number>('port');
-  const vercelUrl = 'https://blogger-app-nest-js.vercel.app';
+  const serverUrl = 'http://localhost:3003';
   // get the swagger json file (if app is running in development mode)
   if (process.env.NODE_ENV === 'development') {
     // write swagger ui files
-    get(`${vercelUrl}/swagger/swagger-ui-bundle.js`, function (response) {
+    get(`${serverUrl}/swagger/swagger-ui-bundle.js`, function (response) {
       response.pipe(createWriteStream('swagger-static/swagger-ui-bundle.js'));
       console.log(
         `Swagger UI bundle file written to: '/swagger-static/swagger-ui-bundle.js'`,
       );
     });
 
-    get(`${vercelUrl}/swagger/swagger-ui-init.js`, function (response) {
+    get(`${serverUrl}/swagger/swagger-ui-init.js`, function (response) {
       response.pipe(createWriteStream('swagger-static/swagger-ui-init.js'));
       console.log(
         `Swagger UI init file written to: '/swagger-static/swagger-ui-init.js'`,
@@ -55,7 +55,7 @@ async function bootstrap() {
     });
 
     get(
-      `${vercelUrl}/swagger/swagger-ui-standalone-preset.js`,
+      `${serverUrl}/swagger/swagger-ui-standalone-preset.js`,
       function (response) {
         response.pipe(
           createWriteStream('swagger-static/swagger-ui-standalone-preset.js'),
@@ -66,7 +66,7 @@ async function bootstrap() {
       },
     );
 
-    get(`${vercelUrl}/swagger/swagger-ui.css`, function (response) {
+    get(`${serverUrl}/swagger/swagger-ui.css`, function (response) {
       response.pipe(createWriteStream('swagger-static/swagger-ui.css'));
       console.log(
         `Swagger UI css file written to: '/swagger-static/swagger-ui.css'`,
