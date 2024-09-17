@@ -11,7 +11,6 @@ export default () => ({
   localDb: process.env.MONGO_DB_URI_LOCAL,
   jwtSecret: process.env.JWT_SECRET,
   jwtExpiration: process.env.JWT_EXPIRES_IN,
-
   //Nodemailer
   emailHost: process.env.EMAIL_HOST,
   emailPort: process.env.EMAIL_PORT,
