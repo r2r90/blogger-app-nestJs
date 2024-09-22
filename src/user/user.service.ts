@@ -14,21 +14,7 @@ export class UserService {
     private readonly usersQueryRepository: UserQueryRepository,
   ) {}
 
-  async createUser(createUserData: CreateUserDto): Promise<Partial<User>> {
-    const hashedPassword = await this.hashPassword(createUserData.password);
 
-    return this.usersRepository.create({
-      ...createUserData,
-      password: hashedPassword,
-      emailConfirmation: {
-        confirmationCode: null,
-        expirationDate: add(new Date(), { hours: 1 }),
-        isConfirmed: true,
-      },
-      createdAt: null,
-      recoveryCode: null,
-    });
-  }
 
   async getAllUsers(query: PaginationInputType) {
     return this.usersQueryRepository.getAll(query);
@@ -49,7 +35,7 @@ export class UserService {
     return true;
   }
 
-  private async hashPassword(password: string) {
+  public async hashPassword(password: string) {
     const salt = await bcrypt.genSalt(10);
     return bcrypt.hash(password, salt);
   }

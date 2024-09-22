@@ -2,7 +2,7 @@ import * as process from 'node:process';
 import dotenv from 'dotenv';
 
 export default () => ({
-  port: process.env.PORT || 3003,
+  port: process.env.APP_PORT || 3003,
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   host: process.env.DB_HOST,

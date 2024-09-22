@@ -5,11 +5,19 @@ import { UserRepository } from './repositories/user.repository';
 import { UserQueryRepository } from './repositories/user.query.repository';
 import { MongooseModule } from '@nestjs/mongoose';
 import forFeatureDb from '../db/for-feature.db';
+import { CommandBus, CqrsModule } from '@nestjs/cqrs';
+import { CreateUserUseCase } from './commands/createUser.use-case';
 
 @Module({
   controllers: [UserController],
-  providers: [UserService, UserRepository, UserQueryRepository],
-  imports: [MongooseModule.forFeature(forFeatureDb)],
+  providers: [
+    UserService,
+    UserRepository,
+    UserQueryRepository,
+    CommandBus,
+    CreateUserUseCase,
+  ],
+  imports: [MongooseModule.forFeature(forFeatureDb), CqrsModule],
   exports: [UserService, UserRepository, UserQueryRepository, MongooseModule],
 })
 export class UserModule {}

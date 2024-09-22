@@ -6,7 +6,8 @@ import {
   HttpCode,
   Param,
   Post,
-  Query, UseGuards,
+  Query,
+  UseGuards, UsePipes, ValidationPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { IsObjectIdPipe } from 'nestjs-object-id';
@@ -15,16 +16,21 @@ import { PaginationInputType } from '../common/pagination/pagination.types';
 import { PaginationQueryPipe } from '../common/pipes/paginationQuery.pipe';
 import { SkipThrottle } from '@nestjs/throttler';
 import { AuthGuard } from '@nestjs/passport';
+import { CommandBus } from '@nestjs/cqrs';
+import { CreateUserCommand } from './commands/createUser.use-case';
 
 @SkipThrottle()
 @Controller('users')
 export class UserController {
-  constructor(private readonly usersService: UserService) {}
+  constructor(
+    private readonly usersService: UserService,
+    private readonly commandBus: CommandBus,
+  ) {}
 
   @Post()
   @UseGuards(AuthGuard('basic'))
   create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.createUser(createUserDto);
+    return this.commandBus.execute(new CreateUserCommand(createUserDto.login, createUserDto.password, createUserDto.email));
   }
 
   @Get()

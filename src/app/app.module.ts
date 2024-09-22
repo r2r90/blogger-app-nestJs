@@ -16,9 +16,12 @@ import { APP_GUARD } from '@nestjs/core';
 import { NameIsExistConstraint } from '../shared/decorators/validate/name-is-exist.decorator';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { CreateUserUseCase } from '../user/commands/createUser.use-case';
+import { CqrsModule } from '@nestjs/cqrs';
 
 @Module({
   imports: [
+    CqrsModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', '..', 'swagger-static'),
       serveRoot: process.env.NODE_ENV === 'development' ? '/' : '/swagger',
@@ -45,6 +48,7 @@ import { join } from 'path';
   controllers: [AppController],
   providers: [
     AppService,
+    CreateUserUseCase,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,

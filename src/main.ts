@@ -36,7 +36,7 @@ async function bootstrap() {
   // app.useGlobalFilters(new HttpExceptionFilter());
   const configService = app.get(ConfigService);
   const port = configService.get<number>('port');
-  const serverUrl = 'http://localhost:3003';
+  const serverUrl = 'http://localhost:3000';
   // get the swagger json file (if app is running in development mode)
   if (process.env.NODE_ENV === 'development') {
     // write swagger ui files
@@ -74,6 +74,7 @@ async function bootstrap() {
     });
   }
   app.enableCors();
+  await app.init();
   await app.listen(port, () => console.log(`Server running on port ${port}`));
 }
 

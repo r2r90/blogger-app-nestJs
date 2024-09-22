@@ -1,13 +1,14 @@
-import { Controller, Delete, Get, HttpCode } from '@nestjs/common';
+import { Controller, Delete, Get, HttpCode, Res } from '@nestjs/common';
 import { AppService } from './app.service';
+import { Response } from 'express';
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  getSwagger(@Res() res: Response): void {
+    return res.redirect('/swagger');
   }
 
   @Delete('testing/all-data')

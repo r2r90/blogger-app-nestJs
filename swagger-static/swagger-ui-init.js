@@ -13,7 +13,7 @@ window.onload = function() {
     "paths": {
       "/": {
         "get": {
-          "operationId": "AppController_getHello",
+          "operationId": "AppController_getSwagger",
           "parameters": [],
           "responses": {
             "200": {

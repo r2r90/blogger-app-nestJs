@@ -5,8 +5,11 @@ import {
   Length,
   Matches,
 } from 'class-validator';
+import { ICommand } from '@nestjs/cqrs';
 
-export class CreateUserDto {
+
+
+export class CreateUserDto implements ICommand{
   @IsNotEmpty()
   @IsString()
   @Length(3, 10)
