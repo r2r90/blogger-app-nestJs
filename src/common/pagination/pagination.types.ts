@@ -4,6 +4,7 @@ export class PaginationInputType {
   searchEmailTerm?: string;
   sortBy?: string;
   sortDirection?: 'asc' | 'desc';
+  filter?: string;
   pageNumber?: number;
   pageSize?: number;
 }

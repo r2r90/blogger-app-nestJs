@@ -13,10 +13,9 @@ import { AuthModule } from '../auth/auth.module';
 import { MailModule } from '../mail/mail.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-import { NameIsExistConstraint } from '../shared/decorators/validate/name-is-exist.decorator';
+import { NameIsExistConstraint } from '../shared/decorators/custom-validators/name-is-exist.decorator';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { CreateUserUseCase } from '../user/commands/createUser.use-case';
 import { CqrsModule } from '@nestjs/cqrs';
 
 @Module({
@@ -48,7 +47,6 @@ import { CqrsModule } from '@nestjs/cqrs';
   controllers: [AppController],
   providers: [
     AppService,
-    CreateUserUseCase,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,

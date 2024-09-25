@@ -10,7 +10,7 @@ export type PostInputModel = {
 export class CreatePostFromBlogDto {
   @IsString()
   @MaxLength(30)
-  name: string;
+  title: string;
 
   @IsString()
   @MaxLength(100)

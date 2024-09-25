@@ -5,7 +5,7 @@ import {
   Length,
   Matches,
 } from 'class-validator';
-import { NameIsExist } from '../../shared/decorators/validate/name-is-exist.decorator';
+import { NameIsExist } from '../../shared/decorators/custom-validators/name-is-exist.decorator';
 
 export class RegisterUserDto {
   @IsNotEmpty()

@@ -5,7 +5,7 @@ import { UserRepository } from './repositories/user.repository';
 import { UserQueryRepository } from './repositories/user.query.repository';
 import { MongooseModule } from '@nestjs/mongoose';
 import forFeatureDb from '../db/for-feature.db';
-import { CommandBus, CqrsModule } from '@nestjs/cqrs';
+import { CqrsModule } from '@nestjs/cqrs';
 import { CreateUserUseCase } from './commands/createUser.use-case';
 
 @Module({
@@ -14,7 +14,6 @@ import { CreateUserUseCase } from './commands/createUser.use-case';
     UserService,
     UserRepository,
     UserQueryRepository,
-    CommandBus,
     CreateUserUseCase,
   ],
   imports: [MongooseModule.forFeature(forFeatureDb), CqrsModule],

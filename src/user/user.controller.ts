@@ -7,7 +7,7 @@ import {
   Param,
   Post,
   Query,
-  UseGuards, UsePipes, ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { IsObjectIdPipe } from 'nestjs-object-id';
@@ -30,7 +30,10 @@ export class UserController {
   @Post()
   @UseGuards(AuthGuard('basic'))
   create(@Body() createUserDto: CreateUserDto) {
-    return this.commandBus.execute(new CreateUserCommand(createUserDto.login, createUserDto.password, createUserDto.email));
+    const { login, password, email } = createUserDto;
+    return this.commandBus.execute(
+      new CreateUserCommand(login, password, email),
+    );
   }
 
   @Get()

@@ -13,6 +13,9 @@ export class AppService {
     @InjectModel(User.name) private userModel: Model<User>,
   ) {}
 
+  getHello(): string {
+    return 'Hello World!';
+  }
 
   async deleteAllData() {
     await this.blogModel.deleteMany({});

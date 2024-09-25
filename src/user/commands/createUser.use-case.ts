@@ -1,5 +1,4 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CreateUserDto } from '../dto/create.user.dto';
 import { User } from '../../db/schemas/users.schema';
 import { add } from 'date-fns';
 import { UserRepository } from '../repositories/user.repository';

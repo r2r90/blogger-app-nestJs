@@ -9,10 +9,18 @@ export type PostInputModel = {
   blogId: string;
 };
 
+export type CreatePostDataType = {
+  title: string;
+  shortDescription: string;
+  content: string;
+  blogId: string;
+  blogName?: string;
+};
+
 export class CreatePostDto extends CreatePostFromBlogDto {
   @IsString()
   @MaxLength(30)
-  name: string;
+  title: string;
 
   @IsString()
   @MaxLength(100)
