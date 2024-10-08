@@ -6,7 +6,8 @@ import { UserQueryRepository } from './repositories/user.query.repository';
 import { MongooseModule } from '@nestjs/mongoose';
 import forFeatureDb from '../db/for-feature.db';
 import { CqrsModule } from '@nestjs/cqrs';
-import { CreateUserUseCase } from './commands/createUser.use-case';
+import { CreateUserHandler } from './commands/handlers/create-user.handler';
+import { MailService } from '../mail/mail.service';
 
 @Module({
   controllers: [UserController],
@@ -14,7 +15,8 @@ import { CreateUserUseCase } from './commands/createUser.use-case';
     UserService,
     UserRepository,
     UserQueryRepository,
-    CreateUserUseCase,
+    CreateUserHandler,
+    MailService,
   ],
   imports: [MongooseModule.forFeature(forFeatureDb), CqrsModule],
   exports: [UserService, UserRepository, UserQueryRepository, MongooseModule],

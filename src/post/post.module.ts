@@ -8,12 +8,14 @@ import { PostQueryRepository } from './repositories/post-query.repository';
 import { CqrsModule } from '@nestjs/cqrs';
 import { CreatePostHandler } from './commands/handlers/create-post.handler';
 import { BlogRepository } from '../blog/repositories/blog.repository';
+import { PostService } from './post.service';
 
 export const CommandHandlers = [CreatePostHandler];
 
 @Module({
   controllers: [PostController],
   providers: [
+    PostService,
     PostRepository,
     PostQueryRepository,
     BlogQueryRepository,

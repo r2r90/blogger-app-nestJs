@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   HttpCode,
-  NotFoundException,
   Param,
   Post,
   Put,
@@ -18,21 +17,17 @@ import { PaginationInputType } from '../common/pagination/pagination.types';
 import { CreatePostFromBlogDto } from '../post/dto/create.post.from.blog.dto';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreateBlogCommand } from './commands/impl/create-blog.command';
-import { BlogRepository } from './repositories/blog.repository';
-import { BlogQueryRepository } from './repositories/blog.query.repository';
-import { PostQueryRepository } from '../post/repositories/post-query.repository';
 import { CreatePostCommand } from '../post/commands/impl/create-post.command';
 import { SkipThrottle } from '@nestjs/throttler';
 import { AuthGuard } from '@nestjs/passport';
+import { BlogService } from './blog.service';
 
 @SkipThrottle()
 @Controller('blogs')
 export class BlogController {
   constructor(
     private readonly commandBus: CommandBus,
-    private readonly blogRepository: BlogRepository,
-    private readonly blogQueryRepository: BlogQueryRepository,
-    private readonly postQueryRepository: PostQueryRepository,
+    private readonly blogService: BlogService,
   ) {}
 
   @UseGuards(AuthGuard('basic'))
@@ -46,12 +41,12 @@ export class BlogController {
 
   @Get()
   getAll(@Query(PaginationQueryPipe) query: PaginationInputType) {
-    return this.blogQueryRepository.getAll(query);
+    return this.blogService.getAllBlogs(query);
   }
 
   @Get(':id')
   async getOne(@Param('id', IsObjectIdPipe) id: string) {
-    return await this.blogQueryRepository.findOne(id);
+    return await this.blogService.findBlogById(id);
   }
 
   @UseGuards(AuthGuard('basic'))
@@ -61,14 +56,14 @@ export class BlogController {
     @Param('id', IsObjectIdPipe) id: string,
     @Body() createBlogDto: CreateBlogDto,
   ) {
-    return this.blogRepository.update(id, createBlogDto);
+    return this.blogService.updateBlog(id, createBlogDto);
   }
 
   @UseGuards(AuthGuard('basic'))
   @Delete(':id')
   @HttpCode(204)
   async remove(@Param('id', IsObjectIdPipe) id: string) {
-    return await this.blogRepository.removeBlog(id);
+    return await this.blogService.removeBlog(id);
   }
 
   @UseGuards(AuthGuard('basic'))
@@ -88,8 +83,6 @@ export class BlogController {
     @Param('blogId', IsObjectIdPipe) blogId: string,
     @Query(PaginationQueryPipe) query: PaginationInputType,
   ) {
-    const blog = await this.blogQueryRepository.findOne(blogId);
-    if (!blog) throw new NotFoundException('Cannot find blog id');
-    return await this.postQueryRepository.findPostsByBlogId(blogId, query);
+    return this.blogService.getPostsByBlogId(blogId, query);
   }
 }

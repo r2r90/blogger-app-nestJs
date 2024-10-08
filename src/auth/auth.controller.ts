@@ -14,16 +14,26 @@ import { ConfirmCodeDto, EmailValidationDto, RegisterUserDto } from './dto';
 import { AuthService } from './auth.service';
 import { SkipThrottle } from '@nestjs/throttler';
 import { PassportLocalGuard } from './guards/passport.local.guard';
+import { CommandBus } from '@nestjs/cqrs';
+import { CreateUserCommand } from '../user/commands/impl/create-user.command.';
+import { MailService } from '../mail/mail.service';
 
 @SkipThrottle()
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly commandBus: CommandBus,
+  ) {}
 
   @Post('registration')
   @HttpCode(204)
   async register(@Body() dto: RegisterUserDto) {
-    const user = await this.authService.register(dto);
+    const isAdmin = false;
+    const { login, email, password } = dto;
+    const user = await this.commandBus.execute(
+      new CreateUserCommand(login, password, email, isAdmin),
+    );
     if (!user)
       throw new BadRequestException(
         `Can't register user with data: ${JSON.stringify(dto)}`,

@@ -63,11 +63,6 @@ export class AuthService {
       throw new BadRequestException([
         { message: 'User already confirmed', field: 'code' },
       ]);
-    // const currentTime = new Date();
-    // const expirationDate = new Date(user.emailConfirmation.expirationDate);
-    // if (currentTime > expirationDate) {
-    //   throw new BadRequestException('Confirmation code expired');
-    // }
     if (!user) return null;
     const isConfirmed = await this.authRepository.confirmUser(user._id);
     return !!isConfirmed;

@@ -9,6 +9,7 @@ import { PostQueryRepository } from '../post/repositories/post-query.repository'
 import { CqrsModule } from '@nestjs/cqrs';
 import { CreateBlogHandler } from './commands/handlers/create-blog.handler';
 import { CreatePostHandler } from '../post/commands/handlers/create-post.handler';
+import { BlogService } from './blog.service';
 
 export const CommandHandlers = [CreateBlogHandler, CreatePostHandler];
 
@@ -19,6 +20,7 @@ export const CommandHandlers = [CreateBlogHandler, CreatePostHandler];
     BlogQueryRepository,
     PostQueryRepository,
     PostRepository,
+    BlogService,
     ...CommandHandlers,
   ],
   imports: [MongooseModule.forFeature(forFeatureDb), CqrsModule],

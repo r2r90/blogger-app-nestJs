@@ -13,6 +13,7 @@ import { BasicStrategy } from './strategies/basic-auth.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { options } from './config';
+import { CqrsModule } from '@nestjs/cqrs';
 
 @Module({
   controllers: [AuthController],
@@ -27,6 +28,11 @@ import { options } from './config';
     UserService,
     LocalStrategy,
   ],
-  imports: [PassportModule, UserModule, JwtModule.registerAsync(options())],
+  imports: [
+    PassportModule,
+    UserModule,
+    JwtModule.registerAsync(options()),
+    CqrsModule,
+  ],
 })
 export class AuthModule {}

@@ -17,7 +17,7 @@ import { PaginationQueryPipe } from '../common/pipes/paginationQuery.pipe';
 import { SkipThrottle } from '@nestjs/throttler';
 import { AuthGuard } from '@nestjs/passport';
 import { CommandBus } from '@nestjs/cqrs';
-import { CreateUserCommand } from './commands/createUser.use-case';
+import { CreateUserCommand } from './commands/impl/create-user.command.';
 
 @SkipThrottle()
 @Controller('users')
@@ -31,8 +31,9 @@ export class UserController {
   @UseGuards(AuthGuard('basic'))
   create(@Body() createUserDto: CreateUserDto) {
     const { login, password, email } = createUserDto;
+    const isAdmin = true;
     return this.commandBus.execute(
-      new CreateUserCommand(login, password, email),
+      new CreateUserCommand(login, password, email, isAdmin),
     );
   }
 
