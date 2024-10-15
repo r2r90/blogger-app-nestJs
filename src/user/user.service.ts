@@ -2,10 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserRepository } from './repositories/user.repository';
 import { UserQueryRepository } from './repositories/user.query.repository';
 import { PaginationInputType } from '../common/pagination/pagination.types';
-import { User } from '../db/schemas/users.schema';
-import { CreateUserDto } from './dto/create.user.dto';
 import * as bcrypt from 'bcrypt';
-import { add } from 'date-fns';
 
 @Injectable()
 export class UserService {
@@ -13,8 +10,6 @@ export class UserService {
     private readonly usersRepository: UserRepository,
     private readonly usersQueryRepository: UserQueryRepository,
   ) {}
-
-
 
   async getAllUsers(query: PaginationInputType) {
     return this.usersQueryRepository.getAll(query);
@@ -35,8 +30,12 @@ export class UserService {
     return true;
   }
 
-  public async hashPassword(password: string) {
+  async hashPassword(password: string) {
     const salt = await bcrypt.genSalt(10);
     return bcrypt.hash(password, salt);
+  }
+
+  async compareHash(password: string, hash: string): Promise<boolean> {
+    return bcrypt.compare(password, hash);
   }
 }

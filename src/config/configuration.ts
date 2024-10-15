@@ -1,5 +1,4 @@
 import * as process from 'node:process';
-import dotenv from 'dotenv';
 
 export default () => ({
   port: process.env.APP_PORT || 3003,
@@ -9,10 +8,10 @@ export default () => ({
   dbName: process.env.DB_NAME,
   localEnv: process.env.NODE_ENV,
   localDb: process.env.MONGO_DB_URI_LOCAL,
-  jwtSecret: process.env.JWT_SECRET,
-  jwtExpiration: process.env.JWT_EXPIRES_IN,
+  accessJwtSecret: process.env.ACCESS_JWT_SECRET,
+  accessJwtExpiration: process.env.ACCESS_JWT_EXPIRES_IN,
   refreshJwtSecret: process.env.REFRESH_JWT_SECRET,
-  refreshJwtExpiration: process.env.REFRESH_JWT_EXPIRES_IN,
+  refreshJwtExpiresIn: process.env.REFRESH_JWT_EXPIRES_IN,
 
   //Nodemailer
   emailHost: process.env.EMAIL_HOST,

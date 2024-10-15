@@ -16,4 +16,8 @@ export class AuthQueryRepository {
     }
     return user;
   }
+
+  async saveToken(refreshToken: string): Promise<any> {
+
+  }
 }

@@ -1,7 +1,7 @@
 import {
   BadRequestException,
   Injectable,
-  UnauthorizedException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import {
   ConfirmCodeDto,
@@ -10,7 +10,6 @@ import {
   RegisterUserDto,
 } from './dto';
 import * as bcrypt from 'bcrypt';
-import { compareSync } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { add } from 'date-fns';
 import { MailService } from '../mail/mail.service';
@@ -19,16 +18,22 @@ import { AuthRepository } from './repositories/auth.repository';
 import { v4 as uuidv4 } from 'uuid';
 import { AuthQueryRepository } from './repositories/auth.query.repository';
 import { UserRepository } from '../user/repositories/user.repository';
+import { UserService } from '../user/user.service';
+import { AuthRefreshTokenService } from './auth-refresh-token.service';
+import { User } from '../db/schemas/users.schema';
+import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
+    private readonly userService: UserService,
     private readonly userQueryRepository: UserQueryRepository,
     private readonly userRepository: UserRepository,
     private readonly authRepository: AuthRepository,
     private readonly authQueryRepository: AuthQueryRepository,
+    private readonly authRefreshTokenService: AuthRefreshTokenService,
   ) {}
 
   async register(dto: RegisterUserDto) {
@@ -69,26 +74,22 @@ export class AuthService {
   }
 
   async validateUser(dto: LoginUserDto) {
-    const user = await this.userQueryRepository.findByLoginOrEmail(
-      dto.loginOrEmail,
-    );
-    if (!user || !compareSync(dto.password, user.password))
-      throw new UnauthorizedException('Incorrect password or login');
+    const { loginOrEmail, password } = dto;
+    const user =
+      await this.userQueryRepository.findByLoginOrEmail(loginOrEmail);
 
-    return {
-      userId: user._id,
-      login: user.login,
-    };
+    if (!user) return null;
+
+    const isMatch = await this.userService.compareHash(password, user.password);
+    if (isMatch) return user;
+    return null;
   }
 
-  async signIn(user: { userId: string; login: string }) {
-    const tokenPayload = {
-      sub: user.userId,
-      login: user.login,
-    };
-
-    const accessToken = await this.jwtService.signAsync(tokenPayload);
-    return { accessToken };
+  async login(res: Response, user:any) {
+    if (!user) {
+      throw new InternalServerErrorException('User not set in request');
+    }
+    return this.authRefreshTokenService.generateTokenPair(user, res);
   }
 
   async resendValidationEmail(emailDto: EmailValidationDto) {

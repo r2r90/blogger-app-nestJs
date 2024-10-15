@@ -3,13 +3,16 @@ import { AppModule } from './app/app.module';
 import { ConfigService } from '@nestjs/config';
 import { useContainer } from 'class-validator';
 import { applyAppSettings } from './settings/apply-app-settings';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
+  app.use(cookieParser());
   applyAppSettings(app);
   const configService = app.get(ConfigService);
   const port = configService.get<number>('port');
+
   // const serverUrl = 'http://localhost:3000';
   // get the swagger json file (if app is running in development mode)
   // if (process.env.NODE_ENV === 'development') {

@@ -5,24 +5,27 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Param,
   Post,
-  Request,
+  Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
-import { ConfirmCodeDto, EmailValidationDto, RegisterUserDto } from './dto';
+import { ConfirmCodeDto, RegisterUserDto } from './dto';
 import { AuthService } from './auth.service';
 import { SkipThrottle } from '@nestjs/throttler';
 import { PassportLocalGuard } from './guards/passport.local.guard';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreateUserCommand } from '../user/commands/impl/create-user.command.';
-import { MailService } from '../mail/mail.service';
+import { Request, Response } from 'express';
+import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
+import { UserService } from '../user/user.service';
 
 @SkipThrottle()
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
+    private readonly userService: UserService,
     private readonly commandBus: CommandBus,
   ) {}
 
@@ -50,22 +53,45 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('login')
   @UseGuards(PassportLocalGuard)
-  async login(@Request() request: any) {
-    return this.authService.signIn(request.user);
+  async login(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    return this.authService.login(res, req.user);
   }
 
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Post('registration-email-resending')
-  async registerEmailResend(@Body() email: EmailValidationDto) {
-    return this.authService.resendValidationEmail(email);
-  }
-
-  @Post('password-recovery')
-  async passwordRecoveryRequest() {}
-
-  @Post('new-password')
-  async newPasswordCreate() {}
-
+  @HttpCode(HttpStatus.OK)
   @Get('me')
-  async getMe(@Param() id: string) {}
+  @UseGuards(JwtRefreshAuthGuard)
+  async getMe(@Req() req: Request) {
+    const userId = req.user.id.toString();
+    const user = await this.userService.getUserById(userId);
+    if (!user) throw new BadRequestException('User not found');
+    return { email: user.email, login: user.login, userId };
+  }
+
+  //   @HttpCode(HttpStatus.NO_CONTENT)
+  //   @Post('registration-email-resending')
+  //   async
+  //
+  //   registerEmailResend(@Body()
+  //                         email: EmailValidationDto;
+  //
+  // ) {
+  //   return;
+  //   this;
+  // .
+  //   authService;
+  // .
+  //
+  //   resendValidationEmail(email);
+  // }
+  //
+  // @Post('password-recovery')
+  // async spasswordRecoveryRequest();
+  // {
+  // }
+  //
+  // @Post('new-password')
+  // async
+  // newPasswordCreate();
+  // {
+  // }
 }
