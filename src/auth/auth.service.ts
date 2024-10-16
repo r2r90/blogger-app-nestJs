@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import {
   ConfirmCodeDto,
@@ -20,7 +21,6 @@ import { AuthQueryRepository } from './repositories/auth.query.repository';
 import { UserRepository } from '../user/repositories/user.repository';
 import { UserService } from '../user/user.service';
 import { AuthRefreshTokenService } from './auth-refresh-token.service';
-import { User } from '../db/schemas/users.schema';
 import { Response } from 'express';
 
 @Injectable()
@@ -85,11 +85,35 @@ export class AuthService {
     return null;
   }
 
-  async login(res: Response, user:any) {
+  async login(res: Response, user: any) {
     if (!user) {
       throw new InternalServerErrorException('User not set in request');
     }
     return this.authRefreshTokenService.generateTokenPair(user, res);
+  }
+
+  async sendRecoveryCode(email: string): Promise<boolean> {
+    const user = await this.userService.getUserByLoginOrEmail(email);
+    if (!user) {
+      throw new NotFoundException('User with email does not exist');
+    }
+
+    const recoveryCode = uuidv4();
+    const updateRecoveryCode = await this.userRepository.updateConfirmationCode(
+      email,
+      recoveryCode,
+    );
+
+    const sendCodeToUser = await this.mailService.sendRecoveryCodeToUser(
+      email,
+      recoveryCode,
+    );
+
+    if (!updateRecoveryCode || !sendCodeToUser) {
+      throw new BadRequestException('Cannot send recovery code');
+    }
+
+    return updateRecoveryCode;
   }
 
   async resendValidationEmail(emailDto: EmailValidationDto) {
@@ -118,6 +142,28 @@ export class AuthService {
       newConfirmationCode,
     );
     return true;
+  }
+
+  async updatePasswordWithRecoveryCode(
+    password: string,
+    code: string,
+  ): Promise<boolean> {
+    const userWithRecoveryCode =
+      await this.userQueryRepository.getUserByRecoveryCode(code);
+    if (!userWithRecoveryCode) {
+      throw new NotFoundException('Recovery Code is invalid');
+    }
+
+    const hashedPassword = await this.hashPassword(password);
+    const updatePassword = await this.userRepository.updatePassword(
+      userWithRecoveryCode._id,
+      hashedPassword,
+    );
+    if (!updatePassword) {
+      throw new BadRequestException('Cannot update password');
+    }
+
+    return updatePassword;
   }
 
   private async getRefreshToken(userId: string): Promise<string> {

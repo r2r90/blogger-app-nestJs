@@ -3,6 +3,7 @@ import { UserRepository } from './repositories/user.repository';
 import { UserQueryRepository } from './repositories/user.query.repository';
 import { PaginationInputType } from '../common/pagination/pagination.types';
 import * as bcrypt from 'bcrypt';
+import { EmailValidationDto } from '../auth/dto';
 
 @Injectable()
 export class UserService {
@@ -18,6 +19,13 @@ export class UserService {
   async getUserById(id: string) {
     return this.usersQueryRepository.findOne(id);
   }
+
+  async getUserByLoginOrEmail(emailOrLogin:string) {
+    return this.usersQueryRepository.findByLoginOrEmail(emailOrLogin);
+  }
+
+
+
 
   async deleteUser(userId: string) {
     const findUser = await this.getUserById(userId);

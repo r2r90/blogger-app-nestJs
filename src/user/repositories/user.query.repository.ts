@@ -77,12 +77,13 @@ export class UserQueryRepository {
     });
   }
 
-  async getUserByConfirmationCode(confirmCodeDto: string) {
+  async getUserByRecoveryCode(code: string) {
     const user = await this.userModel.findOne({
-      'emailConfirmation.confirmationCode': confirmCodeDto,
+      'recoveryCode': code,
     });
     if (!user) return null;
-
     return user;
   }
+
+
 }

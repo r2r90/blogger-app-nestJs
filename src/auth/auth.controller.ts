@@ -10,7 +10,12 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ConfirmCodeDto, RegisterUserDto } from './dto';
+import {
+  ConfirmCodeDto,
+  EmailValidationDto,
+  NewPasswordDto,
+  RegisterUserDto,
+} from './dto';
 import { AuthService } from './auth.service';
 import { SkipThrottle } from '@nestjs/throttler';
 import { PassportLocalGuard } from './guards/passport.local.guard';
@@ -67,31 +72,28 @@ export class AuthController {
     return { email: user.email, login: user.login, userId };
   }
 
-  //   @HttpCode(HttpStatus.NO_CONTENT)
-  //   @Post('registration-email-resending')
-  //   async
-  //
-  //   registerEmailResend(@Body()
-  //                         email: EmailValidationDto;
-  //
-  // ) {
-  //   return;
-  //   this;
-  // .
-  //   authService;
-  // .
-  //
-  //   resendValidationEmail(email);
-  // }
-  //
-  // @Post('password-recovery')
-  // async spasswordRecoveryRequest();
-  // {
-  // }
-  //
-  // @Post('new-password')
-  // async
-  // newPasswordCreate();
-  // {
-  // }
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post('password-recovery')
+  async passwordRecovery(@Body() dto: EmailValidationDto) {
+    const { email } = dto;
+    const user = await this.userService.getUserByLoginOrEmail(email);
+    if (!user) throw new BadRequestException('User not found');
+    await this.authService.sendRecoveryCode(email);
+  }
+
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post('registration-email-resending')
+  async registerEmailResend(@Body() email: EmailValidationDto) {
+    return this.authService.resendValidationEmail(email);
+  }
+
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post('new-password')
+  async newPasswordUpdate(@Body() dto: NewPasswordDto) {
+    const { newPassword, recoveryCode } = dto;
+    await this.authService.updatePasswordWithRecoveryCode(
+      newPassword,
+      recoveryCode,
+    );
+  }
 }

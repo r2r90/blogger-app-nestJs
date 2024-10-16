@@ -30,6 +30,23 @@ export class UserRepository {
     return res;
   }
 
+  async updateConfirmationCode(email: string, recoveryCode: string) {
+    const updateCode = await this.userModel.findOneAndUpdate(
+      { email },
+      { $set: { recoveryCode: recoveryCode } },
+      { new: true },
+    );
 
+    return !!updateCode;
+  }
 
+  async updatePassword(id: string, newPassword: string) {
+    const updatePassword = await this.userModel.findByIdAndUpdate(
+      { _id: id },
+      { $set: { password: newPassword, recoveryCode: null } },
+      { new: true },
+    );
+
+    return !!updatePassword;
+  }
 }

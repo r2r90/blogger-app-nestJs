@@ -26,4 +26,5 @@ export class AuthRepository {
 
     return !!updateCode;
   }
+
 }

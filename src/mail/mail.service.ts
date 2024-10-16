@@ -26,4 +26,27 @@ export class MailService {
       return false;
     }
   }
+
+
+  async sendRecoveryCodeToUser(
+    receiverEmail: string,
+    recoveryCode: string,
+  ): Promise<boolean> {
+    try {
+      await this.mailerService.sendMail({
+        to: receiverEmail,
+        subject: 'Password Recovery Code',
+        html: `<h1>Password Recovery Code</h1>
+ <p>To update your password please follow the link below: 
+     <a href="https://localhost:3000/auth/password-recovery?code=${recoveryCode}" methods="POST">Change Password</a>
+ </p>`,
+      });
+      return true;
+    } catch (e) {
+      console.log('Error sending email:', e);
+      return false;
+    }
+  }
+
+
 }
