@@ -20,7 +20,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { AuthQueryRepository } from './repositories/auth.query.repository';
 import { UserRepository } from '../user/repositories/user.repository';
 import { UserService } from '../user/user.service';
-import { AuthRefreshTokenService } from './auth-refresh-token.service';
+import { JwtTokenService } from './jwt-token.service';
 import { Response } from 'express';
 
 @Injectable()
@@ -33,7 +33,7 @@ export class AuthService {
     private readonly userRepository: UserRepository,
     private readonly authRepository: AuthRepository,
     private readonly authQueryRepository: AuthQueryRepository,
-    private readonly authRefreshTokenService: AuthRefreshTokenService,
+    private readonly authRefreshTokenService: JwtTokenService,
   ) {}
 
   async register(dto: RegisterUserDto) {

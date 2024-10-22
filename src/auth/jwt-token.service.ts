@@ -4,10 +4,10 @@ import { TokenRepository } from './repositories/token.repository';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { User } from '../db/schemas/users.schema';
 import { cookieConfig } from './config/cookie-config';
-import {Response} from 'express'
+import { Response } from 'express';
 
 @Injectable()
-export class AuthRefreshTokenService {
+export class JwtTokenService {
   constructor(
     private jwtService: JwtService,
     private config: ConfigService,
@@ -20,7 +20,7 @@ export class AuthRefreshTokenService {
     currentRefreshTokenExpiresAt?: Date,
   ) {
     const newRefreshToken = this.jwtService.sign(
-      { sub: authUser._id },
+      { sub: authUser._id, login: authUser.login },
       {
         secret: this.config.get('refreshJwtSecret'),
         expiresIn: this.config.get('refreshJwtExpiresIn'),
@@ -41,6 +41,7 @@ export class AuthRefreshTokenService {
         currentRefreshToken,
         currentRefreshTokenExpiresAt,
         authUser._id,
+        authUser.login,
       );
     }
 
@@ -59,7 +60,6 @@ export class AuthRefreshTokenService {
       sub: user._id.toString(),
     };
 
-
     res.cookie(
       cookieConfig.refreshToken.name,
       await this.generateRefreshToken(
@@ -75,5 +75,17 @@ export class AuthRefreshTokenService {
     return {
       accessToken: this.jwtService.sign(payload),
     };
+  }
+
+  verifyToken(token: string) {
+    try {
+      return this.jwtService.verify(token);
+    } catch (error) {
+      throw new UnauthorizedException('Invalid token');
+    }
+  }
+
+  decodeToken(token: string) {
+    return this.jwtService.decode(token);
   }
 }

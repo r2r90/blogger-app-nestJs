@@ -5,6 +5,7 @@ import { PaginationInputType } from '../../common/pagination/pagination.types';
 import { userMapper } from '../mapper/user.mapper';
 
 export class UserQueryRepository {
+
   @InjectModel(User.name) private readonly userModel: Model<User>;
 
   async getAll(query: PaginationInputType) {

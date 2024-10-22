@@ -34,7 +34,7 @@ export class UserService {
       throw new NotFoundException(`User with id ${userId} not found`);
     const isUserDeleted = await this.usersRepository.remove(userId);
     if (!isUserDeleted)
-      throw new NotFoundException(`Cannot remove user with id ${userId}`);
+      throw new NotFoundException(`Cannot remove user with id $userId}`);
     return true;
   }
 

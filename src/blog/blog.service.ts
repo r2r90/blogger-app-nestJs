@@ -35,8 +35,12 @@ export class BlogService {
     return this.blogRepository.update(id, update);
   }
 
-  async getPostsByBlogId(id: string, query: PaginationInputType) {
+  async getPostsByBlogId(
+    id: string,
+    query: PaginationInputType,
+    userId?: string,
+  ) {
     await this.blogQueryRepository.findOne(id);
-    return await this.postQueryRepository.findPostsByBlogId(id, query);
+    return await this.postQueryRepository.findPostsByBlogId(id, query, userId);
   }
 }

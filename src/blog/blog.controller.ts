@@ -21,6 +21,8 @@ import { CreatePostCommand } from '../post/commands/impl/create-post.command';
 import { SkipThrottle } from '@nestjs/throttler';
 import { AuthGuard } from '@nestjs/passport';
 import { BlogService } from './blog.service';
+import { JwtGuard } from '../auth/guards/jwt-guard';
+import { UserDecorator } from '../common/decorators/user.decorator';
 
 @SkipThrottle()
 @Controller('blogs')
@@ -79,10 +81,12 @@ export class BlogController {
   }
 
   @Get(':blogId/posts')
+  @UseGuards(JwtGuard)
   async getPostsByBlogId(
+    @UserDecorator('id') userId: string,
     @Param('blogId', IsObjectIdPipe) blogId: string,
     @Query(PaginationQueryPipe) query: PaginationInputType,
   ) {
-    return this.blogService.getPostsByBlogId(blogId, query);
+    return this.blogService.getPostsByBlogId(blogId, query, userId);
   }
 }

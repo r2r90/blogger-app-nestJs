@@ -17,6 +17,8 @@ import { NameIsExistConstraint } from '../shared/decorators/custom-validators/na
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { CqrsModule } from '@nestjs/cqrs';
+import { JwtGuard } from '../auth/guards/jwt-guard';
+import { UserRepository } from '../user/repositories/user.repository';
 
 @Module({
   imports: [
@@ -47,6 +49,8 @@ import { CqrsModule } from '@nestjs/cqrs';
   controllers: [AppController],
   providers: [
     AppService,
+    JwtGuard,
+
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,

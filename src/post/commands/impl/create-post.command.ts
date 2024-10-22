@@ -4,5 +4,6 @@ export class CreatePostCommand {
     public readonly shortDescription: string,
     public readonly content: string,
     public readonly blogId: string,
+
   ) {}
 }

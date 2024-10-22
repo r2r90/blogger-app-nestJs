@@ -1,5 +1,6 @@
 import { Types } from 'mongoose';
 import { PostDocument } from '../../db/schemas/post.schema';
+import { LikeStatus, PostLike } from '../../db/schemas/post-likes.schema';
 
 export type LikeDetails = {
   description?: 'None' | 'Like' | 'Dislike';
@@ -28,20 +29,50 @@ export type PostOutputType = {
   extendedLikesInfo: ExtendedLikesInfo;
 };
 
-export const postMapper = (post: PostDocument): PostOutputType => {
-  return {
-    id: post.id,
-    title: post.title,
-    shortDescription: post.shortDescription,
-    content: post.content,
-    createdAt: post.createdAt,
-    blogName: post.blogName,
-    blogId: post.blogId,
-    extendedLikesInfo: {
-      likesCount: 0,
-      dislikesCount: 0,
-      myStatus: 'None',
-      newestLikes: [],
-    },
-  };
-};
+export class PostMapper {
+  public mapPost(
+    post: PostDocument,
+    postLikesInfo: PostLike[],
+    userId?: string,
+  ): PostOutputType {
+    const likesCount = post.likesCount;
+    const dislikesCount = post.dislikesCount;
+
+    const myLike = postLikesInfo.find((like) => like.userId === userId);
+    const myStatus = myLike ? myLike.likeStatus : 'None';
+
+    const newestLikes: NewestLikes = postLikesInfo
+      .filter((like) => like.likeStatus === 'Like')
+      .sort(
+        (a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime(),
+      )
+      .slice(0, 3)
+      .map((like) => ({
+        addedAt: like.addedAt,
+        userId: like.userId,
+        login: like.login,
+      }));
+
+
+
+    return {
+      id: post.id,
+      title: post.title,
+      shortDescription: post.shortDescription,
+      content: post.content,
+      createdAt: post.createdAt,
+      blogName: post.blogName,
+      blogId: post.blogId,
+      extendedLikesInfo: {
+        likesCount: postLikesInfo.filter(
+          (like) => like.likeStatus === LikeStatus.Like,
+        ).length,
+        dislikesCount: postLikesInfo.filter(
+          (like) => like.likeStatus === LikeStatus.Dislike,
+        ).length,
+        myStatus,
+        newestLikes,
+      },
+    };
+  }
+}

@@ -9,11 +9,12 @@ export class TokenRepository {
     @InjectModel(Token.name) private readonly tokenModel: Model<Token>,
   ) {}
 
-  async saveToken(refreshToken: string, expiresAt: Date, userId: string) {
+  async saveToken(refreshToken: string, expiresAt: Date, userId: string, userLogin:string) {
     const insertedToken = await this.tokenModel.create({
       refreshToken,
       expiresAt,
       userId,
+      userLogin,
     });
 
     return insertedToken.save();

@@ -4,6 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import { useContainer } from 'class-validator';
 import { applyAppSettings } from './settings/apply-app-settings';
 import cookieParser from 'cookie-parser';
+import { AuthMiddleware } from './common/middlewares/auth.middleware';
+import { JwtService } from '@nestjs/jwt';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

@@ -14,9 +14,10 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { options } from './config';
 import { CqrsModule } from '@nestjs/cqrs';
-import { AuthRefreshTokenService } from './auth-refresh-token.service';
+import { JwtTokenService } from './jwt-token.service';
 import { TokenRepository } from './repositories/token.repository';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh-strategy';
+import { JwtAccessStrategy } from './strategies/jwt-access-strategy';
 
 @Module({
   controllers: [AuthController],
@@ -24,10 +25,11 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh-strategy';
     AuthService,
     AuthRepository,
     AuthQueryRepository,
-    AuthRefreshTokenService,
+    JwtTokenService,
     TokenRepository,
     BasicStrategy,
     JwtRefreshStrategy,
+    JwtAccessStrategy,
     MailService,
     UserQueryRepository,
     UserRepository,
@@ -40,5 +42,8 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh-strategy';
     JwtModule.registerAsync(options()),
     CqrsModule,
   ],
+  exports: [
+    JwtModule
+  ]
 })
 export class AuthModule {}

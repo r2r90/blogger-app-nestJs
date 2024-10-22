@@ -10,6 +10,11 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { CreateBlogHandler } from './commands/handlers/create-blog.handler';
 import { CreatePostHandler } from '../post/commands/handlers/create-post.handler';
 import { BlogService } from './blog.service';
+import { PostMapper } from '../post/mapper/post.mapper';
+import { UserQueryRepository } from '../user/repositories/user.query.repository';
+import { UserService } from '../user/user.service';
+import { JwtService } from '@nestjs/jwt';
+import { UserRepository } from '../user/repositories/user.repository';
 
 export const CommandHandlers = [CreateBlogHandler, CreatePostHandler];
 
@@ -21,6 +26,11 @@ export const CommandHandlers = [CreateBlogHandler, CreatePostHandler];
     PostQueryRepository,
     PostRepository,
     BlogService,
+    PostMapper,
+    UserQueryRepository,
+    UserService,
+    JwtService,
+    UserRepository,
     ...CommandHandlers,
   ],
   imports: [MongooseModule.forFeature(forFeatureDb), CqrsModule],

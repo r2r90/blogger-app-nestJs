@@ -24,6 +24,7 @@ import { CreateUserCommand } from '../user/commands/impl/create-user.command.';
 import { Request, Response } from 'express';
 import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
 import { UserService } from '../user/user.service';
+import { JwtAccessAuthGuard } from './guards/jwt-access-auth.guard';
 
 @SkipThrottle()
 @Controller('auth')
@@ -64,7 +65,7 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Get('me')
-  @UseGuards(JwtRefreshAuthGuard)
+  @UseGuards(JwtAccessAuthGuard)
   async getMe(@Req() req: Request) {
     const userId = req.user.id.toString();
     const user = await this.userService.getUserById(userId);

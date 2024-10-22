@@ -4,11 +4,16 @@ import { Post } from '../../db/schemas/post.schema';
 import { CreatePostDataType, CreatePostDto } from '../dto/create.post.dto';
 import { NotFoundException } from '@nestjs/common';
 import { PostQueryRepository } from './post-query.repository';
+import { UserQueryRepository } from '../../user/repositories/user.query.repository';
+import { LikeStatus, PostLike } from '../../db/schemas/post-likes.schema';
+import { LikeStatusInputDataType } from '../dto/like-status.dto';
 
 export class PostRepository {
   constructor(
     @InjectModel(Post.name) private readonly postModel: Model<Post>,
+    @InjectModel(PostLike.name) private readonly postLikeModel: Model<PostLike>,
     private readonly postQueryRepository: PostQueryRepository,
+    private readonly userQueryRepository: UserQueryRepository,
   ) {}
 
   async createPost(createPostData: CreatePostDataType) {
@@ -45,9 +50,37 @@ export class PostRepository {
   }
 
   async remove(id: string) {
-    await this.postQueryRepository.findOne(id);
+    const post = await this.postQueryRepository.findOne(id);
+    if (!post) throw new NotFoundException();
     const res = await this.postModel.findByIdAndDelete(id);
     if (!res) return null;
     return res;
+  }
+
+  async likePost(data: LikeStatusInputDataType): Promise<any> {
+    const { userId, login, postId, likeStatus } = data;
+    const isAlreadyLiked = await this.postQueryRepository.userAlreadyLiked(
+      postId,
+      userId,
+    );
+
+    const likedUserData = {
+      ...data,
+      addedAt: new Date().toISOString(),
+    };
+
+    if (isAlreadyLiked && isAlreadyLiked.likeStatus !== likeStatus) {
+      await this.postLikeModel.updateOne(
+        { _id: isAlreadyLiked.id },
+        { likeStatus: likeStatus, addedAt: new Date().toISOString() },
+        { new: true },
+      );
+    }
+
+    if (!isAlreadyLiked && likedUserData.likeStatus !== LikeStatus.None) {
+      await this.postLikeModel.create(likedUserData);
+    }
+
+    return null;
   }
 }
