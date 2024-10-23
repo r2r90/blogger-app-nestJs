@@ -24,6 +24,7 @@ import { UserDecorator } from '../common/decorators/user.decorator';
 import { CookieDecorator } from '../common/decorators/cookieDecorator';
 import { JwtAccessAuthGuard } from '../auth/guards/jwt-access-auth.guard';
 import { JwtGuard } from '../auth/guards/jwt-guard';
+import { AuthGuard } from '@nestjs/passport';
 
 @SkipThrottle()
 @Controller('posts')
@@ -53,6 +54,7 @@ export class PostController {
   }
 
   @Post()
+  @UseGuards(AuthGuard('basic'))
   create(@Body() createPostDto: CreatePostDto) {
     const { title, shortDescription, content, blogId } = createPostDto;
     return this.commandBus.execute(
@@ -61,6 +63,7 @@ export class PostController {
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(AuthGuard('basic'))
   @Put(':id')
   update(
     @Param('id', IsObjectIdPipe) id: string,
@@ -100,6 +103,7 @@ export class PostController {
 
   @Delete(':id')
   @HttpCode(204)
+  @UseGuards(AuthGuard('basic'))
   remove(@Param('id', IsObjectIdPipe) id: string) {
     return this.postService.deletePost(id);
   }

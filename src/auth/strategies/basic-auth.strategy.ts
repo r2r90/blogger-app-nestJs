@@ -2,7 +2,6 @@ import { BasicStrategy as Strategy } from 'passport-http';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
-import { isLogLevelEnabled } from '@nestjs/common/services/utils';
 
 @Injectable()
 export class BasicStrategy extends PassportStrategy(Strategy) {
@@ -13,13 +12,14 @@ export class BasicStrategy extends PassportStrategy(Strategy) {
   }
 
   public validate = async (req, username, password): Promise<boolean> => {
-
     if (
       this.configService.get<string>('BASIC_USER') === username &&
       this.configService.get<string>('BASIC_PASS') === password
     ) {
       return true;
     }
-    throw new UnauthorizedException(`Invalid credentials - login or password: "${username}", "${password}"`);
+    throw new UnauthorizedException(
+      `Invalid credentials - login or password: "${username}", "${password}"`,
+    );
   };
 }

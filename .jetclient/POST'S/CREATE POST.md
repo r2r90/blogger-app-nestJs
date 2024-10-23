@@ -13,9 +13,9 @@ password = 'qwerty'
 type = 'JSON'
 raw = '''
 {
-  "title": "new test POST",
-  "shortDescription": "qpsldj qsdpkdqskndsq dqskqsdjqsdkjqsdk",
-  "content": "https://my-test.com",
-  "blogId": "67164994f1e0d5fadda1063c"
+  "title": "title_Tg89",
+  "content": "content_Bu33",
+  "blogId": "6718c99629faa378bd5cb28b",
+  "shortDescription": "shortDescription_UM65"
 }'''
 ```

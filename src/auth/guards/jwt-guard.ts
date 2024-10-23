@@ -13,7 +13,10 @@ export class JwtGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    if (!request.headers.authorization) {
+    if (
+      !request.headers.authorization ||
+      request.headers.authorization.trim() === ''
+    ) {
       return true;
     }
 
@@ -21,6 +24,9 @@ export class JwtGuard implements CanActivate {
 
     const payload = this.jwtService.decode(accessToken);
 
+    if (!payload) {
+      return true;
+    }
     const isUserExist = await this.userService.getUserById(payload.sub);
     if (!isUserExist) {
       return true;
