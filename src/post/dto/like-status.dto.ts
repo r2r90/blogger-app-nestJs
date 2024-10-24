@@ -1,10 +1,17 @@
 import { IsEnum, IsNotEmpty } from 'class-validator';
-import { LikeStatus } from '../../db/schemas/post.schema';
+import { LikeStatus } from '../../db/schemas';
 
-export type LikeStatusInputDataType = {
+export type LikePostStatusInputDataType = {
   userId: string;
   login: string;
   postId: string;
+  likeStatus: LikeStatus;
+};
+
+export type LikeCommentStatusInputDataType = {
+  userId: string;
+  login: string;
+  commentId: string;
   likeStatus: LikeStatus;
 };
 

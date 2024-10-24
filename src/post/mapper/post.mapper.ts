@@ -35,9 +35,6 @@ export class PostMapper {
     postLikesInfo: PostLike[],
     userId?: string,
   ): PostOutputType {
-    const likesCount = post.likesCount;
-    const dislikesCount = post.dislikesCount;
-
     const myLike = postLikesInfo.find((like) => like.userId === userId);
     const myStatus = myLike ? myLike.likeStatus : 'None';
 
@@ -52,8 +49,6 @@ export class PostMapper {
         userId: like.userId,
         login: like.login,
       }));
-
-
 
     return {
       id: post.id,

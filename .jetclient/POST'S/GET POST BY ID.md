@@ -1,7 +1,7 @@
 ```toml
 name = 'GET POST BY ID'
 method = 'GET'
-url = '{{baseUrl}}/posts/67168646348459885b8a56ed'
+url = '{{baseUrl}}/posts/6718c9a129faa378bd5cb28r'
 sortWeight = 2000000
 id = '38a82cd7-7f61-4ea2-a061-d59323375245'
 

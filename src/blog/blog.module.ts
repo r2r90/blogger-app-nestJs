@@ -15,6 +15,8 @@ import { UserQueryRepository } from '../user/repositories/user.query.repository'
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { UserRepository } from '../user/repositories/user.repository';
+import { CommentMapper } from '../comment/mapper/comment.mapper';
+import { CommentRepository } from '../comment/repositories/comment.repository';
 
 export const CommandHandlers = [CreateBlogHandler, CreatePostHandler];
 
@@ -31,6 +33,8 @@ export const CommandHandlers = [CreateBlogHandler, CreatePostHandler];
     UserService,
     JwtService,
     UserRepository,
+    CommentMapper,
+    CommentRepository,
     ...CommandHandlers,
   ],
   imports: [MongooseModule.forFeature(forFeatureDb), CqrsModule],

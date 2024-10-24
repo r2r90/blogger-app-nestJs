@@ -1,8 +1,8 @@
-import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { IsNotEmpty, IsString, MaxLength, Validate } from 'class-validator';
 import { IsObjectId } from 'nestjs-object-id';
 import { CreatePostFromBlogDto } from './create.post.from.blog.dto';
-import { Transform, TransformFnParams } from 'class-transformer';
-import { IsNotBlank } from '../../shared/decorators/custom-validators/is-not-blank.validator.';
+import { BlogIdValidator } from '../../common/validators/custom-validators/blog-id.validator';
+import { IsNotBlank } from '../../common/validators/custom-validators/is-not-blank.validator.';
 
 export type PostInputModel = {
   title: string;
@@ -22,6 +22,7 @@ export type CreatePostDataType = {
 export class CreatePostDto extends CreatePostFromBlogDto {
   @IsString()
   @MaxLength(30)
+  @IsNotEmpty()
   @IsNotBlank()
   title: string;
 
@@ -36,8 +37,9 @@ export class CreatePostDto extends CreatePostFromBlogDto {
   @MaxLength(1000)
   content: string;
 
+  @IsObjectId()
   @IsString()
   @IsNotEmpty()
-  @IsObjectId()
+  @Validate(BlogIdValidator)
   blogId: string;
 }

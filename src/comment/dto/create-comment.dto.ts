@@ -7,14 +7,6 @@ export type CreateCommentDataType = {
   userLogin: string;
 };
 
-export type CreatePostDataType = {
-  title: string;
-  shortDescription: string;
-  content: string;
-  blogId: string;
-  blogName?: string;
-};
-
 export class CreateCommentDto {
   @IsString()
   @MinLength(20)

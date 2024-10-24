@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsString, Matches, MaxLength } from 'class-validator';
-import { IsNotBlank } from '../../shared/decorators/custom-validators/is-not-blank.validator.';
+import { IsNotBlank } from '../../common/validators/custom-validators/is-not-blank.validator.';
 
 export class CreateBlogDto {
   @IsString()

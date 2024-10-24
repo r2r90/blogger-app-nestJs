@@ -1,5 +1,5 @@
 import { IsString, MaxLength } from 'class-validator';
-import { IsNotBlank } from '../../shared/decorators/custom-validators/is-not-blank.validator.';
+import { IsNotBlank } from '../../common/validators/custom-validators/is-not-blank.validator.';
 
 export type PostInputModel = {
   title: string;

@@ -13,12 +13,12 @@ import { AuthModule } from '../auth/auth.module';
 import { MailModule } from '../mail/mail.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-import { NameIsExistConstraint } from '../shared/decorators/custom-validators/name-is-exist.decorator';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { CqrsModule } from '@nestjs/cqrs';
 import { JwtGuard } from '../auth/guards/jwt-guard';
-import { UserRepository } from '../user/repositories/user.repository';
+import { NameIsExistConstraint } from '../common/validators/custom-validators/name-is-exist.validator';
+import { CommentModule } from '../comment/comment.module';
 
 @Module({
   imports: [
@@ -44,6 +44,7 @@ import { UserRepository } from '../user/repositories/user.repository';
     PostModule,
     UserModule,
     AuthModule,
+    CommentModule,
     MailModule,
   ],
   controllers: [AppController],

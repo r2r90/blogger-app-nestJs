@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
-import { LikeStatus } from './post.schema';
 
 export type CommentDocument = HydratedDocument<Comment>;
 
@@ -22,24 +21,22 @@ export class Comment {
 
   @Prop({
     type: {
-      userId: Types.ObjectId,
-      userLogin: String,
+      userId: { type: Types.ObjectId, required: true },
+      userLogin: { type: String, required: true },
     },
   })
   commentatorInfo: {
     userId: string;
     userLogin: string;
-    _id: false, // To avoid creating a new ID for this subdocument
   };
-
 
   @Prop({ type: String })
   createdAt: string;
 
-  @Prop({type:Number, default:0})
+  @Prop({ type: Number, default: 0 })
   likesCount: number;
 
-  @Prop({type:Number, default:0})
+  @Prop({ type: Number, default: 0 })
   dislikesCount: number;
 }
 

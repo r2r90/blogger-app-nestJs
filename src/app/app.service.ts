@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Blog } from '../db/schemas/blog.schema';
-import { Post } from '../db/schemas/post.schema';
 import { Model } from 'mongoose';
-import { User } from '../db/schemas/users.schema';
-import { PostLike } from '../db/schemas/post-likes.schema';
+import {
+  Blog,
+  Comment,
+  CommentLike,
+  Post,
+  PostLike,
+  User,
+} from '../db/schemas';
 
 @Injectable()
 export class AppService {
@@ -12,7 +16,9 @@ export class AppService {
     @InjectModel(Blog.name) private blogModel: Model<Blog>,
     @InjectModel(Post.name) private postModel: Model<Post>,
     @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(Comment.name) private commentModel: Model<Comment>,
     @InjectModel(PostLike.name) private postLike: Model<PostLike>,
+    @InjectModel(CommentLike.name) private commentLikeModel: Model<CommentLike>,
   ) {}
 
   getHello(): string {
@@ -24,5 +30,7 @@ export class AppService {
     await this.postModel.deleteMany({});
     await this.userModel.deleteMany({});
     await this.postLike.deleteMany({});
+    await this.commentModel.deleteMany({});
+    await this.commentLikeModel.deleteMany({});
   }
 }

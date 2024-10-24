@@ -5,7 +5,7 @@ import {
 } from 'class-validator';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Blog, BlogDocument } from '../../db/schemas/blog.schema';
+import { Blog, BlogDocument } from '../../../db/schemas/blog.schema';
 import { Model } from 'mongoose';
 
 @ValidatorConstraint({ name: 'blogId', async: true })
@@ -15,9 +15,10 @@ export class BlogIdValidator implements ValidatorConstraintInterface {
     @InjectModel(Blog.name) private readonly blogModel: Model<BlogDocument>,
   ) {}
 
-  async validate(value: string): Promise<boolean> {
-    const blog = await this.blogModel.findById(value);
-    if (!blog) return false;
+  async validate(blogId: string): Promise<boolean> {
+    if (blogId && blogId.match(/^[0-9a-fA-F]{24}$/)) {
+      return this.blogModel.findById(blogId);
+    }
   }
 
   defaultMessage(validationArguments?: ValidationArguments): string {

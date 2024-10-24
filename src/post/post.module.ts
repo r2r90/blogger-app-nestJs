@@ -16,7 +16,8 @@ import { PostMapper } from './mapper/post.mapper';
 import { UserService } from '../user/user.service';
 import { UserRepository } from '../user/repositories/user.repository';
 import { JwtService } from '@nestjs/jwt';
-import { BlogIdValidator } from '../common/validators/blog-id.validator';
+import { BlogIdValidator } from '../common/validators/custom-validators/blog-id.validator';
+import { CommentMapper } from '../comment/mapper/comment.mapper';
 
 export const CommandHandlers = [CreatePostHandler, CreateCommentHandler];
 
@@ -27,6 +28,7 @@ export const CommandHandlers = [CreatePostHandler, CreateCommentHandler];
     PostRepository,
     PostQueryRepository,
     PostMapper,
+
     BlogQueryRepository,
     BlogRepository,
     CommentRepository,
@@ -35,6 +37,7 @@ export const CommandHandlers = [CreatePostHandler, CreateCommentHandler];
     UserRepository,
     JwtService,
     BlogIdValidator,
+    CommentMapper,
     ...CommandHandlers,
   ],
   imports: [MongooseModule.forFeature(forFeatureDb), CqrsModule],

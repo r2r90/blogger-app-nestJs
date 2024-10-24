@@ -3,12 +3,6 @@ import { HydratedDocument, Types } from 'mongoose';
 
 export type PostDocument = HydratedDocument<Post>;
 
-export enum LikeStatus {
-  None = 'None',
-  Like = 'Like',
-  Dislike = 'Dislike',
-}
-
 @Schema({
   versionKey: false,
 })

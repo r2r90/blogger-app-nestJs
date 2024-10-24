@@ -25,6 +25,8 @@ import { CookieDecorator } from '../common/decorators/cookieDecorator';
 import { JwtAccessAuthGuard } from '../auth/guards/jwt-access-auth.guard';
 import { JwtGuard } from '../auth/guards/jwt-guard';
 import { AuthGuard } from '@nestjs/passport';
+import { CreateCommentDto } from '../comment/dto/create-comment.dto';
+import { CreateCommentCommand } from './commands/impl/create-comment.command';
 
 @SkipThrottle()
 @Controller('posts')
@@ -49,7 +51,6 @@ export class PostController {
     @Param('id', IsObjectIdPipe) id: string,
     @UserDecorator('id') userId: string | undefined,
   ) {
-    console.log(userId);
     return this.postService.getOnePost(id, userId);
   }
 
@@ -88,31 +89,32 @@ export class PostController {
     );
   }
 
-  // @Post(':postId/comments')
-  // @UseGuards(JwtRefreshAuthGuard)
-  // createComment(
-  //   @Req() req: Request,
-  //   @Param('postId', IsObjectIdPipe) postId: string,
-  //   @Body() dto: CreateCommentDto,
-  // ) {
-  //   const userId = req.user.id.toString();
-  //   return this.commandBus.execute(
-  //     new CreateCommentCommand(userId, postId, dto.content),
-  //   );
-  // }
-
   @Delete(':id')
   @HttpCode(204)
   @UseGuards(AuthGuard('basic'))
   remove(@Param('id', IsObjectIdPipe) id: string) {
     return this.postService.deletePost(id);
   }
+
+  @Post(':postId/comments')
+  @UseGuards(JwtAccessAuthGuard)
+  createComment(
+    @UserDecorator('id') userId: string,
+    @Param('postId', IsObjectIdPipe) postId: string,
+    @Body() dto: CreateCommentDto,
+  ) {
+    return this.commandBus.execute(
+      new CreateCommentCommand(userId, postId, dto.content),
+    );
+  }
+
+  @Get(':postId/comments')
+  @UseGuards(JwtGuard)
+  getPostsComments(
+    @Param('postId', IsObjectIdPipe) postId: string,
+    @Query(PaginationQueryPipe) query: PaginationInputType,
+    @UserDecorator('id') userId: string,
+  ) {
+    return this.postService.getPostComments(postId, query, userId);
+  }
 }
-
-
-// import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-//
-// export const Cookies = createParamDecorator((data: string, ctx: ExecutionContext) => {
-//   const request = ctx.switchToHttp().getRequest();
-//   return data ? request.cookies?.[data] : request.cookies;
-// });
