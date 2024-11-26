@@ -42,6 +42,7 @@ export class PostController {
     @Query(PaginationQueryPipe) query: PaginationInputType,
     @CookieDecorator('sub') userId: string,
   ) {
+
     return this.postService.getAllPosts(query, userId);
   }
 

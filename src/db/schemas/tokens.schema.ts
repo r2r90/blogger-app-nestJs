@@ -14,12 +14,6 @@ export class Token {
   refreshToken: string;
 
   @Prop({
-    type: Date,
-    required: true,
-  })
-  expiresAt: Date;
-
-  @Prop({
     type: mongoose.Schema.Types.ObjectId,
     required: true,
   })

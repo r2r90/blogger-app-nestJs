@@ -13,6 +13,6 @@ password = 'qwerty'
 type = 'JSON'
 raw = '''
 {
-  "code": "75f31616-d54e-4257-ae0d-29c19798d344"
+  "code": "0358a0ac-9ba1-4056-a788-1c0e6e0ec6b6"
 }'''
 ```

@@ -3,13 +3,9 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
-import {
-  ConfirmCodeDto,
-  EmailValidationDto,
-  LoginUserDto,
-  RegisterUserDto,
-} from './dto';
+import { ConfirmCodeDto, EmailValidationDto, LoginUserDto } from './dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { add } from 'date-fns';
@@ -20,8 +16,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { AuthQueryRepository } from './repositories/auth.query.repository';
 import { UserRepository } from '../user/repositories/user.repository';
 import { UserService } from '../user/user.service';
-import { JwtTokenService } from './jwt-token.service';
-import { Response } from 'express';
+import { AuthJwtTokenService } from './auth-jwt-token.service';
+import { SessionData } from '../db/schemas';
+import { SecurityDevicesRepository } from '../security-devices/security-devices.repository';
+import { TokenRepository } from './repositories/token.repository';
 
 @Injectable()
 export class AuthService {
@@ -33,33 +31,10 @@ export class AuthService {
     private readonly userRepository: UserRepository,
     private readonly authRepository: AuthRepository,
     private readonly authQueryRepository: AuthQueryRepository,
-    private readonly authRefreshTokenService: JwtTokenService,
+    private readonly authJwtTokenService: AuthJwtTokenService,
+    private readonly securityDevicesRepository: SecurityDevicesRepository,
+    private readonly tokenRepository: TokenRepository,
   ) {}
-
-  async register(dto: RegisterUserDto) {
-    const hashedPassword = await this.hashPassword(dto.password);
-    const randomConfirmationCode = uuidv4();
-
-    const dataToCreateUser = {
-      login: dto.login,
-      email: dto.email,
-      password: hashedPassword,
-      createdAt: new Date().toISOString(),
-      emailConfirmation: {
-        confirmationCode: randomConfirmationCode,
-        expirationDate: add(new Date(), { hours: 1 }),
-        isConfirmed: false,
-      },
-      recoveryCode: null,
-    };
-    const createUser = await this.userRepository.create(dataToCreateUser);
-    if (!createUser) return null;
-    await this.mailService.sendRegistrationConfirmationCode(
-      dto.email,
-      randomConfirmationCode,
-    );
-    return true;
-  }
 
   async confirmCode(confirmCodeDto: ConfirmCodeDto) {
     const { code } = confirmCodeDto;
@@ -85,11 +60,51 @@ export class AuthService {
     return null;
   }
 
-  async login(res: Response, user: any) {
+  async login(user: any, sessionData: SessionData) {
     if (!user) {
       throw new InternalServerErrorException('User not set in request');
     }
-    return this.authRefreshTokenService.generateTokenPair(user, res);
+
+    const { accessToken, refreshToken } =
+      await this.authJwtTokenService.generateTokenPair(user);
+
+    await this.securityDevicesRepository.saveSession(sessionData);
+
+    return { accessToken, refreshToken };
+  }
+
+  async refreshToken(
+    userid: string,
+    currentRefreshToken: string,
+    expiresAt: Date,
+  ) {
+    const user = await this.userQueryRepository.findOne(userid);
+    if (!user) {
+      throw new InternalServerErrorException(
+        'Something went wrong, please log in...',
+      );
+    }
+
+    const { accessToken, refreshToken } =
+      await this.authJwtTokenService.generateTokenPair(
+        user,
+        currentRefreshToken,
+        expiresAt,
+      );
+
+    return { accessToken, refreshToken };
+  }
+
+  async logoutFromDevice(userId: string, ip: string, token: string) {
+    const isBlackListed = await this.tokenRepository.isRefreshTokenBlackListed(
+      token,
+      userId,
+    );
+    if (isBlackListed) {
+      throw new UnauthorizedException('change to valid Token to logout');
+    }
+    await this.tokenRepository.saveToken(token, userId);
+    return await this.securityDevicesRepository.logoutFromDevice(userId, ip);
   }
 
   async sendRecoveryCode(email: string): Promise<boolean> {

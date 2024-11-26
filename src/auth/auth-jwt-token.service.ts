@@ -1,16 +1,13 @@
 import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
 import { TokenRepository } from './repositories/token.repository';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { User } from '../db/schemas/users.schema';
-import { cookieConfig } from './config/cookie-config';
-import { Response } from 'express';
+import { User } from '../db/schemas';
+import configuration from '../config/configuration';
 
 @Injectable()
-export class JwtTokenService {
+export class AuthJwtTokenService {
   constructor(
     private jwtService: JwtService,
-    private config: ConfigService,
     private tokenRepository: TokenRepository,
   ) {}
 
@@ -22,8 +19,8 @@ export class JwtTokenService {
     const newRefreshToken = this.jwtService.sign(
       { sub: authUser._id, login: authUser.login },
       {
-        secret: this.config.get('refreshJwtSecret'),
-        expiresIn: this.config.get('refreshJwtExpiresIn'),
+        secret: configuration().refreshJwtSecret,
+        expiresIn: configuration().refreshJwtExpiresIn,
       },
     );
 
@@ -37,12 +34,7 @@ export class JwtTokenService {
         throw new UnauthorizedException('invalid refresh token');
       }
 
-      await this.tokenRepository.saveToken(
-        currentRefreshToken,
-        currentRefreshTokenExpiresAt,
-        authUser._id,
-        authUser.login,
-      );
+      await this.tokenRepository.saveToken(currentRefreshToken, authUser._id);
     }
 
     return newRefreshToken;
@@ -50,7 +42,6 @@ export class JwtTokenService {
 
   async generateTokenPair(
     user: User,
-    res: Response,
     currentRefreshToken?: string,
     currentRefreshTokenExpiresAt?: Date,
   ): Promise<any> {
@@ -60,21 +51,18 @@ export class JwtTokenService {
       sub: user._id.toString(),
     };
 
-    res.cookie(
-      cookieConfig.refreshToken.name,
-      await this.generateRefreshToken(
-        user,
-        currentRefreshToken,
-        currentRefreshTokenExpiresAt,
-      ),
-      {
-        ...cookieConfig.refreshToken.options,
-      },
+    const accessToken = this.jwtService.sign(payload, {
+      secret: configuration().accessJwtSecret,
+      expiresIn: configuration().accessJwtExpiration,
+    });
+
+    const refreshToken = await this.generateRefreshToken(
+      user,
+      currentRefreshToken,
+      currentRefreshTokenExpiresAt,
     );
 
-    return {
-      accessToken: this.jwtService.sign(payload),
-    };
+    return { accessToken, refreshToken };
   }
 
   verifyToken(token: string) {

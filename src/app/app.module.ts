@@ -19,6 +19,8 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { JwtGuard } from '../auth/guards/jwt-guard';
 import { NameIsExistConstraint } from '../common/validators/custom-validators/name-is-exist.validator';
 import { CommentModule } from '../comment/comment.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { SecurityDevicesModule } from '../security-devices/security-devices.module';
 
 @Module({
   imports: [
@@ -37,6 +39,7 @@ import { CommentModule } from '../comment/comment.module';
         limit: 5,
       },
     ]),
+    ScheduleModule.forRoot(),
 
     MongooseModule.forFeature(forFeatureDb),
     DatabaseModule,
@@ -45,6 +48,7 @@ import { CommentModule } from '../comment/comment.module';
     UserModule,
     AuthModule,
     CommentModule,
+    SecurityDevicesModule,
     MailModule,
   ],
   controllers: [AppController],

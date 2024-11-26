@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AuthQueryRepository } from './repositories/auth.query.repository';
@@ -14,10 +14,13 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { options } from './config';
 import { CqrsModule } from '@nestjs/cqrs';
-import { JwtTokenService } from './jwt-token.service';
+import { AuthJwtTokenService } from './auth-jwt-token.service';
 import { TokenRepository } from './repositories/token.repository';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh-strategy';
 import { JwtAccessStrategy } from './strategies/jwt-access-strategy';
+import { SessionDataMiddleware } from '../common/middlewares/session-data.middleware';
+import { SessionDataRepository } from './repositories/session-data.repository';
+import { SecurityDevicesRepository } from '../security-devices/security-devices.repository';
 
 @Module({
   controllers: [AuthController],
@@ -25,7 +28,7 @@ import { JwtAccessStrategy } from './strategies/jwt-access-strategy';
     AuthService,
     AuthRepository,
     AuthQueryRepository,
-    JwtTokenService,
+    AuthJwtTokenService,
     TokenRepository,
     BasicStrategy,
     JwtRefreshStrategy,
@@ -35,6 +38,8 @@ import { JwtAccessStrategy } from './strategies/jwt-access-strategy';
     UserRepository,
     UserService,
     LocalStrategy,
+    SessionDataRepository,
+    SecurityDevicesRepository,
   ],
   imports: [
     PassportModule,
@@ -42,8 +47,13 @@ import { JwtAccessStrategy } from './strategies/jwt-access-strategy';
     JwtModule.registerAsync(options()),
     CqrsModule,
   ],
-  exports: [
-    JwtModule
-  ]
+  exports: [JwtModule],
 })
-export class AuthModule {}
+export class AuthModule {
+  // configure(consumer: MiddlewareConsumer) {
+  //   consumer
+  //     .apply(SessionDataMiddleware)
+  //     .forRoutes('auth/login', 'auth/logout');
+  // }
+}
+

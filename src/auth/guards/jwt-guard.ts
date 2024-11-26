@@ -20,6 +20,7 @@ export class JwtGuard implements CanActivate {
       return true;
     }
 
+
     const accessToken = request.headers.authorization.split(' ')[1];
 
     const payload = this.jwtService.decode(accessToken);

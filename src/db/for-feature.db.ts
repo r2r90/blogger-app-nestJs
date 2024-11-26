@@ -1,10 +1,18 @@
-import { Blog, BlogSchema } from './schemas/blog.schema';
-import { Post, PostSchema } from './schemas/post.schema';
-import { User, UserSchema } from './schemas/users.schema';
-import { Token, TokenSchema } from './schemas/tokens.schema';
-import { Comment, CommentSchema } from './schemas/comments.schema';
-import { PostLike, PostLikeSchema } from './schemas/post-likes.schema';
-import { CommentLike, CommentLikeSchema } from './schemas/comment-likes.schema';
+import {
+  Blog,
+  BlogSchema,
+  Comment,
+  CommentLike,
+  CommentLikeSchema,
+  CommentSchema,
+  Post,
+  PostLike,
+  PostLikeSchema,
+  PostSchema, SessionData, SessionDataSchema, Token, TokenSchema,
+  User,
+  UserSchema,
+} from './schemas';
+
 
 export default [
   { name: Blog.name, schema: BlogSchema },
@@ -14,4 +22,5 @@ export default [
   { name: Comment.name, schema: CommentSchema },
   { name: CommentLike.name, schema: CommentLikeSchema },
   { name: Token.name, schema: TokenSchema },
+  { name: SessionData.name, schema: SessionDataSchema },
 ];

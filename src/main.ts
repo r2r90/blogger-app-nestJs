@@ -4,8 +4,6 @@ import { ConfigService } from '@nestjs/config';
 import { useContainer } from 'class-validator';
 import { applyAppSettings } from './settings/apply-app-settings';
 import cookieParser from 'cookie-parser';
-import { AuthMiddleware } from './common/middlewares/auth.middleware';
-import { JwtService } from '@nestjs/jwt';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,8 +13,8 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = configService.get<number>('port');
 
-  // const serverUrl = 'http://localhost:3000';
-  // get the swagger json file (if app is running in development mode)
+  const serverUrl = 'http://localhost:3000';
+  // // get the swagger json file (if app is running in development mode)
   // if (process.env.NODE_ENV === 'development') {
   //   // write swagger ui files
   //   get(`${serverUrl}/swagger/swagger-ui-bundle.js`, function (response) {
