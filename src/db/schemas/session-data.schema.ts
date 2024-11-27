@@ -15,6 +15,12 @@ export class SessionData {
 
   @Prop({
     type: String,
+    default: null,
+  })
+  refreshToken: string;
+
+  @Prop({
+    type: String,
     required: true,
   })
   ip: string;

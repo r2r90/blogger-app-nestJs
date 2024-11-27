@@ -17,7 +17,6 @@ export const CookieDecorator = createParamDecorator(
 
     return {
       sub: null,
-      login: null,
       iat: null,
       exp: null,
     };

@@ -4,7 +4,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { useContainer } from 'class-validator';
-import { AppModule } from '../app/app.module';
+import { AppModule } from '../modules/app/app.module';
 import { HttpExceptionFilter } from '../common/filters/custom.exception.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
