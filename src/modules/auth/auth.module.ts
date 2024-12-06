@@ -51,7 +51,7 @@ import { SecurityDevicesRepository } from '../security-devices/security-devices.
 export class AuthModule {
   // configure(consumer: MiddlewareConsumer) {
   //   consumer
-  //     .apply(SessionDataMiddleware)
+  //     .apply(SessionDataMiddlu eware)
   //     .forRoutes('auth/login', 'auth/logout');
   // }
 }

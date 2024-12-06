@@ -18,7 +18,6 @@ import {
   RegisterUserDto,
 } from './dto';
 import { AuthService } from './auth.service';
-import { SkipThrottle } from '@nestjs/throttler';
 import { PassportLocalGuard } from './guards/passport.local.guard';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreateUserCommand } from '../user/commands/impl/create-user.command.';

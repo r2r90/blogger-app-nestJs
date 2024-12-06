@@ -3,9 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import mongoose, { Connection } from 'mongoose';
 import { MongooseModule } from '@nestjs/mongoose';
 import { DB_CONNECTION } from './db.constants';
-import { MongooseConfigService } from './mongoose-config.service';
+import { MongooseConfigService } from './mongoose.config.service';
 
-const DATABASE_PROVIDER = {
+const MONGO_DATABASE_PROVIDER = {
   provide: DB_CONNECTION,
   useFactory: async (
     config: ConfigService,
@@ -14,15 +14,23 @@ const DATABASE_PROVIDER = {
     const { uri } = await mongooseConfigService.createMongooseOptions();
 
     mongoose.connection.on('connecting', () => {
-      console.log('CONNECTING TO DATABASE');
+      console.log('MONGO-DB: CONNECTING TO DATABASE');
     });
 
     mongoose.connection.on('connected', () => {
-      console.log('DATABASE SUCCESSFULLY CONNECTED ');
+      console.log('MONGO-DB: DATABASE SUCCESSFULLY CONNECTED');
+    });
+
+    mongoose.connection.on('error', (error) => {
+      console.error('MONGO-DB: CONNECTION ERROR', error);
+    });
+
+    mongoose.connection.on('reconnected', () => {
+      console.log('MONGO-DB: DATABASE RECONNECTED');
     });
 
     mongoose.connection.on('disconnected', () => {
-      console.log('DATABASE DISCONNECTED');
+      console.log('MONGO-DB: DATABASE DISCONNECTED');
     });
 
     const mongooseConnection = await mongoose.connect(uri);
@@ -38,7 +46,7 @@ const DATABASE_PROVIDER = {
       useClass: MongooseConfigService,
     }),
   ],
-  providers: [DATABASE_PROVIDER, MongooseConfigService],
-  exports: [DATABASE_PROVIDER, MongooseModule],
+  providers: [MONGO_DATABASE_PROVIDER, MongooseConfigService],
+  exports: [MONGO_DATABASE_PROVIDER, MongooseModule],
 })
 export class DatabaseModule {}
