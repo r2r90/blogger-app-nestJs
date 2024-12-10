@@ -5,7 +5,7 @@ import {
 } from 'class-validator';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Blog, BlogDocument } from '../../../db/schemas/blog.schema';
+import { Blog, BlogDocument } from '../../../db/db-mongo/schemas/blog.schema';
 import { Model } from 'mongoose';
 
 @ValidatorConstraint({ name: 'blogId', async: true })

@@ -5,8 +5,6 @@ import { BlogModule } from '../blog/blog.module';
 import configuration from '../../config/configuration';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from '../../db/database.module';
-import { MongooseModule } from '@nestjs/mongoose';
-import forFeatureDb from '../../db/for-feature.db';
 import { PostModule } from '../post/post.module';
 import { UserModule } from '../user/user.module';
 import { AuthModule } from '../auth/auth.module';
@@ -21,6 +19,9 @@ import { NameIsExistConstraint } from '../../common/validators/custom-validators
 import { CommentModule } from '../comment/comment.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { SecurityDevicesModule } from '../security-devices/security-devices.module';
+import { MongoDatabaseModule } from '../../db/db-mongo/mongo-database.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { WalletsModule } from '../wallets/wallets.module';
 
 @Module({
   imports: [
@@ -39,9 +40,20 @@ import { SecurityDevicesModule } from '../security-devices/security-devices.modu
         limit: 5,
       },
     ]),
-    ScheduleModule.forRoot(),
 
-    MongooseModule.forFeature(forFeatureDb),
+    ScheduleModule.forRoot(),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.POSTGREST_HOST,
+      port: 5432,
+      username: process.env.POSTGRES_USER,
+      password: process.env.POSTGRES_PASSWORD,
+      database: process.env.POSTGRES_DB,
+      autoLoadEntities: false,
+      synchronize: false,
+    }),
+    TypeOrmModule.forFeature([]),
+    MongoDatabaseModule,
     DatabaseModule,
     BlogModule,
     PostModule,
@@ -50,6 +62,7 @@ import { SecurityDevicesModule } from '../security-devices/security-devices.modu
     CommentModule,
     SecurityDevicesModule,
     MailModule,
+    WalletsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -19,7 +19,7 @@ import { UserService } from '../user/user.service';
 import { AuthJwtTokenService } from './auth-jwt-token.service';
 import { SecurityDevicesRepository } from '../security-devices/security-devices.repository';
 import { TokenRepository } from './repositories/token.repository';
-import { SessionData } from '../../db/schemas';
+import { SessionData } from '../../db/db-mongo/schemas';
 
 @Injectable()
 export class AuthService {

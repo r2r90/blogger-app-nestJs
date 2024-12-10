@@ -20,7 +20,7 @@ import { CommandBus } from '@nestjs/cqrs';
 import { CreateUserCommand } from './commands/impl/create-user.command.';
 
 @SkipThrottle()
-@Controller('sa/users')
+@Controller('users')
 export class UserController {
   constructor(
     private readonly usersService: UserService,

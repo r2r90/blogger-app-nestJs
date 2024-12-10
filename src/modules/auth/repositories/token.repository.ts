@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Token } from '../../../db/schemas/tokens.schema';
+import { Token } from '../../../db/db-mongo/schemas/tokens.schema';
 import { Model } from 'mongoose';
 import { Cron, CronExpression } from '@nestjs/schedule';
 

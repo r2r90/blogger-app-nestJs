@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
-import { LikeStatus } from '../../../db/schemas/post-likes.schema';
-import { CommentDocument } from '../../../db/schemas/comments.schema';
-import { CommentLike } from '../../../db/schemas/comment-likes.schema';
+import { LikeStatus } from '../../../db/db-mongo/schemas/post-likes.schema';
+import { CommentDocument } from '../../../db/db-mongo/schemas/comments.schema';
+import { CommentLike } from '../../../db/db-mongo/schemas/comment-likes.schema';
 
 export type LikeDetails = {
   description?: 'None' | 'Like' | 'Dislike';
@@ -38,8 +38,6 @@ export class CommentMapper {
     const myLike = commentLikeInfo.find((like) => like.userId === userId);
 
     const myStatus = myLike ? myLike.likeStatus : 'None';
-
-
 
     return {
       id: comment.id,

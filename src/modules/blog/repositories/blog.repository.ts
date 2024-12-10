@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Blog } from '../../../db/schemas/blog.schema';
+import { Blog } from '../../../db/db-mongo/schemas/blog.schema';
 import { Model } from 'mongoose';
 import { CreateBlogDto } from '../dto/create.blog.dto';
 import { BlogOutputType } from '../mapper/blog.mapper';

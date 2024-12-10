@@ -10,6 +10,16 @@ export default () => ({
   mongo_local_port: process.env.LOCAL_MONGO_DB_PORT,
   mongo_local_host: process.env.MONGO_LOCAL_DB_HOST,
   mongo_db_name: process.env.MONGO_DB_NAME,
+
+  // POSTGRES TYPEORM DB CONSTANTS
+  postgres_username: process.env.POSTGRES_DB_USERNAME,
+  postgres_password: process.env.POSTGRES_DB_PASSWORD,
+  postgres_local_port: process.env.LOCAL_POSTGRES_DB_PORT,
+  postgres_local_host: process.env.POSTGRES_LOCAL_DB_HOST,
+  postgres_db_name: process.env.POSTGRES_DB_NAME,
+  db_sync: process.env.DB_SYNC,
+  db_logging: process.env.DB_LOGGING,
+
   localEnv: process.env.NODE_ENV,
   localDb: process.env.MONGO_DB_URI_LOCAL,
   accessJwtSecret: process.env.ACCESS_JWT_SECRET,

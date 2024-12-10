@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import forFeatureDb from '../../db/for-feature.db';
+import forFeatureDb from '../../db/db-mongo/for-feature.db';
 import { PostController } from './post.controller';
 import { PostRepository } from './repositories/post.repository';
 import { BlogQueryRepository } from '../blog/repositories/blog.query.repository';

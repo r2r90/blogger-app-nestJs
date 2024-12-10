@@ -1,18 +1,21 @@
 import {
   Blog,
   BlogSchema,
-  Comment,
   CommentLike,
   CommentLikeSchema,
+  Comment,
   CommentSchema,
   Post,
   PostLike,
   PostLikeSchema,
-  PostSchema, SessionData, SessionDataSchema, Token, TokenSchema,
+  PostSchema,
+  SessionData,
+  SessionDataSchema,
+  Token,
+  TokenSchema,
   User,
   UserSchema,
 } from './schemas';
-
 
 export default [
   { name: Blog.name, schema: BlogSchema },

@@ -1,5 +1,5 @@
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from '../../../db/schemas/users.schema';
+import { User } from '../../../db/db-mongo/schemas/users.schema';
 import { Model } from 'mongoose';
 import { NotFoundException } from '@nestjs/common';
 
@@ -17,7 +17,5 @@ export class AuthQueryRepository {
     return user;
   }
 
-  async saveToken(refreshToken: string): Promise<any> {
-
-  }
+  async saveToken(refreshToken: string): Promise<any> {}
 }

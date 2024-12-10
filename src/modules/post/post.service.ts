@@ -3,7 +3,7 @@ import { CreatePostDto } from './dto/create.post.dto';
 import { PostRepository } from './repositories/post.repository';
 import { PaginationInputType } from '../../common/pagination/pagination.types';
 import { PostQueryRepository } from './repositories/post-query.repository';
-import { LikeStatus } from '../../db/schemas';
+import { LikeStatus } from '../../db/db-mongo/schemas';
 
 @Injectable()
 export class PostService {

@@ -1,6 +1,9 @@
 import { Types } from 'mongoose';
-import { PostDocument } from '../../../db/schemas/post.schema';
-import { LikeStatus, PostLike } from '../../../db/schemas/post-likes.schema';
+import { PostDocument } from '../../../db/db-mongo/schemas/post.schema';
+import {
+  LikeStatus,
+  PostLike,
+} from '../../../db/db-mongo/schemas/post-likes.schema';
 
 export type LikeDetails = {
   description?: 'None' | 'Like' | 'Dislike';

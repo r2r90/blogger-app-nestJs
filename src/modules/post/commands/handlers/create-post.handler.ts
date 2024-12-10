@@ -3,7 +3,7 @@ import { CreatePostCommand } from '../impl/create-post.command';
 import { PostRepository } from '../../repositories/post.repository';
 import { BlogQueryRepository } from '../../../blog/repositories/blog.query.repository';
 import { BadRequestException } from '@nestjs/common';
-import { Blog } from '../../../../db/schemas/blog.schema';
+import { Blog } from '../../../../db/db-mongo/schemas/blog.schema';
 
 @CommandHandler(CreatePostCommand)
 export class CreatePostHandler implements ICommandHandler<CreatePostCommand> {

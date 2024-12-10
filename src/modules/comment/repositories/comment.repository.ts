@@ -8,7 +8,7 @@ import {
 } from '../dto/create-comment.dto';
 import { CommentMapper, CommentOutputType } from '../mapper/comment.mapper';
 import { LikeCommentStatusInputDataType } from '../../post/dto/like-status.dto';
-import { Comment, CommentLike, LikeStatus } from '../../../db/schemas';
+import { Comment, CommentLike, LikeStatus } from '../../../db/db-mongo/schemas';
 
 @Injectable()
 export class CommentRepository {
@@ -62,7 +62,6 @@ export class CommentRepository {
     const res = await this.commentModel.findOneAndUpdate({ _id: id }, data, {
       new: true,
     });
-
 
     if (!res) throw new NotFoundException();
     return res;

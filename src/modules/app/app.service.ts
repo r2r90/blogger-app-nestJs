@@ -8,7 +8,7 @@ import {
   Post,
   PostLike,
   User,
-} from '../../db/schemas';
+} from '../../db/db-mongo/schemas';
 
 @Injectable()
 export class AppService {

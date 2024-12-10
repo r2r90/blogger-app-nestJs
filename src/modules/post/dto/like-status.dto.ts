@@ -1,5 +1,5 @@
 import { IsEnum, IsNotEmpty } from 'class-validator';
-import { LikeStatus } from '../../../db/schemas';
+import { LikeStatus } from '../../../db/db-mongo/schemas';
 
 export type LikePostStatusInputDataType = {
   userId: string;

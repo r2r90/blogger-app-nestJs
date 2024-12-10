@@ -1,10 +1,13 @@
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Post } from '../../../db/schemas/post.schema';
+import { Post } from '../../../db/db-mongo/schemas/post.schema';
 import { CreatePostDataType, CreatePostDto } from '../dto/create.post.dto';
 import { NotFoundException } from '@nestjs/common';
 import { PostQueryRepository } from './post-query.repository';
-import { LikeStatus, PostLike } from '../../../db/schemas/post-likes.schema';
+import {
+  LikeStatus,
+  PostLike,
+} from '../../../db/db-mongo/schemas/post-likes.schema';
 import { LikePostStatusInputDataType } from '../dto/like-status.dto';
 
 export class PostRepository {

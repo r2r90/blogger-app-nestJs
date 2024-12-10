@@ -1,52 +1,47 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { CreateUserDto, User } from '../../../db/schemas/users.schema';
-import { Model } from 'mongoose';
+import { CreateUserDto } from '../../../db/db-mongo/schemas';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class UserRepository {
-  @InjectModel(User.name) private readonly userModel: Model<User>;
+  constructor(@InjectDataSource() protected readonly db: DataSource) {}
 
   async create(data: CreateUserDto) {
+    const { login, email, password, emailConfirmation } = data;
     const createdAt = new Date().toISOString();
-    const createdUser = new this.userModel({
-      ...data,
-      createdAt,
-    });
 
-    const savedUser = await createdUser.save();
+    const query = `
+        INSERT INTO users (login, email, password, confirmation_code, expiration_date, is_confirmed, created_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING *;
+    `;
+
+    const values = [
+      login,
+      email,
+      password,
+      emailConfirmation.confirmationCode || null,
+      emailConfirmation.expirationDate || null,
+      emailConfirmation.isConfirmed || null,
+      createdAt,
+    ];
+
+    const res = await this.db.query(query, values);
+
+    if (!res || !res.rows || res.rows.length === 0) {
+      throw new Error(
+        'User creation failed: no data returned from the database',
+      );
+    }
+
+    const user = res[0];
 
     return {
-      id: savedUser._id,
-      createdAt: savedUser.createdAt,
-      email: savedUser.email,
-      login: savedUser.login,
+      id: user.id,
+      login: user.login,
+      email: user.email,
+      createdAt,
     };
-  }
-
-  async remove(id: string) {
-    const res = await this.userModel.findByIdAndDelete(id);
-    if (!res) return null;
-    return res;
-  }
-
-  async updateConfirmationCode(email: string, recoveryCode: string) {
-    const updateCode = await this.userModel.findOneAndUpdate(
-      { email },
-      { $set: { recoveryCode: recoveryCode } },
-      { new: true },
-    );
-
-    return !!updateCode;
-  }
-
-  async updatePassword(id: string, newPassword: string) {
-    const updatePassword = await this.userModel.findByIdAndUpdate(
-      { _id: id },
-      { $set: { password: newPassword, recoveryCode: null } },
-      { new: true },
-    );
-
-    return !!updatePassword;
   }
 }

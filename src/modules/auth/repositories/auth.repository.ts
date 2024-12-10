@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { User } from '../../../db/schemas/users.schema';
+import { User } from '../../../db/db-mongo/schemas/users.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -26,5 +26,4 @@ export class AuthRepository {
 
     return !!updateCode;
   }
-
 }

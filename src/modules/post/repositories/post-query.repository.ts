@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Post, PostDocument } from '../../../db/schemas/post.schema';
+import { Post, PostDocument } from '../../../db/db-mongo/schemas/post.schema';
 import {
   PaginationInputType,
   PaginationType,
@@ -11,8 +11,11 @@ import {
   CommentMapper,
   CommentOutputType,
 } from '../../comment/mapper/comment.mapper';
-import { PostLike } from '../../../db/schemas/post-likes.schema';
-import { Comment, CommentDocument } from '../../../db/schemas/comments.schema';
+import { PostLike } from '../../../db/db-mongo/schemas/post-likes.schema';
+import {
+  Comment,
+  CommentDocument,
+} from '../../../db/db-mongo/schemas/comments.schema';
 import { CommentRepository } from '../../comment/repositories/comment.repository';
 
 @Injectable()
