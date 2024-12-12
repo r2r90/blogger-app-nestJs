@@ -21,7 +21,6 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { SecurityDevicesModule } from '../security-devices/security-devices.module';
 import { MongoDatabaseModule } from '../../db/db-mongo/mongo-database.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { WalletsModule } from '../wallets/wallets.module';
 
 @Module({
   imports: [
@@ -44,7 +43,7 @@ import { WalletsModule } from '../wallets/wallets.module';
     ScheduleModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.POSTGREST_HOST,
+      host: 'localhost',
       port: 5432,
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
@@ -62,13 +61,11 @@ import { WalletsModule } from '../wallets/wallets.module';
     CommentModule,
     SecurityDevicesModule,
     MailModule,
-    WalletsModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
     JwtGuard,
-
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,

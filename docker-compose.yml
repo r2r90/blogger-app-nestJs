@@ -25,18 +25,7 @@ services:
     networks:
       - app-network
 
-  mongo-db:
-    image: mongo
-    container_name: blogger-mongodb-nestjs
-    ports:
-      - '${LOCAL_MONGO_DB_PORT}:${LOCAL_MONGO_DB_PORT}'
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_DB_USERNAME}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_DB_PASSWORD}
-    volumes:
-      - db-data:/var/lib/mongodb/data
-    networks:
-      - app-network
+
 
   postgres-db:
     image: postgres:17-alpine
@@ -62,6 +51,19 @@ services:
       - '${PGADMIN_PORT}:80'
     depends_on:
       - postgres-db
+    networks:
+      - app-network
+
+  mongo-db:
+    image: mongo
+    container_name: blogger-mongodb-nestjs
+    ports:
+      - '${LOCAL_MONGO_DB_PORT}:${LOCAL_MONGO_DB_PORT}'
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_DB_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_DB_PASSWORD}
+    volumes:
+      - db-data:/var/lib/mongodb/data
     networks:
       - app-network
 

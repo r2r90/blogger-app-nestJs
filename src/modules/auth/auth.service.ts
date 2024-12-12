@@ -192,26 +192,23 @@ export class AuthService {
     return true;
   }
 
-  async updatePasswordWithRecoveryCode(
-    password: string,
-    code: string,
-  ): Promise<boolean> {
-    const userWithRecoveryCode =
-      await this.userQueryRepository.getUserByRecoveryCode(code);
-    if (!userWithRecoveryCode) {
-      throw new NotFoundException('Recovery Code is invalid');
-    }
-
-    const hashedPassword = await this.hashPassword(password);
-    const updatePassword = await this.userRepository.updatePassword(
-      userWithRecoveryCode._id,
-      hashedPassword,
-    );
-    if (!updatePassword) {
-      throw new BadRequestException('Cannot update password');
-    }
-
-    return updatePassword;
+  async updatePasswordWithRecoveryCode(password: string, code: string) {
+    // const userWithRecoveryCode =
+    //   await this.userQueryRepository.getUserByRecoveryCode(code);
+    // if (!userWithRecoveryCode) {
+    //   throw new NotFoundException('Recovery Code is invalid');
+    // }
+    //
+    // const hashedPassword = await this.hashPassword(password);
+    // const updatePassword = await this.userRepository.updatePassword(
+    //   userWithRecoveryCode._id,
+    //   hashedPassword,
+    // );
+    // if (!updatePassword) {
+    //   throw new BadRequestException('Cannot update password');
+    // }
+    //
+    // return updatePassword;
   }
 
   async checkRefreshCodeWithDevice(

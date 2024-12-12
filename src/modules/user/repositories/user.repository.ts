@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../../../db/db-mongo/schemas';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
@@ -12,7 +12,7 @@ export class UserRepository {
     const createdAt = new Date().toISOString();
 
     const query = `
-        INSERT INTO users (login, email, password, confirmation_code, expiration_date, is_confirmed, created_at)
+        INSERT INTO users (login, email, password, confirmation_code, expiration_date, is_confirmed, created_At)
         VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING *;
     `;
@@ -27,21 +27,47 @@ export class UserRepository {
       createdAt,
     ];
 
-    const res = await this.db.query(query, values);
+    try {
+      const res = await this.db.query(query, values);
+      if (!res || res.length === 0) {
+        new HttpException(
+          'User creation failed: no data returned from the database',
+          HttpStatus.INTERNAL_SERVER_ERROR, // Use appropriate status
+        );
+      }
+      const user = res[0];
 
-    if (!res || !res.rows || res.rows.length === 0) {
-      throw new Error(
-        'User creation failed: no data returned from the database',
-      );
+      return {
+        id: user.id,
+        login: user.login,
+        email: user.email,
+        createdAt,
+      };
+    } catch (e) {
+      console.log(e.message);
     }
+  }
 
-    const user = res[0];
+  async remove(id: string) {
+    return 'remove from sql db';
+  }
 
-    return {
-      id: user.id,
-      login: user.login,
-      email: user.email,
-      createdAt,
-    };
+  async updateConfirmationCode(email: string, recoveryCode: string) {
+    //   const updateCode = await this.userModel.findOneAndUpdate(
+    //     { email },
+    //     { $set: { recoveryCode: recoveryCode } },
+    //     { new: true },
+    //   );
+    //
+    //   return !!updateCode;
+    // }
+    //
+    // async updatePassword(id: string, newPassword: string) {
+    //   const updatePassword = await this.userModel.findByIdAndUpdate(
+    //     { _id: id },
+    //     { $set: { password: newPassword, recoveryCode: null } },
+    //     { new: true },
+    //   );
+    return true;
   }
 }

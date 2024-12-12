@@ -2,7 +2,7 @@ export class PaginationInputType {
   searchNameTerm?: string;
   searchLoginTerm?: string;
   searchEmailTerm?: string;
-  sortBy?: string;
+  sortBy?: 'created_at' | null;
   sortDirection?: 'asc' | 'desc';
   filter?: string;
   pageNumber?: number;

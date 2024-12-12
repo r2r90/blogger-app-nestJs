@@ -15,7 +15,7 @@ export class MongooseConfigService implements MongooseOptionsFactory {
     const dbName = this.config.get('mongo_db_name');
     const localHost = this.config.get('mongo_local_host');
     const localPort = this.config.get('mongo_local_port');
-    const isLocal = this.config.get('NODE_ENV') === 'LOCAL';
+    const isLocal = this.config.get('NODE_ENV') !== 'LOCAL';
 
     let uri: string;
 

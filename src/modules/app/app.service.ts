@@ -9,6 +9,8 @@ import {
   PostLike,
   User,
 } from '../../db/db-mongo/schemas';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class AppService {
@@ -19,6 +21,7 @@ export class AppService {
     @InjectModel(Comment.name) private commentModel: Model<Comment>,
     @InjectModel(PostLike.name) private postLike: Model<PostLike>,
     @InjectModel(CommentLike.name) private commentLikeModel: Model<CommentLike>,
+    @InjectDataSource() private readonly db: DataSource,
   ) {}
 
   getHello(): string {
@@ -26,6 +29,8 @@ export class AppService {
   }
 
   async deleteAllData() {
+    await this.db.query(`DELETE
+                         FROM "users";`);
     await this.blogModel.deleteMany({});
     await this.postModel.deleteMany({});
     await this.userModel.deleteMany({});

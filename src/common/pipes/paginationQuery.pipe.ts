@@ -26,7 +26,7 @@ export class PaginationQueryPipe implements PipeTransform {
       searchNameTerm: searchNameTerm ?? null,
       searchLoginTerm: searchLoginTerm ?? null,
       searchEmailTerm: searchEmailTerm ?? null,
-      sortBy: sortBy ?? 'createdAt',
+      sortBy: sortBy ?? 'created_at',
       sortDirection: (sortDirection ?? 'desc').toLowerCase() as 'asc' | 'desc',
       pageNumber: pageNumber ? +pageNumber : 1,
       pageSize: pageSize ? +pageSize : 10,

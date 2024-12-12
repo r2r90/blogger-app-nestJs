@@ -1,18 +1,17 @@
-import { Types } from 'mongoose';
-import { UserDocument } from '../../../db/db-mongo/schemas/users.schema';
+import { User } from '../entity/user.entity';
 
 export type UserOutputType = {
-  id: Types.ObjectId;
+  id: string;
   login: string;
   email: string;
   createdAt: string;
 };
 
-export const userMapper = (user: UserDocument): UserOutputType => {
+export const userMapper = (user: User): UserOutputType => {
   return {
     id: user.id,
     login: user.login,
     email: user.email,
-    createdAt: user.createdAt,
+    createdAt: user.created_at,
   };
 };
