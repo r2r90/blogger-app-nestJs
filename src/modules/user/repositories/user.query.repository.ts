@@ -28,7 +28,7 @@ export class UserQueryRepository {
         SELECT *
         FROM users
         WHERE (COALESCE($1, '') = '' OR login ILIKE '%' || $1 || '%')
-          OR (COALESCE($2, '') = '' OR email ILIKE '%' || $2 || '%')
+           OR (COALESCE($2, '') = '' OR email ILIKE '%' || $2 || '%')
         ORDER BY ${sortBy} ${sortDirection.toLowerCase()}
         LIMIT $3 OFFSET $4;
     `;
@@ -38,7 +38,7 @@ export class UserQueryRepository {
         SELECT COUNT(*)
         FROM users
         WHERE (COALESCE($1, '') = '' OR login ILIKE '%' || $1 || '%')
-          OR (COALESCE($2, '') = '' OR email ILIKE '%' || $2 || '%');
+           OR (COALESCE($2, '') = '' OR email ILIKE '%' || $2 || '%');
     `;
 
     const [users, totalCountResult] = await Promise.all([
@@ -68,7 +68,13 @@ export class UserQueryRepository {
   }
 
   async findOne(id: string) {
-    const findUser = await this.userModel.findById(id);
+    const query = `
+        SELECT *
+        FROM users
+        WHERE id = $1
+    `;
+
+    const findUser = await this.db.query(query, [id]);
     if (!findUser) return null;
     return findUser;
   }

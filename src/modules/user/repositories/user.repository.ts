@@ -49,7 +49,18 @@ export class UserRepository {
   }
 
   async remove(id: string) {
-    return 'remove from sql db';
+    const query = `
+        DELETE
+        FROM users
+        WHERE id = $1;
+    `;
+
+    const result = await this.db.query(query, [id]);
+
+    return {
+      message: `User with id ${id} has been removed`,
+      affectedRows: result.rowCount,
+    };
   }
 
   async updateConfirmationCode(email: string, recoveryCode: string) {
