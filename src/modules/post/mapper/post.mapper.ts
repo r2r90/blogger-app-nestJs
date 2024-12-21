@@ -1,28 +1,29 @@
-import { Types } from 'mongoose';
-import { PostDocument } from '../../../db/db-mongo/schemas/post.schema';
-import {
-  LikeStatus,
-  PostLike,
-} from '../../../db/db-mongo/schemas/post-likes.schema';
+import { PostWithBlogName } from '../entity/post.entity';
+import { LikeStatus } from '../../../db/db-mongo/schemas';
 
-export type LikeDetails = {
-  description?: 'None' | 'Like' | 'Dislike';
-  addedAt?: string;
-  userId?: string;
-  login?: string;
+export type NewestLikes = {
+  addedAt: string;
+  userId: string;
+  login: string;
 };
 
-export type NewestLikes = LikeDetails[];
+export type PostLikesInfo = {
+  user_id: string;
+  post_id: string;
+  login: string;
+  like_status: LikeStatus;
+  created_at: string;
+};
 
 export type ExtendedLikesInfo = {
   likesCount: number;
   dislikesCount: number;
   myStatus: 'None' | 'Like' | 'Dislike';
-  newestLikes: NewestLikes;
+  newestLikes: NewestLikes[];
 };
 
 export type PostOutputType = {
-  id: Types.ObjectId;
+  id: string;
   title: string;
   shortDescription: string;
   content: string;
@@ -33,40 +34,44 @@ export type PostOutputType = {
 };
 
 export class PostMapper {
-  public mapPost(
-    post: PostDocument,
-    postLikesInfo: PostLike[],
+  public async mapPost(
+    post: PostWithBlogName,
+    postLikesInfo: PostLikesInfo[],
     userId?: string,
-  ): PostOutputType {
-    const myLike = postLikesInfo.find((like) => like.userId === userId);
-    const myStatus = myLike ? myLike.likeStatus : 'None';
+  ): Promise<PostOutputType> {
+    const myStatus: LikeStatus =
+      !userId || postLikesInfo.length === 0
+        ? LikeStatus.None
+        : (postLikesInfo.find((like) => like.user_id === userId)
+            ?.like_status as LikeStatus) || LikeStatus.None;
 
-    const newestLikes: NewestLikes = postLikesInfo
-      .filter((like) => like.likeStatus === 'Like')
+    const newestLikes: NewestLikes[] = postLikesInfo
+      .filter((like) => like.like_status === LikeStatus.Like)
       .sort(
-        (a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime(),
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
       )
       .slice(0, 3)
       .map((like) => ({
-        addedAt: like.addedAt,
-        userId: like.userId,
+        addedAt: like.created_at,
+        userId: like.user_id,
         login: like.login,
       }));
 
     return {
       id: post.id,
       title: post.title,
-      shortDescription: post.shortDescription,
+      shortDescription: post.short_description,
       content: post.content,
-      createdAt: post.createdAt,
-      blogName: post.blogName,
-      blogId: post.blogId,
+      createdAt: post.created_at,
+      blogName: post.blog_name,
+      blogId: post.blog_id,
       extendedLikesInfo: {
         likesCount: postLikesInfo.filter(
-          (like) => like.likeStatus === LikeStatus.Like,
+          (like) => like.like_status === LikeStatus.Like,
         ).length,
         dislikesCount: postLikesInfo.filter(
-          (like) => like.likeStatus === LikeStatus.Dislike,
+          (like) => like.like_status === LikeStatus.Dislike,
         ).length,
         myStatus,
         newestLikes,

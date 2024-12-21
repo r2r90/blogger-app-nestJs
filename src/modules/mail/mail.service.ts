@@ -27,7 +27,6 @@ export class MailService {
     }
   }
 
-
   async sendRecoveryCodeToUser(
     receiverEmail: string,
     recoveryCode: string,
@@ -47,6 +46,4 @@ export class MailService {
       return false;
     }
   }
-
-
 }

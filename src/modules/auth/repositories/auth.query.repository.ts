@@ -1,20 +1,25 @@
-import { InjectModel } from '@nestjs/mongoose';
-import { User } from '../../../db/db-mongo/schemas/users.schema';
-import { Model } from 'mongoose';
 import { NotFoundException } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { User } from '../../user/entity/user.entity';
 
 export class AuthQueryRepository {
-  @InjectModel(User.name) private readonly userModel: Model<User>;
+  constructor(@InjectDataSource() protected readonly db: DataSource) {}
 
   async getUserByConfirmationCode(code: string): Promise<User> {
-    const user = await this.userModel.findOne({
-      'emailConfirmation.confirmationCode': code,
-    });
+    const query = `
+        SELECT *
+        FROM users
+        WHERE confirmation_code = $1;
+    `;
 
-    if (!user) {
+    const values = [code];
+    const result = await this.db.query(query, values);
+
+    if (result.length === 0) {
       throw new NotFoundException('Could not find user with confirmation code');
     }
-    return user;
+    return result[0];
   }
 
   async saveToken(refreshToken: string): Promise<any> {}

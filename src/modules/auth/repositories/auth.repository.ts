@@ -1,28 +1,30 @@
 import { Injectable } from '@nestjs/common';
-import { User } from '../../../db/db-mongo/schemas/users.schema';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class AuthRepository {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(@InjectDataSource() protected readonly db: DataSource) {}
 
   async confirmUser(id: string) {
-    const confirmUser = await this.userModel.findByIdAndUpdate(
-      { _id: id },
-      { $set: { 'emailConfirmation.isConfirmed': true } },
-      { new: true },
-    );
-
+    const query = `
+        UPDATE users
+        SET is_confirmed = TRUE
+        WHERE id = $1
+        RETURNING *
+    `;
+    const confirmUser = await this.db.query(query, [id]);
     return !!confirmUser;
   }
 
   async updateConfirmationCode(id: string, newCode: string) {
-    const updateCode = await this.userModel.findByIdAndUpdate(
-      { _id: id },
-      { $set: { 'emailConfirmation.confirmationCode': newCode } },
-      { new: true },
-    );
+    const query = `
+        UPDATE users
+        SET confirmation_code = $1
+        WHERE id = $2
+        RETURNING *
+    `;
+    const updateCode = await this.db.query(query, [newCode, id]);
 
     return !!updateCode;
   }

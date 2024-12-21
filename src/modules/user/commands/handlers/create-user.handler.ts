@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { User } from '../../../../db/db-mongo/schemas/users.schema';
+import { User } from '../../../../db/db-mongo/schemas';
 import { add } from 'date-fns';
 import { UserRepository } from '../../repositories/user.repository';
 import { UserService } from '../../user.service';
@@ -36,7 +36,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
       password: hashedPassword,
       emailConfirmation: {
         confirmationCode: command.isAdmin ? null : randomConfirmationCode,
-        expirationDate: add(new Date(), { hours: 1 }),
+        expirationDate: command.isAdmin ? null : add(new Date(), { hours: 1 }),
         isConfirmed: command.isAdmin,
       },
       createdAt: null,

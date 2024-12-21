@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -21,12 +20,11 @@ import { CreatePostCommand } from './commands/impl/create-post.command';
 import { PostService } from './post.service';
 import { LikeStatusDto } from './dto/like-status.dto';
 import { UserDecorator } from '../../common/decorators/user.decorator';
-import { CookieDecorator } from '../../common/decorators/cookieDecorator';
 import { JwtAccessAuthGuard } from '../auth/guards/jwt-access-auth.guard';
 import { JwtGuard } from '../auth/guards/jwt-guard';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateCommentDto } from '../comment/dto/create-comment.dto';
-import { CreateCommentCommand } from './commands/impl/create-comment.command';
+import { CreateCommentCommand } from '../comment/commands/impl/create-comment.command';
 
 @SkipThrottle()
 @Controller('posts')
@@ -40,7 +38,7 @@ export class PostController {
   @UseGuards(JwtGuard)
   getAll(
     @Query(PaginationQueryPipe) query: PaginationInputType,
-    @CookieDecorator('sub') userId: string,
+    @UserDecorator('userId') userId: string,
   ) {
     return this.postService.getAllPosts(query, userId);
   }
@@ -48,9 +46,10 @@ export class PostController {
   @Get(':id')
   @UseGuards(JwtGuard)
   getOne(
-    @Param('id', IsObjectIdPipe) id: string,
-    @UserDecorator('id') userId: string | undefined,
+    @Param('id') id: string,
+    @UserDecorator('userId') userId: string | undefined,
   ) {
+    console.log(userId);
     return this.postService.getOnePost(id, userId);
   }
 
@@ -77,30 +76,19 @@ export class PostController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAccessAuthGuard)
   likesStatus(
-    @Param('postId', IsObjectIdPipe) postId: string,
-    @UserDecorator() user: { id: string; login: string },
-    @Body() dto: LikeStatusDto,
+    @Param('postId') postId: string,
+    @UserDecorator('userId') userId: string,
+    @Body()
+    dto: LikeStatusDto,
   ) {
-    return this.postService.likeStatus(
-      user.id,
-      user.login,
-      postId,
-      dto.likeStatus,
-    );
-  }
-
-  @Delete(':id')
-  @HttpCode(204)
-  @UseGuards(AuthGuard('basic'))
-  remove(@Param('id', IsObjectIdPipe) id: string) {
-    return this.postService.deletePost(id);
+    return this.postService.likeStatus(userId, postId, dto.likeStatus);
   }
 
   @Post(':postId/comments')
   @UseGuards(JwtAccessAuthGuard)
   createComment(
-    @UserDecorator('id') userId: string,
-    @Param('postId', IsObjectIdPipe) postId: string,
+    @UserDecorator('userId') userId: string,
+    @Param('postId') postId: string,
     @Body() dto: CreateCommentDto,
   ) {
     return this.commandBus.execute(
@@ -111,10 +99,19 @@ export class PostController {
   @Get(':postId/comments')
   @UseGuards(JwtGuard)
   getPostsComments(
-    @Param('postId', IsObjectIdPipe) postId: string,
+    @Param('postId') postId: string,
     @Query(PaginationQueryPipe) query: PaginationInputType,
     @UserDecorator('id') userId: string,
   ) {
     return this.postService.getPostComments(postId, query, userId);
   }
+
+  // @Get()
+  // @UseGuards(JwtGuard)
+  // getAll(
+  //   @Query(PaginationQueryPipe) query: PaginationInputType,
+  //   @CookieDecorator('sub') userId: string,
+  // ) {
+  //   return this.postService.getAllPosts(query, userId);
+  // }
 }

@@ -1,43 +1,52 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import {
-  CreateCommentDataType,
-  CreateCommentDto,
-} from '../dto/create-comment.dto';
-import { CommentMapper, CommentOutputType } from '../mapper/comment.mapper';
+import { CreateCommentDataType } from '../dto/create-comment.dto';
+
 import { LikeCommentStatusInputDataType } from '../../post/dto/like-status.dto';
 import { Comment, CommentLike, LikeStatus } from '../../../db/db-mongo/schemas';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { CommentQueryRepository } from './comment.query.repository';
+import { CommentMapper } from '../mapper/comment.mapper';
 
 @Injectable()
 export class CommentRepository {
   constructor(
+    @InjectDataSource() protected readonly db: DataSource,
     @InjectModel(Comment.name) private readonly commentModel: Model<Comment>,
     @InjectModel(CommentLike.name)
     private readonly commentLikeModel: Model<CommentLike>,
     private readonly commentMapper: CommentMapper,
+    private readonly commentQueryRepository: CommentQueryRepository,
   ) {}
 
   async createComment(createCommentData: CreateCommentDataType) {
     const createdAt = new Date().toISOString();
-    const createdComment = new this.commentModel({
-      ...createCommentData,
-      createdAt,
-      commentatorInfo: {
-        userId: createCommentData.userId,
-        userLogin: createCommentData.userLogin,
-      },
-    });
 
-    const savedComment = await createdComment.save();
+    const { userId, userLogin, postId, content } = createCommentData;
+    const createCommentQuery = `
+        INSERT INTO comments (user_id, post_id, content, created_at)
+        VALUES ($1, $2, $3, $4)
+        RETURNING *;
+    `;
+
+    const createdComment = await this.db.query(createCommentQuery, [
+      userId,
+      postId,
+      content,
+      createdAt,
+    ]);
+
+    const comment = createdComment[0];
     return {
-      id: createdComment._id,
-      content: savedComment.content,
-      createdAt: savedComment.createdAt,
+      id: comment.id,
+      content: comment.content,
+      createdAt: comment.created_at,
       commentatorInfo: {
-        userId: createCommentData.userId,
-        userLogin: createCommentData.userLogin,
+        userId: comment.user_id,
+        userLogin,
       },
       likesInfo: {
         likesCount: 0,
@@ -47,41 +56,33 @@ export class CommentRepository {
     };
   }
 
-  async getCommentById(
-    commentId: string,
-    userId?: string,
-  ): Promise<CommentOutputType> {
-    const comment = await this.commentModel.findById(commentId);
-    const likeInfo = await this.getLikesByCommentId(commentId);
-    if (!comment)
-      throw new NotFoundException(`Comment with id ${commentId} not found`);
-    return this.commentMapper.mapComments(comment, likeInfo, userId);
-  }
+  async updateContent(commentId: string, content: string) {
+    const updateCommentQuery = `
+        UPDATE comments
+        SET content = $1
+        WHERE id = $2
+    `;
 
-  async update(id: string, data: CreateCommentDto) {
-    const res = await this.commentModel.findOneAndUpdate({ _id: id }, data, {
-      new: true,
-    });
-
-    if (!res) throw new NotFoundException();
-    return res;
-  }
-
-  async remove(id: string) {
-    const comment = await this.getCommentById(id);
-    if (!comment) throw new NotFoundException();
-    const res = await this.commentModel.findByIdAndDelete(id);
+    const res = await this.db.query(updateCommentQuery, [content, commentId]);
     if (!res) return null;
     return res;
   }
 
-  getLikesByCommentId(commentId: string): Promise<CommentLike[]> {
-    return this.commentLikeModel.find({ commentId }).lean();
+  async remove(id: string) {
+    const deleteCommentQuery = `
+        DELETE
+        FROM comments
+        WHERE id = $1
+    `;
+
+    const res = await this.db.query(deleteCommentQuery, [id]);
+    if (!res) return null;
+    return res;
   }
 
   async likeComment(data: LikeCommentStatusInputDataType): Promise<any> {
     const { userId, commentId, likeStatus } = data;
-    const isAlreadyLiked = await this.userAlreadyLikedComment(
+    const isAlreadyLiked = await this.commentQueryRepository.isUserAlreadyLiked(
       commentId,
       userId,
     );
@@ -104,11 +105,5 @@ export class CommentRepository {
     }
 
     return null;
-  }
-
-  async userAlreadyLikedComment(commentId: string, userId: string) {
-    const user = await this.commentLikeModel.findOne({ commentId, userId });
-    if (!user) return null;
-    return user;
   }
 }

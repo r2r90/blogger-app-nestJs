@@ -4,16 +4,19 @@ import { PostRepository } from './repositories/post.repository';
 import { PaginationInputType } from '../../common/pagination/pagination.types';
 import { PostQueryRepository } from './repositories/post-query.repository';
 import { LikeStatus } from '../../db/db-mongo/schemas';
+import { CreatePostFromBlogDto } from './dto/create.post.from.blog.dto';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class PostService {
   constructor(
     private readonly postRepository: PostRepository,
+    private readonly userService: UserService,
     private readonly postQueryRepository: PostQueryRepository,
   ) {}
 
   async getAllPosts(query: PaginationInputType, userId?: string) {
-    return this.postQueryRepository.getAll(query, userId);
+    return this.postQueryRepository.getAllPosts(query, userId);
   }
 
   async getOnePost(id: string, userId?: string) {
@@ -26,7 +29,7 @@ export class PostService {
   async deletePost(id: string) {
     const postToDelete = await this.getOnePost(id);
     if (!postToDelete) throw new NotFoundException();
-    const isDeleted = await this.postRepository.remove(id);
+    const isDeleted = await this.postRepository.removePost(id);
     if (!isDeleted) throw new NotFoundException('Cannot delete blog id');
     return true;
   }
@@ -35,16 +38,13 @@ export class PostService {
     return this.postRepository.update(id, updatePostData);
   }
 
-  async likeStatus(
-    userId: string,
-    login: string,
-    postId: string,
-    likeStatus: LikeStatus,
-  ) {
+  async likeStatus(userId: string, postId: string, likeStatus: LikeStatus) {
     const post = await this.postQueryRepository.getPostById(postId);
     if (!post) throw new NotFoundException();
 
-    const data = { userId, login, postId, likeStatus };
+    const user = await this.userService.getUserById(userId);
+
+    const data = { userId, login: user.login, postId, likeStatus };
 
     return await this.postRepository.likePost(data);
   }
@@ -61,5 +61,21 @@ export class PostService {
       query,
       userId,
     );
+  }
+
+  async updatePostByBlogId(
+    blogId: string,
+    postId: string,
+    updateData: CreatePostFromBlogDto,
+  ) {
+    const post = await this.postQueryRepository.getPostById(postId);
+    if (!post || post.blogId !== blogId) throw new NotFoundException();
+    return this.postRepository.updatePost(postId, updateData);
+  }
+
+  async deletePostByBlogId(blogId: string, postId: string) {
+    const post = await this.postQueryRepository.getPostById(postId);
+    if (!post || post.blogId !== blogId) throw new NotFoundException();
+    return this.postRepository.removePost(postId);
   }
 }

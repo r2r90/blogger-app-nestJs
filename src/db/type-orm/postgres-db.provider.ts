@@ -25,8 +25,6 @@ export const PostgresDatabaseProvider = {
       throw error;
     }
 
-    console.log('hello');
-
     return dataSource;
   },
   inject: [ConfigService],

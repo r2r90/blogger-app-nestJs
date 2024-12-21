@@ -2,8 +2,8 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BadRequestException } from '@nestjs/common';
 import { CreateCommentCommand } from '../impl/create-comment.command';
 import { UserQueryRepository } from '../../../user/repositories/user.query.repository';
-import { PostQueryRepository } from '../../repositories/post-query.repository';
-import { CommentRepository } from '../../../comment/repositories/comment.repository';
+import { PostQueryRepository } from '../../../post/repositories/post-query.repository';
+import { CommentRepository } from '../../repositories/comment.repository';
 import { User } from '../../../../db/db-mongo/schemas/users.schema';
 import { Post } from '../../../../db/db-mongo/schemas/post.schema';
 

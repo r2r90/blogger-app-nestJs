@@ -67,6 +67,7 @@ export class AuthController {
     @Ip() ip: string,
   ): Promise<{ accessToken: string }> {
     const { userId } = req.user;
+
     const userAgent = req.headers['user-agent'];
 
     const deviceInfo = {

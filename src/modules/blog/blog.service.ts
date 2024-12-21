@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { BlogRepository } from './repositories/blog.repository';
 import { BlogQueryRepository } from './repositories/blog.query.repository';
 import { BlogOutputType } from './mapper/blog.mapper';
@@ -8,6 +8,7 @@ import {
 } from '../../common/pagination/pagination.types';
 import { PostQueryRepository } from '../post/repositories/post-query.repository';
 import { CreateBlogDto } from './dto/create.blog.dto';
+import { CreatePostFromBlogDto } from '../post/dto/create.post.from.blog.dto';
 
 @Injectable()
 export class BlogService {
@@ -24,7 +25,11 @@ export class BlogService {
   }
 
   async findBlogById(id: string): Promise<BlogOutputType> {
-    return this.blogQueryRepository.findOne(id);
+    const blog = await this.blogQueryRepository.findOne(id);
+    if (!blog) {
+      throw new NotFoundException(`Blog with id -  ${id} not found`);
+    }
+    return blog;
   }
 
   async removeBlog(id: string) {
@@ -32,15 +37,29 @@ export class BlogService {
   }
 
   async updateBlog(id: string, update: CreateBlogDto): Promise<any> {
-    return this.blogRepository.update(id, update);
+    return this.blogRepository.updateBlog(id, update);
+  }
+
+  async updatePost(
+    blogId: string,
+    postId: string,
+    data: CreatePostFromBlogDto,
+  ) {
+    // return this.blogRepository.updatePost(blogId, postId, data);
   }
 
   async getPostsByBlogId(
-    id: string,
     query: PaginationInputType,
+    blogId: string,
     userId?: string,
   ) {
-    await this.blogQueryRepository.findOne(id);
-    return await this.postQueryRepository.findPostsByBlogId(id, query, userId);
+    const blog = await this.blogQueryRepository.findOne(blogId);
+    if (!blog)
+      throw new NotFoundException(`Blog with id -  ${blogId} not found`);
+    return await this.postQueryRepository.getPostsByBlogId(
+      query,
+      blogId,
+      userId,
+    );
   }
 }

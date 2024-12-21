@@ -1,4 +1,3 @@
-// Обязательна регистрация в ioc
 import {
   registerDecorator,
   ValidationArguments,
@@ -11,11 +10,17 @@ import { UserQueryRepository } from '../../../modules/user/repositories/user.que
 
 @ValidatorConstraint({ name: 'NameIsExist', async: false })
 @Injectable()
-export class NameIsExistConstraint implements ValidatorConstraintInterface {
+export class UserAlreadyExistConstraint
+  implements ValidatorConstraintInterface
+{
   constructor(private readonly usersQueryRepository: UserQueryRepository) {}
+
   async validate(value: any, args: ValidationArguments) {
-    const nameIsExist = await this.usersQueryRepository.findByLoginOrEmail(value);
-    return !nameIsExist;
+    const isUserExist = await this.usersQueryRepository.findUserByFields({
+      login: value,
+      email: value,
+    });
+    return !isUserExist;
   }
 
   defaultMessage(validationArguments?: ValidationArguments): string {
@@ -33,7 +38,7 @@ export function NameIsExist(
       propertyName: propertyName,
       options: validationOptions,
       constraints: [property],
-      validator: NameIsExistConstraint,
+      validator: UserAlreadyExistConstraint,
     });
   };
 }

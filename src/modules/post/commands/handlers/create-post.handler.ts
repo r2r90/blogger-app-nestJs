@@ -1,22 +1,21 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreatePostCommand } from '../impl/create-post.command';
-import { PostRepository } from '../../repositories/post.repository';
 import { BlogQueryRepository } from '../../../blog/repositories/blog.query.repository';
-import { BadRequestException } from '@nestjs/common';
-import { Blog } from '../../../../db/db-mongo/schemas/blog.schema';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BlogRepository } from '../../../blog/repositories/blog.repository';
 
 @CommandHandler(CreatePostCommand)
 export class CreatePostHandler implements ICommandHandler<CreatePostCommand> {
   constructor(
-    private postRepository: PostRepository,
+    private blogRepository: BlogRepository,
     private blogQueryRepository: BlogQueryRepository,
   ) {}
 
   async execute(command: CreatePostCommand) {
     const { title, shortDescription, content, blogId } = command;
     const blog = await this.blogQueryRepository.findOne(blogId);
-    if (!blog) throw new BadRequestException("Blog doesn't exist");
-    return await this.postRepository.createPost({
+    if (!blog) throw new NotFoundException("Blog doesn't exist");
+    return await this.blogRepository.createPost({
       title,
       shortDescription,
       content,

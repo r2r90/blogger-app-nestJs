@@ -1,8 +1,8 @@
 import { Types } from 'mongoose';
-import { BlogDocument } from '../../../db/db-mongo/schemas';
+import { Blog } from '../entity/blog.entity';
 
 export type BlogOutputType = {
-  id: Types.ObjectId;
+  id: string;
   name: string;
   description: string;
   createdAt: string;
@@ -10,13 +10,13 @@ export type BlogOutputType = {
   isMembership: boolean;
 };
 
-export const blogMapper = (blog: BlogDocument): BlogOutputType => {
+export const blogMapper = (blog: Blog): BlogOutputType => {
   return {
     id: blog.id,
     name: blog.name,
     description: blog.description,
-    websiteUrl: blog.websiteUrl,
-    createdAt: blog.createdAt,
-    isMembership: blog.isMembership,
+    websiteUrl: blog.website_url,
+    createdAt: blog.created_at,
+    isMembership: blog.is_membership,
   };
 };

@@ -32,7 +32,7 @@ export class JwtGuard implements CanActivate {
       return true;
     }
 
-    request['user'] = { userid: payload.sub, deviceId: payload.deviceId };
+    request['user'] = { userId: payload.sub, deviceId: payload.deviceId };
 
     return true;
   }

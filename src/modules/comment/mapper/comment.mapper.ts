@@ -1,7 +1,8 @@
-import { Types } from 'mongoose';
 import { LikeStatus } from '../../../db/db-mongo/schemas/post-likes.schema';
-import { CommentDocument } from '../../../db/db-mongo/schemas/comments.schema';
 import { CommentLike } from '../../../db/db-mongo/schemas/comment-likes.schema';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { Comment } from '../entity/comment.entity';
 
 export type LikeDetails = {
   description?: 'None' | 'Like' | 'Dislike';
@@ -22,7 +23,7 @@ export type CommentatorInfo = {
 };
 
 export type CommentOutputType = {
-  id: Types.ObjectId;
+  id: string;
   content: string;
   commentatorInfo: CommentatorInfo;
   createdAt: string;
@@ -30,22 +31,27 @@ export type CommentOutputType = {
 };
 
 export class CommentMapper {
-  public mapComments(
-    comment: CommentDocument,
-    commentLikeInfo: CommentLike[],
-    userId?: string,
-  ): CommentOutputType {
-    const myLike = commentLikeInfo.find((like) => like.userId === userId);
+  constructor(@InjectDataSource() protected readonly db: DataSource) {}
 
-    const myStatus = myLike ? myLike.likeStatus : 'None';
+  public mapComments(
+    comment: Comment,
+    commentLikeInfo: CommentLike[],
+    userLogin: string,
+    userId?: string,
+  ): Promise<CommentOutputType> {
+    const myStatus: LikeStatus =
+      !userId || commentLikeInfo.length === 0
+        ? LikeStatus.None
+        : commentLikeInfo.find((like) => like.userId === userId)?.likeStatus ||
+          LikeStatus.None;
 
     return {
       id: comment.id,
       content: comment.content,
-      createdAt: comment.createdAt,
+      createdAt: comment.created_at,
       commentatorInfo: {
-        userId: comment.commentatorInfo.userId,
-        userLogin: comment.commentatorInfo.userLogin,
+        userId: comment.user_id,
+        userLogin,
       },
       likesInfo: {
         likesCount: commentLikeInfo.filter(

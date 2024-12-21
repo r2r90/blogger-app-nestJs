@@ -20,6 +20,7 @@ import { AuthJwtTokenService } from './auth-jwt-token.service';
 import { SecurityDevicesRepository } from '../security-devices/security-devices.repository';
 import { TokenRepository } from './repositories/token.repository';
 import { SessionData } from '../../db/db-mongo/schemas';
+import { User } from '../user/entity/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -38,20 +39,24 @@ export class AuthService {
 
   async confirmCode(confirmCodeDto: ConfirmCodeDto) {
     const { code } = confirmCodeDto;
-    const user = await this.authQueryRepository.getUserByConfirmationCode(code);
-    if (user.emailConfirmation?.isConfirmed === true)
+    const user: User =
+      await this.authQueryRepository.getUserByConfirmationCode(code);
+    if (user.is_confirmed === true)
       throw new BadRequestException([
         { message: 'User already confirmed', field: 'code' },
       ]);
     if (!user) return null;
-    const isConfirmed = await this.authRepository.confirmUser(user._id);
+    const isConfirmed = await this.authRepository.confirmUser(user.id);
     return !!isConfirmed;
   }
 
   async validateUser(dto: LoginUserDto) {
     const { loginOrEmail, password } = dto;
-    const user =
-      await this.userQueryRepository.findByLoginOrEmail(loginOrEmail);
+
+    const user = await this.userQueryRepository.findUserByFields({
+      login: loginOrEmail,
+      email: loginOrEmail,
+    });
 
     if (!user) return null;
 
@@ -69,7 +74,7 @@ export class AuthService {
       deviceInfo,
     );
 
-    const deviceId = createdSession._id.toString();
+    const deviceId = createdSession[0].id;
 
     const { accessToken, refreshToken } =
       await this.authJwtTokenService.generateTokenPair(userId, deviceId);
@@ -141,7 +146,7 @@ export class AuthService {
   }
 
   async sendRecoveryCode(email: string): Promise<boolean> {
-    const user = await this.userService.getUserByLoginOrEmail(email);
+    const user = await this.userQueryRepository.findUserByFields({ email });
     if (!user) {
       throw new NotFoundException('User with email does not exist');
     }
@@ -166,13 +171,13 @@ export class AuthService {
 
   async resendValidationEmail(emailDto: EmailValidationDto) {
     const { email } = emailDto;
-    const user = await this.userQueryRepository.findByLoginOrEmail(email);
+    const user = await this.userQueryRepository.findUserByFields({ email });
     if (!user) {
       throw new BadRequestException([
         { message: `Can't find user with email ${email}`, field: 'email' },
       ]);
     }
-    if (user.emailConfirmation.isConfirmed === true) {
+    if (user.is_confirmed === true) {
       throw new BadRequestException([
         { message: `User with ${email} is already confirmed'`, field: 'email' },
       ]);
@@ -181,7 +186,7 @@ export class AuthService {
     const newConfirmationCode = uuidv4();
 
     await this.authRepository.updateConfirmationCode(
-      user._id,
+      user.id,
       newConfirmationCode,
     );
 
@@ -205,7 +210,7 @@ export class AuthService {
     //   hashedPassword,
     // );
     // if (!updatePassword) {
-    //   throw new BadRequestException('Cannot update password');
+    //   throw new BadRequestException('Cannot updateBlog password');
     // }
     //
     // return updatePassword;

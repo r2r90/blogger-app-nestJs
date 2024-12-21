@@ -1,16 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-
-@Entity()
-export class Blog {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column({ type: 'varchar', length: 15 })
+export interface Blog {
+  id: string;
   name: string;
-
-  @Column({ type: 'text' })
   description: string;
-
-  @Column({ type: 'text' })
-  websiteUrl: string;
+  website_url: string;
+  is_membership: boolean;
+  created_at: string;
 }

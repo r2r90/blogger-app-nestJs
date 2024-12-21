@@ -20,12 +20,14 @@ export class UserService {
   }
 
   async getUserByLoginOrEmail(emailOrLogin: string) {
-    return this.usersQueryRepository.findByLoginOrEmail(emailOrLogin);
+    return this.usersQueryRepository.findUserByFields({
+      login: emailOrLogin,
+      email: emailOrLogin,
+    });
   }
 
   async deleteUser(userId: string) {
     const findUser = await this.getUserById(userId);
-    console.log(findUser);
 
     if (findUser.length === 0)
       throw new NotFoundException(`User with id ${userId} not found`);

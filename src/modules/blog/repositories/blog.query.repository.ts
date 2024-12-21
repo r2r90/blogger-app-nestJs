@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Blog, BlogDocument } from '../../../db/db-mongo/schemas/blog.schema';
 import { Model } from 'mongoose';
@@ -7,11 +7,14 @@ import {
   PaginationType,
 } from '../../../common/pagination/pagination.types';
 import { blogMapper, BlogOutputType } from '../mapper/blog.mapper';
-import { Post, PostDocument } from '../../../db/db-mongo/schemas/post.schema';
+import { Post, PostDocument } from '../../../db/db-mongo/schemas';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class BlogQueryRepository {
   constructor(
+    @InjectDataSource() protected readonly db: DataSource,
     @InjectModel(Blog.name) private readonly blogModel: Model<BlogDocument>,
     @InjectModel(Post.name) private readonly postModel: Model<PostDocument>,
   ) {}
@@ -19,36 +22,65 @@ export class BlogQueryRepository {
   async getAll(
     query: PaginationInputType,
   ): Promise<PaginationType<BlogOutputType>> {
-    const { searchNameTerm, pageNumber, pageSize, sortDirection, sortBy } =
-      query;
-    let filter = {};
-    if (searchNameTerm) {
-      filter = {
-        name: {
-          $regex: new RegExp(searchNameTerm, 'i'),
-        },
-      };
-    }
+    const {
+      searchNameTerm,
+      pageNumber = 1,
+      pageSize = 10,
+      sortDirection,
+      sortBy,
+    } = query;
 
-    const blogs = await this.blogModel
-      .find(filter)
-      .sort({ [sortBy]: sortDirection })
-      .skip((pageNumber - 1) * pageSize)
-      .limit(pageSize);
-    const totalCount = await this.blogModel.countDocuments(filter);
+    const offset = (pageNumber - 1) * pageSize;
+    const searchNameTermNormalized = searchNameTerm ?? '';
+
+    const blogsQuery = `
+        SELECT *
+        FROM blogs
+        WHERE (COALESCE($1, '') = '' OR name ILIKE '%' || $1 || '%')
+        ORDER BY ${sortBy} ${sortDirection.toLowerCase()}
+        LIMIT $2 OFFSET $3;
+    `;
+
+    // Requête pour le comptage total
+    const countQuery = `
+        SELECT COUNT(*)
+        FROM blogs
+        WHERE (COALESCE($1, '') = '' OR name ILIKE '%' || $1 || '%')
+    `;
+
+    const [blogs, totalCountResult] = await Promise.all([
+      this.db.query(blogsQuery, [
+        searchNameTermNormalized || '', // $1
+        pageSize, // $2
+        offset, // $3
+      ]),
+      this.db.query(countQuery, [
+        searchNameTermNormalized || '', // $1
+      ]),
+    ]);
+
+    const totalCount = parseInt(totalCountResult[0].count, 10);
     const pagesCount = Math.ceil(totalCount / pageSize);
+
     return {
       pagesCount,
       page: pageNumber,
-      pageSize: pageSize,
+      pageSize,
       totalCount,
       items: blogs.map(blogMapper),
     };
   }
 
   async findOne(id: string) {
-    const blog = await this.blogModel.findById(id);
-    if (!blog) throw new NotFoundException(`Blog with id ${id} not found`);
-    return blogMapper(blog);
+    const query = `
+        SELECT *
+        FROM blogs
+        WHERE id = $1
+    `;
+
+    const findBlog = await this.db.query(query, [id]);
+    if (findBlog.length === 0) return null;
+
+    return findBlog.map(blogMapper)[0];
   }
 }

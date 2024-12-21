@@ -15,7 +15,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { CqrsModule } from '@nestjs/cqrs';
 import { JwtGuard } from '../auth/guards/jwt-guard';
-import { NameIsExistConstraint } from '../../common/validators/custom-validators/name-is-exist.validator';
+import { UserAlreadyExistConstraint } from '../../common/validators/custom-validators/name-is-exist.validator';
 import { CommentModule } from '../comment/comment.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { SecurityDevicesModule } from '../security-devices/security-devices.module';
@@ -70,7 +70,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
-    NameIsExistConstraint,
+    UserAlreadyExistConstraint,
   ],
 })
 export class AppModule {}

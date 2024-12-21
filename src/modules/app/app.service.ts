@@ -31,6 +31,19 @@ export class AppService {
   async deleteAllData() {
     await this.db.query(`DELETE
                          FROM "users";`);
+    await this.db.query(`DELETE
+                         FROM "sessions";`);
+    await this.db.query(`DELETE
+                         FROM "blogs";`);
+    await this.db.query(`DELETE
+                         FROM "posts";`);
+    await this.db.query(`DELETE
+                         FROM "comments";`);
+    await this.db.query(`DELETE
+                         FROM "comment_likes";`);
+    await this.db.query(`DELETE
+                         FROM "post_likes";`);
+
     await this.blogModel.deleteMany({});
     await this.postModel.deleteMany({});
     await this.userModel.deleteMany({});
