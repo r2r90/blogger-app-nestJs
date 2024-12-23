@@ -35,8 +35,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     }),
     ThrottlerModule.forRoot([
       {
-        ttl: 10000,
-        limit: 5,
+        ttl: 20000,
+        limit: 6,
       },
     ]),
 

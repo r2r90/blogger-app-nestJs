@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 
 import { CreateCommentDataType } from '../dto/create-comment.dto';
 
 import { LikeCommentStatusInputDataType } from '../../post/dto/like-status.dto';
-import { Comment, CommentLike, LikeStatus } from '../../../db/db-mongo/schemas';
+import { LikeStatus } from '../../../db/db-mongo/schemas';
+import { CommentLike } from '../entity/comment_like.entity';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { CommentQueryRepository } from './comment.query.repository';
@@ -15,9 +14,6 @@ import { CommentMapper } from '../mapper/comment.mapper';
 export class CommentRepository {
   constructor(
     @InjectDataSource() protected readonly db: DataSource,
-    @InjectModel(Comment.name) private readonly commentModel: Model<Comment>,
-    @InjectModel(CommentLike.name)
-    private readonly commentLikeModel: Model<CommentLike>,
     private readonly commentMapper: CommentMapper,
     private readonly commentQueryRepository: CommentQueryRepository,
   ) {}
@@ -82,26 +78,41 @@ export class CommentRepository {
 
   async likeComment(data: LikeCommentStatusInputDataType): Promise<any> {
     const { userId, commentId, likeStatus } = data;
-    const isAlreadyLiked = await this.commentQueryRepository.isUserAlreadyLiked(
-      commentId,
-      userId,
-    );
+    const isAlreadyLiked: CommentLike =
+      await this.commentQueryRepository.isUserAlreadyLiked(commentId, userId);
 
-    const likedUserData = {
-      ...data,
-      addedAt: new Date().toISOString(),
-    };
+    const likeQuery = `
+        INSERT INTO comment_likes (comment_id, user_id, like_status, created_at)
+        VALUES ($1, $2, $3, $4)
+        RETURNING *
+    `;
 
-    if (isAlreadyLiked && isAlreadyLiked.likeStatus !== likeStatus) {
-      await this.commentLikeModel.updateOne(
-        { _id: isAlreadyLiked.id },
-        { likeStatus: likeStatus, addedAt: new Date().toISOString() },
-        { new: true },
-      );
+    const updateLikeQuery = `
+        UPDATE comment_likes
+        SET like_status = $1,
+            created_at  = $2
+        WHERE comment_id = $3
+          AND user_id = $4
+    `;
+
+    const createdAt = new Date().toISOString();
+
+    if (isAlreadyLiked && isAlreadyLiked.like_status !== likeStatus) {
+      await this.db.query(updateLikeQuery, [
+        likeStatus,
+        createdAt,
+        commentId,
+        userId,
+      ]);
     }
 
-    if (!isAlreadyLiked && likedUserData.likeStatus !== LikeStatus.None) {
-      await this.commentLikeModel.create(likedUserData);
+    if (!isAlreadyLiked && likeStatus !== LikeStatus.None) {
+      await this.db.query(likeQuery, [
+        commentId,
+        userId,
+        likeStatus,
+        createdAt,
+      ]);
     }
 
     return null;

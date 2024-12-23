@@ -49,7 +49,6 @@ export class PostController {
     @Param('id') id: string,
     @UserDecorator('userId') userId: string | undefined,
   ) {
-    console.log(userId);
     return this.postService.getOnePost(id, userId);
   }
 

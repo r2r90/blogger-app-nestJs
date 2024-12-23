@@ -33,33 +33,31 @@ export class BlogQueryRepository {
     const offset = (pageNumber - 1) * pageSize;
     const searchNameTermNormalized = searchNameTerm ?? '';
 
-    const blogsQuery = `
-        SELECT *
-        FROM blogs
-        WHERE (COALESCE($1, '') = '' OR name ILIKE '%' || $1 || '%')
-        ORDER BY ${sortBy} ${sortDirection.toLowerCase()}
-        LIMIT $2 OFFSET $3;
-    `;
+    const allBlogsQuery = `
+            WITH found_blogs AS (
+            SELECT 
+                    b.id AS "id",            
+                    b.name AS "name",            
+                    b.description AS "description",            
+                    b.website_url AS "websiteUrl",
+                    b.is_membership AS "isMembership",
+                    to_char(b.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MSZ') AS "createdAt"
+            FROM blogs b
+            ORDER BY ${sortBy} ${sortDirection.toLowerCase()}),
+    paginated_found_blogs AS (
+            SELECT * 
+            FROM found_blogs 
+            LIMIT ${pageSize} 
+            OFFSET ${offset})
+            SELECT (SELECT COUNT(*)::INTEGER FROM found_blogs) AS "totalCount",
+                     json_agg(pfb) AS "items"
+            FROM paginated_found_blogs pfb;
+                                               `;
 
-    // Requête pour le comptage total
-    const countQuery = `
-        SELECT COUNT(*)
-        FROM blogs
-        WHERE (COALESCE($1, '') = '' OR name ILIKE '%' || $1 || '%')
-    `;
+    const blogsResult = await this.db.query(allBlogsQuery);
 
-    const [blogs, totalCountResult] = await Promise.all([
-      this.db.query(blogsQuery, [
-        searchNameTermNormalized || '', // $1
-        pageSize, // $2
-        offset, // $3
-      ]),
-      this.db.query(countQuery, [
-        searchNameTermNormalized || '', // $1
-      ]),
-    ]);
+    const { items, totalCount } = blogsResult[0];
 
-    const totalCount = parseInt(totalCountResult[0].count, 10);
     const pagesCount = Math.ceil(totalCount / pageSize);
 
     return {
@@ -67,7 +65,7 @@ export class BlogQueryRepository {
       page: pageNumber,
       pageSize,
       totalCount,
-      items: blogs.map(blogMapper),
+      items,
     };
   }
 

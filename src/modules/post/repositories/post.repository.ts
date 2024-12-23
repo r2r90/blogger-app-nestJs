@@ -1,6 +1,6 @@
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { LikeStatus, Post, PostLike } from '../../../db/db-mongo/schemas';
+import { LikeStatus, Post } from '../../../db/db-mongo/schemas';
 import { CreatePostDto } from '../dto/create.post.dto';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { PostQueryRepository } from './post-query.repository';
@@ -8,12 +8,12 @@ import { LikePostStatusInputDataType } from '../dto/like-status.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { CreatePostFromBlogDto } from '../dto/create.post.from.blog.dto';
+import { PostLike } from '../entity/post-likes.entity';
 
 export class PostRepository {
   constructor(
     @InjectDataSource() protected readonly db: DataSource,
     @InjectModel(Post.name) private readonly postModel: Model<Post>,
-    @InjectModel(PostLike.name) private readonly postLikeModel: Model<PostLike>,
     private readonly postQueryRepository: PostQueryRepository,
   ) {}
 
@@ -35,50 +35,6 @@ export class PostRepository {
 
     if (!res.rows) return null;
     return res;
-  }
-
-  async likePost(data: LikePostStatusInputDataType): Promise<any> {
-    const likeQuery = `
-        INSERT INTO post_likes (post_id, user_id, like_status, created_at)
-        VALUES ($1, $2, $3, $4)
-        RETURNING *
-    `;
-
-    const updateLikeQuery = `
-        UPDATE post_likes
-        SET like_status = $1,
-            created_at  = $2
-        WHERE post_id = $3
-          AND user_id = $4
-    `;
-    const { userId, postId, likeStatus } = data;
-
-    const isAlreadyLiked = await this.postQueryRepository.userAlreadyLikedPost(
-      postId,
-      userId,
-    );
-
-    const likedUserData = {
-      ...data,
-      addedAt: new Date().toISOString(),
-    };
-
-    const createdAt = new Date().toISOString();
-
-    if (isAlreadyLiked && isAlreadyLiked.like_status !== likeStatus) {
-      await this.db.query(updateLikeQuery, [
-        likeStatus,
-        createdAt,
-        postId,
-        userId,
-      ]);
-    }
-
-    if (!isAlreadyLiked && likedUserData.likeStatus !== LikeStatus.None) {
-      await this.db.query(likeQuery, [postId, userId, likeStatus, createdAt]);
-    }
-
-    return null;
   }
 
   async updatePost(postId: string, updateData: CreatePostFromBlogDto) {
@@ -117,5 +73,54 @@ export class PostRepository {
     } catch (e) {
       throw new BadRequestException(e);
     }
+  }
+
+  async likePost(data: LikePostStatusInputDataType): Promise<any> {
+    const likeQuery = `
+        INSERT INTO post_likes (post_id, user_id, like_status, created_at)
+        VALUES ($1, $2, $3, $4)
+        RETURNING *
+    `;
+
+    const updateLikeQuery = `
+        UPDATE post_likes
+        SET like_status = $1,
+            created_at  = $2
+        WHERE post_id = $3
+          AND user_id = $4
+    `;
+
+    const deleteLikeQuery = `
+        DELETE
+        FROM post_likes
+        WHERE user_id = $1
+          AND post_id = $2;
+    `;
+    const { userId, postId, likeStatus } = data;
+
+    const isAlreadyLiked: PostLike =
+      await this.postQueryRepository.userAlreadyLikedPost(postId, userId);
+
+    const createdAt = new Date().toISOString();
+
+    if (likeStatus === LikeStatus.None) {
+      if (!isAlreadyLiked) return null;
+      await this.db.query(deleteLikeQuery, [userId, postId]);
+    }
+
+    if (isAlreadyLiked && isAlreadyLiked.like_status !== likeStatus) {
+      await this.db.query(updateLikeQuery, [
+        likeStatus,
+        createdAt,
+        postId,
+        userId,
+      ]);
+    }
+
+    if (!isAlreadyLiked && likeStatus !== LikeStatus.None) {
+      await this.db.query(likeQuery, [postId, userId, likeStatus, createdAt]);
+    }
+
+    return null;
   }
 }

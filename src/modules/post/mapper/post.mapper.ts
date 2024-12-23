@@ -68,10 +68,12 @@ export class PostMapper {
       blogId: post.blog_id,
       extendedLikesInfo: {
         likesCount: postLikesInfo.filter(
-          (like) => like.like_status === LikeStatus.Like,
+          (like) =>
+            like.like_status === LikeStatus.Like && like.post_id === post.id,
         ).length,
         dislikesCount: postLikesInfo.filter(
-          (like) => like.like_status === LikeStatus.Dislike,
+          (like) =>
+            like.like_status === LikeStatus.Dislike && like.post_id === post.id,
         ).length,
         myStatus,
         newestLikes,

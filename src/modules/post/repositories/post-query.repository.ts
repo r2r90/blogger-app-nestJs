@@ -8,7 +8,7 @@ import {
   CommentMapper,
   CommentOutputType,
 } from '../../comment/mapper/comment.mapper';
-import { LikeStatus, PostLike } from '../../../db/db-mongo/schemas';
+import { LikeStatus } from '../../../db/db-mongo/schemas';
 import { PostWithBlogName } from '../entity/post.entity';
 import { CommentRepository } from '../../comment/repositories/comment.repository';
 import { InjectDataSource } from '@nestjs/typeorm';
@@ -35,64 +35,67 @@ export class PostQueryRepository {
     userId?: string,
   ): Promise<PaginationType<PostOutputType>> {
     const { pageNumber = 1, pageSize = 10, sortDirection, sortBy } = query;
-
     const offset = (pageNumber - 1) * pageSize;
 
-    const orderByColumn =
-      sortBy === 'blogName' ? 'blogs.name' : `posts.${sortBy}`;
+    const orderByColumn = sortBy === 'blogName' ? 'b.name' : `p.${sortBy}`;
 
-    const postsQuery = `
-        SELECT posts.*,
-               blogs.name AS blog_name,
-               post_likes.user_id AS like_user_id,
-               post_likes.like_status AS like_status,
-               post_likes.created_at AS like_created_at
-        FROM posts
-                 JOIN blogs ON posts.blog_id = blogs.id
-                 LEFT JOIN post_likes ON posts.id = post_likes.post_id
-                WHERE posts.id = $3
-        ORDER BY ${orderByColumn} ${sortDirection.toLowerCase()}
-        LIMIT $1 OFFSET $2;
+    const queryResult = await this.db.query(
+      `
+          WITH found_posts AS (SELECT p.id                                                                    AS "id",
+                                      b.name                                                                  AS "blogName",
+                                      p.blog_id                                                               AS "blogId",
+                                      p.content                                                               AS "content",
+                                      to_char(p.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MSZ') AS "createdAt",
+                                      p.short_description                                                     AS "shortDescription",
+                                      p.title                                                                 AS "title"
+                               FROM posts p
+                                        INNER JOIN blogs b ON b.id = p.blog_id
+                               ORDER BY ${orderByColumn} ${sortDirection}),
+               paginated_found_posts AS (SELECT *
+                                         FROM found_posts
+                                         LIMIT ${pageSize} OFFSET ${offset})
+          SELECT (SELECT COUNT(*)::INTEGER FROM found_posts) AS "totalCount",
+                 json_agg(fpm)                               AS items
+          FROM (SELECT fp.*,
+                       json_build_object(
+                               'likesCount', (SELECT COUNT(*)
+                                              FROM post_likes pl
+                                              WHERE pl.like_status = 'Like'
+                                                AND fp.id = pl.post_id),
+                               'dislikesCount', (SELECT COUNT(*)
+                                                 FROM post_likes pl
+                                                 WHERE pl.like_status = 'Dislike'
+                                                   AND fp.id = pl.post_id),
+                               'myStatus', CASE
+                                               WHEN $1::uuid IS NOT NULL THEN COALESCE(
+                                                       (SELECT pl.like_status
+                                                        FROM post_likes pl
+                                                        WHERE pl.user_id = $1::uuid
+                                                          AND fp.id = pl.post_id),
+                                                       'None'
+                                                                              )
+                                               ELSE 'None'
+                                   END,
+                               'newestLikes', (SELECT COALESCE(json_agg(nl), '[]'::json)
+                                               FROM (SELECT to_char(pl.created_at AT TIME ZONE 'UTC',
+                                                                    'YYYY-MM-DD"T"HH24:MI:SS.MSZ') AS "addedAt",
+                                                            u.login                                AS "login",
+                                                            u.id                                   AS "userId"
+                                                     FROM post_likes pl
+                                                              INNER JOIN users u ON pl.user_id = u.id
+                                                     WHERE pl.post_id = fp.id
+                                                       AND pl.like_status = 'Like'
+                                                     ORDER BY pl.created_at DESC
+                                                     LIMIT 3 OFFSET 0) AS nl)
+                       ) AS "extendedLikesInfo"
+                FROM paginated_found_posts fp) AS fpm;
 
-    `;
-
-    const postId = '6356269e-f0a8-4c3a-b4b5-9463ce43f7a5';
-
-    const likesQuery = `
-        SELECT *
-        FROM post_likes;
-    `;
-
-    const countQuery = `
-        SELECT COUNT(*)
-        FROM posts
-    `;
-
-    const posts = await this.db.query(postsQuery, [pageSize, offset, postId]);
-
-    console.log(posts);
-
-    const countResult = await this.db.query(countQuery);
-
-    const totalCount = parseInt(countResult[0].count, 10);
+      `,
+      [userId],
+    );
+    const { totalCount, items } = queryResult[0];
 
     const pagesCount = Math.ceil(totalCount / pageSize);
-
-    const items = posts.map((post) => ({
-      id: post.id,
-      title: post.title,
-      shortDescription: post.short_description,
-      content: post.content,
-      blogId: post.blog_id,
-      blogName: post.blog_name,
-      createdAt: post.created_at,
-      extendedLikesInfo: {
-        likesCount: 0,
-        dislikesCount: 0,
-        myStatus: 'None',
-        newestLikes: [],
-      },
-    }));
 
     return {
       pagesCount,
@@ -112,69 +115,76 @@ export class PostQueryRepository {
 
     const offset = (pageNumber - 1) * pageSize;
 
-    const postsQuery = `
-        SELECT posts.*,
-               blogs.name AS blog_name
-        FROM posts
-                 JOIN blogs ON posts.blog_id = blogs.id
-        WHERE posts.blog_id = $1
-        ORDER BY ${sortBy} ${sortDirection.toLowerCase()}
-        LIMIT $2 OFFSET $3;
-    `;
+    const orderByColumn = sortBy === 'blogName' ? 'b.name' : `p.${sortBy}`;
 
-    const likesQuery = `
-        SELECT u.login,
-               p.post_id,
-               p.user_id,
-               p.like_status,
-               p.created_at
-        FROM users u
-                 INNER JOIN post_likes p
-                            ON
-                                u.id = p.user_id;
-    `;
+    const queryResult = await this.db.query(
+      `
+          WITH found_posts AS (SELECT p.id                                                                    AS "id",
+                                      b.name                                                                  AS "blogName",
+                                      p.blog_id                                                               AS "blogId",
+                                      p.content                                                               AS "content",
+                                      to_char(p.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MSZ') AS "createdAt",
+                                      p.short_description                                                     AS "shortDescription",
+                                      p.title                                                                 AS "title"
+                               FROM posts p
+                                        INNER JOIN blogs b ON b.id = p.blog_id
+                               WHERE p.blog_id = $2
+                               ORDER BY ${orderByColumn} ${sortDirection}),
+               paginated_found_posts AS (SELECT *
+                                         FROM found_posts
+                                         LIMIT ${pageSize} OFFSET ${offset})
+          SELECT (SELECT COUNT(*)::INTEGER FROM found_posts) AS "totalCount",
+                 json_agg(fpm)                               AS items
+          FROM (SELECT fp.*,
+                       json_build_object(
+                               'likesCount', (SELECT COUNT(*)
+                                              FROM post_likes pl
+                                              WHERE pl.like_status = 'Like'
+                                                AND fp.id = pl.post_id),
+                               'dislikesCount', (SELECT COUNT(*)
+                                                 FROM post_likes pl
+                                                 WHERE pl.like_status = 'Dislike'
+                                                   AND fp.id = pl.post_id),
+                               'myStatus', CASE
+                                               WHEN $1::uuid IS NOT NULL THEN COALESCE(
+                                                       (SELECT pl.like_status
+                                                        FROM post_likes pl
+                                                        WHERE pl.user_id = $1::uuid
+                                                          AND fp.id = pl.post_id),
+                                                       'None'
+                                                                              )
+                                               ELSE 'None'
+                                   END,
+                               'newestLikes', (SELECT COALESCE(json_agg(nl), '[]'::json)
+                                               FROM (SELECT to_char(pl.created_at AT TIME ZONE 'UTC',
+                                                                    'YYYY-MM-DD"T"HH24:MI:SS.MSZ') AS "addedAt",
+                                                            u.login                                AS "login",
+                                                            u.id                                   AS "userId"
+                                                     FROM post_likes pl
+                                                              INNER JOIN users u ON pl.user_id = u.id
+                                                     WHERE pl.post_id = fp.id
+                                                       AND pl.like_status = 'Like'
+                                                     ORDER BY pl.created_at DESC
+                                                     LIMIT 3 OFFSET 0) AS nl)
+                       ) AS "extendedLikesInfo"
+                FROM paginated_found_posts fp) AS fpm;
 
-    const countQuery = `
-        SELECT COUNT(*)
-        FROM posts
-        WHERE blog_id = $1
-    `;
-
-    const posts = await this.db.query(postsQuery, [blogId, pageSize, offset]);
-    const likes = await this.db.query(likesQuery);
-    const countResult = await this.db.query(countQuery, [blogId]);
-
-    const totalCount = parseInt(countResult[0].count, 10);
-    const pagesCount = Math.ceil(totalCount / pageSize);
-
-    const postOutput = await Promise.all(
-      posts.map(async (post: PostWithBlogName) => {
-        return this.postMapper.mapPost(post, likes, userId);
-      }),
+      `,
+      [userId, blogId],
     );
+
+    const { totalCount, items } = queryResult[0];
+
+    const pagesCount = Math.ceil(totalCount / pageSize);
 
     return {
       pagesCount,
       page: pageNumber,
       pageSize,
       totalCount,
-      items: postOutput,
+      items,
     };
   }
-
-  async getLikesByPostId(postId: string): Promise<PostLike[]> {
-    const postLikesQuery = `
-        SELECT *
-        FROM post_likes
-        WHERE post_id = $1
-    `;
-
-    return await this.db.query(postLikesQuery, [postId]);
-  }
-
-  // getCommentsByPostId(postId: string): Promise<Comment[]> {
-  //   return this.commentModel.find({ postId }).lean();
-  // }
 
   async userAlreadyLikedPost(postId: string, userId: string) {
     const query = `
@@ -202,8 +212,6 @@ export class PostQueryRepository {
         WHERE post_id = $1
         ORDER BY ${sortBy} ${sortDirection.toLowerCase()}
         LIMIT $2 OFFSET $3;
-        ;
-
     `;
 
     const countQuery = `
@@ -217,6 +225,11 @@ export class PostQueryRepository {
       pageSize,
       offset,
     ]);
+
+    const likesQuery = `
+        SELECT *
+        FROM comment_likes;
+    `;
     const countResult = await this.db.query(countQuery, [postId]);
 
     const totalCount = parseInt(countResult[0].count, 10);
@@ -250,15 +263,24 @@ export class PostQueryRepository {
 
   async getPostById(postId: string, userId?: string) {
     const findPostByIdQuery = `
-        SELECT *
+        SELECT posts.*,
+               blogs.name AS blog_name
         FROM posts
-        WHERE id = $1;
+                 JOIN blogs ON posts.blog_id = blogs.id
+        WHERE posts.id = $1;
     `;
 
     const likesQuery = `
-        SELECT *
-        FROM post_likes
-        WHERE post_id = $1;
+        SELECT pl.post_id,
+               pl.user_id,
+               pl.like_status,
+               pl.created_at,
+               u.login
+        FROM post_likes pl
+                 INNER JOIN users u
+                            ON pl.user_id = u.id
+        WHERE pl.post_id = $1;
+
     `;
 
     const findPost = await this.db.query(findPostByIdQuery, [postId]);

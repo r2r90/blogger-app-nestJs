@@ -54,7 +54,6 @@ export class BlogController {
     @Param('blogId') blogId: string,
     @Query(PaginationQueryPipe) query: PaginationInputType,
   ) {
-    console.log(userId);
     return this.blogService.getPostsByBlogId(query, blogId, userId);
   }
 }

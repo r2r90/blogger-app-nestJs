@@ -2,9 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { CommentMapper, CommentOutputType } from '../mapper/comment.mapper';
-import { User } from '../../user/entity/user.entity';
-import { CommentLike } from '../../../db/db-mongo/schemas';
 import { UserQueryRepository } from '../../user/repositories/user.query.repository';
+import { CommentLike } from '../entity/comment_like.entity';
 
 @Injectable()
 export class CommentQueryRepository {
@@ -55,7 +54,7 @@ export class CommentQueryRepository {
   async isUserAlreadyLiked(
     commentId: string,
     userId: string,
-  ): Promise<User | null> {
+  ): Promise<CommentLike | null> {
     const ifAlreadyLikedQuery = `
         SELECT *
         FROM comment_likes

@@ -1,15 +1,8 @@
-import { LikeStatus } from '../../../db/db-mongo/schemas/post-likes.schema';
-import { CommentLike } from '../../../db/db-mongo/schemas/comment-likes.schema';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { Comment } from '../entity/comment.entity';
-
-export type LikeDetails = {
-  description?: 'None' | 'Like' | 'Dislike';
-  addedAt?: string;
-  userId?: string;
-  login?: string;
-};
+import { CommentLike } from '../entity/comment_like.entity';
+import { LikeStatus } from '../../../db/db-mongo/schemas';
 
 export type LikesInfo = {
   likesCount: number;
@@ -38,12 +31,12 @@ export class CommentMapper {
     commentLikeInfo: CommentLike[],
     userLogin: string,
     userId?: string,
-  ): Promise<CommentOutputType> {
+  ): CommentOutputType {
     const myStatus: LikeStatus =
       !userId || commentLikeInfo.length === 0
         ? LikeStatus.None
-        : commentLikeInfo.find((like) => like.userId === userId)?.likeStatus ||
-          LikeStatus.None;
+        : (commentLikeInfo.find((like) => like.user_id === userId)
+            ?.like_status as LikeStatus) || LikeStatus.None;
 
     return {
       id: comment.id,
@@ -55,10 +48,10 @@ export class CommentMapper {
       },
       likesInfo: {
         likesCount: commentLikeInfo.filter(
-          (like) => like.likeStatus === LikeStatus.Like,
+          (like) => like.like_status === LikeStatus.Like,
         ).length,
         dislikesCount: commentLikeInfo.filter(
-          (like) => like.likeStatus === LikeStatus.Dislike,
+          (like) => like.like_status === LikeStatus.Dislike,
         ).length,
         myStatus,
       },
