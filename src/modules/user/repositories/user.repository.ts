@@ -38,7 +38,7 @@ export class UserRepository {
       const user = res[0];
 
       return {
-        id: user.id,
+        id: user.user_id,
         login: user.login,
         email: user.email,
         createdAt,
@@ -52,7 +52,7 @@ export class UserRepository {
     const query = `
         DELETE
         FROM users
-        WHERE id = $1;
+        WHERE user_id = $1;
     `;
 
     const result = await this.db.query(query, [id]);

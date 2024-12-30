@@ -100,17 +100,8 @@ export class PostController {
   getPostsComments(
     @Param('postId') postId: string,
     @Query(PaginationQueryPipe) query: PaginationInputType,
-    @UserDecorator('id') userId: string,
+    @UserDecorator('userId') userId: string,
   ) {
     return this.postService.getPostComments(postId, query, userId);
   }
-
-  // @Get()
-  // @UseGuards(JwtGuard)
-  // getAll(
-  //   @Query(PaginationQueryPipe) query: PaginationInputType,
-  //   @CookieDecorator('sub') userId: string,
-  // ) {
-  //   return this.postService.getAllPosts(query, userId);
-  // }
 }

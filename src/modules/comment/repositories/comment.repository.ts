@@ -36,8 +36,9 @@ export class CommentRepository {
     ]);
 
     const comment = createdComment[0];
+
     return {
-      id: comment.id,
+      id: comment.comment_id,
       content: comment.content,
       createdAt: comment.created_at,
       commentatorInfo: {
@@ -56,7 +57,7 @@ export class CommentRepository {
     const updateCommentQuery = `
         UPDATE comments
         SET content = $1
-        WHERE id = $2
+        WHERE comment_id = $2
     `;
 
     const res = await this.db.query(updateCommentQuery, [content, commentId]);
@@ -68,7 +69,7 @@ export class CommentRepository {
     const deleteCommentQuery = `
         DELETE
         FROM comments
-        WHERE id = $1
+        WHERE comment_id = $1
     `;
 
     const res = await this.db.query(deleteCommentQuery, [id]);
@@ -78,6 +79,7 @@ export class CommentRepository {
 
   async likeComment(data: LikeCommentStatusInputDataType): Promise<any> {
     const { userId, commentId, likeStatus } = data;
+
     const isAlreadyLiked: CommentLike =
       await this.commentQueryRepository.isUserAlreadyLiked(commentId, userId);
 
@@ -91,7 +93,7 @@ export class CommentRepository {
         UPDATE comment_likes
         SET like_status = $1,
             created_at  = $2
-        WHERE comment_id = $3
+        WHERE comment_like_id = $3
           AND user_id = $4
     `;
 
@@ -101,7 +103,7 @@ export class CommentRepository {
       await this.db.query(updateLikeQuery, [
         likeStatus,
         createdAt,
-        commentId,
+        isAlreadyLiked.comment_like_id,
         userId,
       ]);
     }

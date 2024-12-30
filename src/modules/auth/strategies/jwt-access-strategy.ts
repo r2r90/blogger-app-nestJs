@@ -29,6 +29,7 @@ export class JwtAccessStrategy extends PassportStrategy(
     if (!isUserExist) {
       throw new UnauthorizedException('invalid access jwt payload');
     }
+
     return { userId: payload.sub };
   }
 }

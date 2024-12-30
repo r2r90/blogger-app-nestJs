@@ -59,7 +59,7 @@ export class PostMapper {
       }));
 
     return {
-      id: post.id,
+      id: post.post_id,
       title: post.title,
       shortDescription: post.short_description,
       content: post.content,
@@ -69,11 +69,13 @@ export class PostMapper {
       extendedLikesInfo: {
         likesCount: postLikesInfo.filter(
           (like) =>
-            like.like_status === LikeStatus.Like && like.post_id === post.id,
+            like.like_status === LikeStatus.Like &&
+            like.post_id === post.post_id,
         ).length,
         dislikesCount: postLikesInfo.filter(
           (like) =>
-            like.like_status === LikeStatus.Dislike && like.post_id === post.id,
+            like.like_status === LikeStatus.Dislike &&
+            like.post_id === post.post_id,
         ).length,
         myStatus,
         newestLikes,

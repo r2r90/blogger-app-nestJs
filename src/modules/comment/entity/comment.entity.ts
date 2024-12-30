@@ -1,5 +1,5 @@
 export interface Comment {
-  id: string;
+  comment_id: string;
   content: string;
   user_id: string;
   post_id: string;

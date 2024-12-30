@@ -1,5 +1,5 @@
 export interface PostLike {
-  id: string;
+  post_like_id: string;
   post_id: string;
   user_id: string;
   like_status: string;

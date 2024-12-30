@@ -43,7 +43,7 @@ export class SecurityDevicesRepository {
     const query = `
         SELECT *
         FROM sessions
-        WHERE id = $1;
+        WHERE session_id = $1;
     `;
 
     const device = await this.db.query(query, [deviceId]);
@@ -54,7 +54,7 @@ export class SecurityDevicesRepository {
     const query = `SELECT *
                    FROM sessions
                    WHERE user_id = $1
-                     AND id = $2`;
+                     AND session_id = $2`;
 
     const res = await this.db.query(query, [userId, deviceId]);
 
@@ -68,7 +68,7 @@ export class SecurityDevicesRepository {
     const query = `DELETE
                    FROM sessions
                    WHERE user_id = $1
-                     AND id != $2`;
+                     AND session_id != $2`;
 
     const res = await this.db.query(query, [userId, deviceId]);
 
@@ -86,7 +86,7 @@ export class SecurityDevicesRepository {
     const query = `
         DELETE
         FROM sessions
-        WHERE id = $1
+        WHERE session_id = $1
           AND user_id = $2;
     `;
     return this.db.query(query, [deviceId, userId]);
@@ -97,7 +97,7 @@ export class SecurityDevicesRepository {
         UPDATE sessions
         SET refresh_token    = $1,
             last_active_date = $2
-        WHERE id = $3
+        WHERE session_id = $3
           AND user_id = $4
     `;
 
@@ -114,7 +114,7 @@ export class SecurityDevicesRepository {
   async deleteSession(deviceId: string, userId: string) {
     const query = `DELETE
                    FROM sessions
-                   WHERE id = $1
+                   WHERE session_id = $1
                      AND user_id = $2`;
 
     return await this.db.query(query, [deviceId, userId]);
@@ -128,7 +128,7 @@ export class SecurityDevicesRepository {
     const query = `
         SELECT *
         FROM sessions
-        WHERE id = $1
+        WHERE session_id = $1
           AND user_id = $2
           AND refresh_token = $3`;
 

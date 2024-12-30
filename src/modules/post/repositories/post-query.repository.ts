@@ -41,19 +41,20 @@ export class PostQueryRepository {
 
     const queryResult = await this.db.query(
       `
-          WITH found_posts AS (SELECT p.id                                                                    AS "id",
-                                      b.name                                                                  AS "blogName",
-                                      p.blog_id                                                               AS "blogId",
-                                      p.content                                                               AS "content",
-                                      to_char(p.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MSZ') AS "createdAt",
-                                      p.short_description                                                     AS "shortDescription",
-                                      p.title                                                                 AS "title"
-                               FROM posts p
-                                        INNER JOIN blogs b ON b.id = p.blog_id
+           WITH found_posts AS (
+                                SELECT p.post_id                                                                    AS "id",
+                                 b.name                                                                  AS "blogName",
+                                 p.blog_id                                                               AS "blogId",
+                                 p.content                                                               AS "content",
+                                 to_char(p.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MSZ') AS "createdAt",
+                                 p.short_description                                                     AS "shortDescription",
+                                 p.title                                                                 AS "title"
+                               FROM posts p 
+                               INNER JOIN blogs b ON b.blog_id = p.blog_id
                                ORDER BY ${orderByColumn} ${sortDirection}),
-               paginated_found_posts AS (SELECT *
-                                         FROM found_posts
-                                         LIMIT ${pageSize} OFFSET ${offset})
+                               paginated_found_posts AS (SELECT *
+                                                         FROM found_posts
+                                                         LIMIT ${pageSize} OFFSET ${offset})
           SELECT (SELECT COUNT(*)::INTEGER FROM found_posts) AS "totalCount",
                  json_agg(fpm)                               AS items
           FROM (SELECT fp.*,
@@ -80,9 +81,9 @@ export class PostQueryRepository {
                                                FROM (SELECT to_char(pl.created_at AT TIME ZONE 'UTC',
                                                                     'YYYY-MM-DD"T"HH24:MI:SS.MSZ') AS "addedAt",
                                                             u.login                                AS "login",
-                                                            u.id                                   AS "userId"
+                                                            u.user_id                                   AS "userId"
                                                      FROM post_likes pl
-                                                              INNER JOIN users u ON pl.user_id = u.id
+                                                              INNER JOIN users u ON pl.user_id = u.user_id
                                                      WHERE pl.post_id = fp.id
                                                        AND pl.like_status = 'Like'
                                                      ORDER BY pl.created_at DESC
@@ -119,7 +120,7 @@ export class PostQueryRepository {
 
     const queryResult = await this.db.query(
       `
-          WITH found_posts AS (SELECT p.id                                                                    AS "id",
+          WITH found_posts AS (SELECT p.post_id                                                                    AS "id",
                                       b.name                                                                  AS "blogName",
                                       p.blog_id                                                               AS "blogId",
                                       p.content                                                               AS "content",
@@ -127,11 +128,11 @@ export class PostQueryRepository {
                                       p.short_description                                                     AS "shortDescription",
                                       p.title                                                                 AS "title"
                                FROM posts p
-                                        INNER JOIN blogs b ON b.id = p.blog_id
+                                        INNER JOIN blogs b ON b.blog_id = p.blog_id
                                WHERE p.blog_id = $2
                                ORDER BY ${orderByColumn} ${sortDirection}),
                paginated_found_posts AS (SELECT *
-                                         FROM found_posts
+                                         FROM found_posts fp
                                          LIMIT ${pageSize} OFFSET ${offset})
           SELECT (SELECT COUNT(*)::INTEGER FROM found_posts) AS "totalCount",
                  json_agg(fpm)                               AS items
@@ -159,9 +160,9 @@ export class PostQueryRepository {
                                                FROM (SELECT to_char(pl.created_at AT TIME ZONE 'UTC',
                                                                     'YYYY-MM-DD"T"HH24:MI:SS.MSZ') AS "addedAt",
                                                             u.login                                AS "login",
-                                                            u.id                                   AS "userId"
+                                                            u.user_id                                   AS "userId"
                                                      FROM post_likes pl
-                                                              INNER JOIN users u ON pl.user_id = u.id
+                                                              INNER JOIN users u ON pl.user_id = u.user_id
                                                      WHERE pl.post_id = fp.id
                                                        AND pl.like_status = 'Like'
                                                      ORDER BY pl.created_at DESC
@@ -238,7 +239,7 @@ export class PostQueryRepository {
     const commentOutput = await Promise.all(
       comments.map(async (comment: Comment) => {
         const likeInfo = await this.commentQueryRepository.getLikesByCommentId(
-          comment.id,
+          comment.comment_id,
         );
 
         const commentator = await this.userService.getUserById(comment.user_id);
@@ -266,8 +267,8 @@ export class PostQueryRepository {
         SELECT posts.*,
                blogs.name AS blog_name
         FROM posts
-                 JOIN blogs ON posts.blog_id = blogs.id
-        WHERE posts.id = $1;
+                 JOIN blogs ON posts.blog_id = blogs.blog_id
+        WHERE posts.post_id = $1;
     `;
 
     const likesQuery = `
@@ -278,7 +279,7 @@ export class PostQueryRepository {
                u.login
         FROM post_likes pl
                  INNER JOIN users u
-                            ON pl.user_id = u.id
+                            ON pl.user_id = u.user_id
         WHERE pl.post_id = $1;
 
     `;
@@ -314,46 +315,4 @@ export class PostQueryRepository {
 
     return countLikes[0].count;
   }
-
-  // async findPostsByBlogId(
-  //   blogId: string,
-  //   query: PaginationInputType,
-  //   userId?: string,
-  // ) {
-  //   const { searchNameTerm, pageNumber, pageSize, sortDirection, sortBy } =
-  //     query;
-  //   let filter = {};
-  //   if (searchNameTerm) {
-  //     filter = {
-  //       name: {
-  //         $regex: new RegExp(searchNameTerm, 'i'),
-  //       },
-  //     };
-  //   }
-  //
-  //   const posts = await this.postModel
-  //     .find({ blogId })
-  //     .sort({ [sortBy]: sortDirection })
-  //     .skip((pageNumber - 1) * pageSize)
-  //     .limit(pageSize);
-  //
-  //   if (!posts) throw new NotFoundException('No posts found');
-  //   const totalCount = await this.postModel.countDocuments({ blogId }, filter);
-  //   const pagesCount = Math.ceil(totalCount / pageSize);
-  //
-  //   const postOutput = await Promise.all(
-  //     posts.map(async (post) => {
-  //       const likeInfo = await this.getLikesByPostId(post.id);
-  //       return this.postMapper.mapPost(post, likeInfo, userId);
-  //     }),
-  //   );
-  //
-  //   return {
-  //     pagesCount,
-  //     page: pageNumber,
-  //     pageSize: pageSize,
-  //     totalCount,
-  //     items: postOutput,
-  //   };
-  // }
 }

@@ -72,7 +72,7 @@ export class UserQueryRepository {
     const query = `
         SELECT *
         FROM users
-        WHERE id = $1
+        WHERE user_id = $1
     `;
 
     const findUser = await this.db.query(query, [id]);

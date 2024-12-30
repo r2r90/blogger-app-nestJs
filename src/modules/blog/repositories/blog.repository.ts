@@ -45,7 +45,7 @@ export class BlogRepository {
       const blog = res[0];
 
       return {
-        id: blog.id,
+        id: blog.blog_id,
         name: blog.name,
         description: blog.description,
         websiteUrl: blog.website_url,
@@ -92,7 +92,7 @@ export class BlogRepository {
     const query = `
         UPDATE blogs
         SET ${fields.join(', ')}
-        WHERE id = $${index}`;
+        WHERE blog_id = $${index}`;
 
     try {
       const res = await this.db.query(query, values);
@@ -108,7 +108,7 @@ export class BlogRepository {
     const query = `
         DELETE
         FROM blogs
-        WHERE id = $1
+        WHERE blog_id = $1
     `;
     const res = await this.db.query(query, [id]);
 
@@ -134,7 +134,7 @@ export class BlogRepository {
     ]);
 
     const postOutputQuery = `
-        SELECT posts.id                AS post_id,
+        SELECT posts.post_id           AS post_id,
                posts.title             AS title,
                posts.short_description AS short_description,
                posts.blog_id           AS blog_id,
@@ -142,12 +142,11 @@ export class BlogRepository {
                posts.created_at        AS created_at
         FROM posts
                  LEFT JOIN
-             post_likes ON posts.id = post_likes.post_id
-        WHERE posts.id = $1;
+             post_likes ON posts.post_id = post_likes.post_id
+        WHERE posts.post_id = $1;
     `;
 
-    const data = await this.db.query(postOutputQuery, [createdPost[0].id]);
-
+    const data = await this.db.query(postOutputQuery, [createdPost[0].post_id]);
     const post = data[0];
 
     const blog = await this.blogQueryRepository.findOne(post.blog_id);
@@ -168,48 +167,4 @@ export class BlogRepository {
       },
     };
   }
-
-  // async updatePost(postId, data: CreatePostFromBlogDto): Promise<any> {
-  //   const { title, shortDescription, content } = data;
-  //   if (!isBlogExist)
-  //     throw new NotFoundException(
-  //       "Can't updateBlog the Blog - Blog does not exist",
-  //     );
-  //   const fields: string[] = [];
-  //   const values: any[] = [];
-  //   let index = 1;
-  //
-  //   if (name) {
-  //     fields.push(`name = $${index++}`);
-  //     values.push(name);
-  //   }
-  //   if (description) {
-  //     fields.push(`description = $${index++}`);
-  //     values.push(description);
-  //   }
-  //   if (websiteUrl) {
-  //     fields.push(`website_url = $${index++}`);
-  //     values.push(websiteUrl);
-  //   }
-  //
-  //   // Если нет полей для обновления
-  //   if (fields.length === 0) {
-  //     throw new BadRequestException('No fields to updateBlog');
-  //   }
-  //
-  //   // Добавляем id в список параметров
-  //   values.push(id);
-  //
-  //   const query = `
-  //       UPDATE blogs
-  //       SET ${fields.join(', ')}
-  //       WHERE id = $${index}`;
-  //
-  //   try {
-  //     const res = await this.db.query(query, values);
-  //     return res.rows;
-  //   } catch (e) {
-  //     throw new BadRequestException(e);
-  //   }
-  // }
 }

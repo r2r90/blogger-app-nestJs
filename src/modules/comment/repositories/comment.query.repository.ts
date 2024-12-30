@@ -20,7 +20,7 @@ export class CommentQueryRepository {
     const findCommentQuery = `
         SELECT *
         FROM comments
-        WHERE id = $1
+        WHERE comment_id = $1
     `;
 
     const findComment = await this.db.query(findCommentQuery, [commentId]);
@@ -66,7 +66,7 @@ export class CommentQueryRepository {
       userId,
     ]);
 
-    if (checkIsAlreadyLiked[0].length === 0) return null;
+    if (checkIsAlreadyLiked.length === 0) return null;
     return checkIsAlreadyLiked[0];
   }
 
@@ -98,7 +98,7 @@ export class CommentQueryRepository {
     const searchQuery = `
         SELECT *
         FROM comments
-        WHERE id = $1
+        WHERE comment_id = $1
     `;
 
     const findComment = await this.db.query(searchQuery, [commentId]);

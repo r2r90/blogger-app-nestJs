@@ -1,5 +1,5 @@
 export interface Blog {
-  id: string;
+  blog_id: string;
   name: string;
   description: string;
   website_url: string;

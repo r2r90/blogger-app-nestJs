@@ -29,7 +29,7 @@ export class PostRepository {
     const deletePostQuery = `
         DELETE
         FROM posts
-        WHERE id = $1
+        WHERE post_id = $1
     `;
     const res = await this.db.query(deletePostQuery, [id]);
 
@@ -65,7 +65,7 @@ export class PostRepository {
     const query = `
         UPDATE posts
         SET ${fields.join(', ')}
-        WHERE id = $${index}`;
+        WHERE post_id = $${index}`;
 
     try {
       const res = await this.db.query(query, values);

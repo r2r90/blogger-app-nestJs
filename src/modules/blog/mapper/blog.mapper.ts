@@ -1,4 +1,3 @@
-import { Types } from 'mongoose';
 import { Blog } from '../entity/blog.entity';
 
 export type BlogOutputType = {
@@ -12,7 +11,7 @@ export type BlogOutputType = {
 
 export const blogMapper = (blog: Blog): BlogOutputType => {
   return {
-    id: blog.id,
+    id: blog.blog_id,
     name: blog.name,
     description: blog.description,
     websiteUrl: blog.website_url,

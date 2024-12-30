@@ -10,7 +10,7 @@ export class AuthRepository {
     const query = `
         UPDATE users
         SET is_confirmed = TRUE
-        WHERE id = $1
+        WHERE user_id = $1
         RETURNING *
     `;
     const confirmUser = await this.db.query(query, [id]);
@@ -21,7 +21,7 @@ export class AuthRepository {
     const query = `
         UPDATE users
         SET confirmation_code = $1
-        WHERE id = $2
+        WHERE user_id = $2
         RETURNING *
     `;
     const updateCode = await this.db.query(query, [newCode, id]);

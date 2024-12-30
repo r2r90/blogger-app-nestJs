@@ -8,7 +8,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { PaginationQueryPipe } from '../../common/pipes/paginationQuery.pipe';
-import { IsObjectIdPipe } from 'nestjs-object-id';
 import { PaginationInputType } from '../../common/pagination/pagination.types';
 import { CreatePostFromBlogDto } from '../post/dto/create.post.from.blog.dto';
 import { CommandBus } from '@nestjs/cqrs';
@@ -38,7 +37,7 @@ export class BlogController {
 
   @Post(':blogId/posts')
   async createPostInBlog(
-    @Param('blogId', IsObjectIdPipe) id: string,
+    @Param('blogId') id: string,
     @Body() createPostFromBlogInput: CreatePostFromBlogDto,
   ) {
     const { title, shortDescription, content } = createPostFromBlogInput;

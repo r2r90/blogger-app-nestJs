@@ -39,7 +39,7 @@ export class CommentMapper {
             ?.like_status as LikeStatus) || LikeStatus.None;
 
     return {
-      id: comment.id,
+      id: comment.comment_id,
       content: comment.content,
       createdAt: comment.created_at,
       commentatorInfo: {
