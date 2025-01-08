@@ -25,6 +25,7 @@ import { JwtGuard } from '../auth/guards/jwt-guard';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateCommentDto } from '../comment/dto/create-comment.dto';
 import { CreateCommentCommand } from '../comment/commands/impl/create-comment.command';
+import { ApiTags } from '@nestjs/swagger';
 
 @SkipThrottle()
 @Controller('posts')

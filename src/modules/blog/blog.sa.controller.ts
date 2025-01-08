@@ -11,7 +11,6 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { CreateBlogDto } from './dto/create.blog.dto';
 import { PaginationQueryPipe } from '../../common/pipes/paginationQuery.pipe';
 import { PaginationInputType } from '../../common/pagination/pagination.types';
 import { CreatePostFromBlogDto } from '../post/dto/create.post.from.blog.dto';
@@ -23,16 +22,24 @@ import { AuthGuard } from '@nestjs/passport';
 import { BlogService } from './blog.service';
 import { UserDecorator } from '../../common/decorators/user.decorator';
 import { PostService } from '../post/post.service';
+import { CreateBlogDto, UpdateBlogDto } from './dto';
+import { ApiTags } from '@nestjs/swagger';
 
 @SkipThrottle()
 @UseGuards(AuthGuard('basic'))
 @Controller('sa/blogs')
+@ApiTags('Super-Admin Blog')
 export class SuperAdminBlogController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly blogService: BlogService,
     private readonly postService: PostService,
   ) {}
+
+  @Get()
+  getAll(@Query(PaginationQueryPipe) query: PaginationInputType) {
+    return this.blogService.getAllBlogs(query);
+  }
 
   @Post()
   create(@Body() createBlogDto: CreateBlogDto) {
@@ -42,11 +49,6 @@ export class SuperAdminBlogController {
     );
   }
 
-  @Get()
-  getAll(@Query(PaginationQueryPipe) query: PaginationInputType) {
-    return this.blogService.getAllBlogs(query);
-  }
-
   @Get(':id')
   async getOne(@Param('id') id: string) {
     return await this.blogService.findBlogById(id);
@@ -54,8 +56,8 @@ export class SuperAdminBlogController {
 
   @Put(':id')
   @HttpCode(204)
-  async update(@Param('id') id: string, @Body() createBlogDto: CreateBlogDto) {
-    return this.blogService.updateBlog(id, createBlogDto);
+  async update(@Param('id') id: string, @Body() updateBlogDto: UpdateBlogDto) {
+    return this.blogService.updateBlog(id, updateBlogDto);
   }
 
   @Delete(':id')

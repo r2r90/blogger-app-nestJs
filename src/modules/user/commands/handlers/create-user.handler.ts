@@ -1,5 +1,4 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { User } from '../../../../db/db-mongo/schemas';
 import { add } from 'date-fns';
 import { UserRepository } from '../../repositories/user.repository';
 import { UserService } from '../../user.service';
@@ -7,6 +6,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserCommand } from '../impl/create-user.command.';
 import { v4 as uuidv4 } from 'uuid';
 import { MailService } from '../../../mail/mail.service';
+import { UserOutputType } from '../../types';
 
 @Injectable()
 @CommandHandler(CreateUserCommand)
@@ -17,7 +17,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
     private readonly mailService: MailService,
   ) {}
 
-  async execute(command: CreateUserCommand): Promise<Partial<User>> {
+  async execute(command: CreateUserCommand): Promise<UserOutputType> {
     const hashedPassword = await this.userService.hashPassword(
       command.password,
     );

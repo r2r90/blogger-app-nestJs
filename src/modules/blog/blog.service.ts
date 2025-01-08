@@ -7,8 +7,8 @@ import {
   PaginationType,
 } from '../../common/pagination/pagination.types';
 import { PostQueryRepository } from '../post/repositories/post-query.repository';
-import { CreateBlogDto } from './dto/create.blog.dto';
 import { CreatePostFromBlogDto } from '../post/dto/create.post.from.blog.dto';
+import { UpdateBlogDto } from './dto/update-blog.dto';
 
 @Injectable()
 export class BlogService {
@@ -36,7 +36,7 @@ export class BlogService {
     return this.blogRepository.removeBlog(id);
   }
 
-  async updateBlog(id: string, update: CreateBlogDto): Promise<any> {
+  async updateBlog(id: string, update: UpdateBlogDto): Promise<any> {
     return this.blogRepository.updateBlog(id, update);
   }
 

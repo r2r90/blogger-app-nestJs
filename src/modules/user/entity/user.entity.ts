@@ -1,10 +1,37 @@
-export interface User {
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+
+@Entity()
+export class User {
+  @PrimaryGeneratedColumn()
   id: string;
+
+  @Column()
   login: string;
-  password: string;
+
+  @Column()
   email: string;
-  created_at: string;
+
+  @Column()
+  password: string;
+
+  @CreateDateColumn({
+    name: 'created_at',
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+  })
+  createdAt: Date;
+
+  @Column()
   confirmation_code: string;
+
+  @Column({ default: false })
   is_confirmed: boolean;
-  expiration_date: string;
+
+  @Column({ type: 'timestamptz' }) // Recommended
+  expiration_date: Date;
 }

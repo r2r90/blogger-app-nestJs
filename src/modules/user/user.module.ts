@@ -8,6 +8,8 @@ import forFeatureDb from '../../db/db-mongo/for-feature.db';
 import { CqrsModule } from '@nestjs/cqrs';
 import { CreateUserHandler } from './commands/handlers/create-user.handler';
 import { MailService } from '../mail/mail.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from './entity/user.entity';
 
 @Module({
   controllers: [UserController],
@@ -18,7 +20,11 @@ import { MailService } from '../mail/mail.service';
     CreateUserHandler,
     MailService,
   ],
-  imports: [MongooseModule.forFeature(forFeatureDb), CqrsModule],
+  imports: [
+    TypeOrmModule.forFeature([User]),
+    MongooseModule.forFeature(forFeatureDb),
+    CqrsModule,
+  ],
   exports: [UserService, UserRepository, UserQueryRepository, MongooseModule],
 })
 export class UserModule {}

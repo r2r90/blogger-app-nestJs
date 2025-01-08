@@ -7,13 +7,13 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CreateBlogDto } from '../dto/create.blog.dto';
-import { BlogOutputType } from '../mapper/blog.mapper';
+import { CreateBlogDto } from '../dto/create-blog.dto';
 import { BlogQueryRepository } from './blog.query.repository';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { Blog } from '../../../db/db-mongo/schemas';
 import { CreatePostDataType } from '../../post/dto/create.post.dto';
+import { BlogOutputType } from '../types';
 
 @Injectable()
 export class BlogRepository {

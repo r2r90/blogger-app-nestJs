@@ -6,9 +6,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User } from '../../../db/db-mongo/schemas';
 import { Model } from 'mongoose';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { IUserQueryRepository } from './interfaces/IUserQueryRepository';
 
-export class UserQueryRepository implements IUserQueryRepository {
+export class UserQueryRepository {
   @InjectDataSource() protected readonly db: DataSource;
   @InjectModel(User.name) protected readonly userModel: Model<User>;
 
