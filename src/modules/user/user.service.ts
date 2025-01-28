@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UserRepository } from './repositories/user.repository';
 import { UserQueryRepository } from './repositories/user.query.repository';
 import * as bcrypt from 'bcrypt';
@@ -17,6 +21,12 @@ export class UserService {
 
   async getUserById(id: string) {
     return this.usersQueryRepository.findUserById(id);
+  }
+
+  async getUserByEmail(email: string) {
+    const user = this.usersQueryRepository.findUserByEmail(email);
+    if (!user) throw new BadRequestException('User not found');
+    return user;
   }
 
   async getUserByLoginOrEmail(emailOrLogin: string) {
@@ -40,5 +50,15 @@ export class UserService {
 
   async compareHash(password: string, hash: string): Promise<boolean> {
     return bcrypt.compare(password, hash);
+  }
+
+  async updateEmailConfirmationCode(
+    email: string,
+    newConfirmationCode: string,
+  ): Promise<boolean> {
+    return await this.usersRepository.updateConfirmationCode(
+      email,
+      newConfirmationCode,
+    );
   }
 }

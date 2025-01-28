@@ -40,10 +40,22 @@ export class User {
   created_at: Date;
 
   @Column({
+    type: 'boolean',
+    nullable: false,
+  })
+  is_admin: boolean = false;
+
+  @Column({
     type: 'varchar',
     nullable: true,
   })
   confirmation_code: string;
+
+  @Column({
+    type: 'varchar',
+    nullable: true,
+  })
+  recovery_code: string = null;
 
   @Column({ default: false })
   is_confirmed: boolean;

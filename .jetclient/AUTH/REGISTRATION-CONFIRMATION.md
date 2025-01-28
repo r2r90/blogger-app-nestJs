@@ -2,7 +2,7 @@
 name = 'REGISTRATION-CONFIRMATION'
 method = 'POST'
 url = '{{baseUrl}}/auth/registration-confirmation'
-sortWeight = 4500000
+sortWeight = 5437500
 id = '30c62e3f-a651-46b5-81a4-955258c307e8'
 
 [auth.basic]
@@ -13,6 +13,6 @@ password = 'qwerty'
 type = 'JSON'
 raw = '''
 {
-  "code": "0358a0ac-9ba1-4056-a788-1c0e6e0ec6b6"
+  "code": "cb6cd5c8-38bb-40a2-9ebd-7dbbf7d1f70a"
 }'''
 ```

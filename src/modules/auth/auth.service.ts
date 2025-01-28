@@ -13,7 +13,6 @@ import { MailService } from '../mail/mail.service';
 import { UserQueryRepository } from '../user/repositories/user.query.repository';
 import { AuthRepository } from './repositories/auth.repository';
 import { v4 as uuidv4 } from 'uuid';
-import { AuthQueryRepository } from './repositories/auth.query.repository';
 import { UserRepository } from '../user/repositories/user.repository';
 import { UserService } from '../user/user.service';
 import { AuthJwtTokenService } from './auth-jwt-token.service';
@@ -31,7 +30,6 @@ export class AuthService {
     private readonly userQueryRepository: UserQueryRepository,
     private readonly userRepository: UserRepository,
     private readonly authRepository: AuthRepository,
-    private readonly authQueryRepository: AuthQueryRepository,
     private readonly authJwtTokenService: AuthJwtTokenService,
     private readonly securityDevicesRepository: SecurityDevicesRepository,
     private readonly tokenRepository: TokenRepository,
@@ -40,13 +38,19 @@ export class AuthService {
   async confirmCode(confirmCodeDto: ConfirmCodeDto) {
     const { code } = confirmCodeDto;
     const user: User =
-      await this.authQueryRepository.getUserByConfirmationCode(code);
+      await this.userQueryRepository.getUserByConfirmationCode(code);
+
+    if (!user) {
+      throw new BadRequestException(
+        'Code Not Valid. Please check confirmation code!',
+      );
+    }
     if (user.is_confirmed === true)
       throw new BadRequestException([
         { message: 'User already confirmed', field: 'code' },
       ]);
-    if (!user) return null;
-    const isConfirmed = await this.authRepository.confirmUser(user.id);
+
+    const isConfirmed = await this.userRepository.confirmUser(user.id);
     return !!isConfirmed;
   }
 
@@ -67,23 +71,9 @@ export class AuthService {
 
   async login(
     userId: string,
-    deviceInfo: { ip: string; title: string },
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    const createdSession = await this.securityDevicesRepository.saveSession(
-      userId,
-      deviceInfo,
-    );
-
-    const deviceId = createdSession[0].id;
-
     const { accessToken, refreshToken } =
-      await this.authJwtTokenService.generateTokenPair(userId, deviceId);
-
-    await this.securityDevicesRepository.updateSession(
-      userId,
-      refreshToken,
-      deviceId,
-    );
+      await this.authJwtTokenService.generateTokenPair(userId);
 
     return { accessToken, refreshToken };
   }
@@ -162,31 +152,30 @@ export class AuthService {
       recoveryCode,
     );
 
-    if (!updateRecoveryCode || !sendCodeToUser) {
+    if (!sendCodeToUser) {
       throw new BadRequestException('Cannot send recovery code');
     }
 
-    return updateRecoveryCode;
+    return true;
   }
 
-  async resendValidationEmail(emailDto: EmailValidationDto) {
+  async resendRecoveryCode(emailDto: EmailValidationDto) {
     const { email } = emailDto;
-    const user = await this.userQueryRepository.findUserByFields({ email });
+    const user = await this.userQueryRepository.findUserByEmail(email);
     if (!user) {
       throw new BadRequestException([
         { message: `Can't find user with email ${email}`, field: 'email' },
       ]);
     }
+
     if (user.is_confirmed === true) {
       throw new BadRequestException([
         { message: `User with ${email} is already confirmed'`, field: 'email' },
       ]);
     }
-
     const newConfirmationCode = uuidv4();
-
-    await this.authRepository.updateConfirmationCode(
-      user.id,
+    await this.userService.updateEmailConfirmationCode(
+      email,
       newConfirmationCode,
     );
 
@@ -234,4 +223,30 @@ export class AuthService {
     const salt = await bcrypt.genSalt(10);
     return bcrypt.hash(password, salt);
   }
+
+  /*
+   *  Ip restriction version
+   */
+  // async login(
+  //   userId: string,
+  //   deviceInfo: { ip: string; title: string },
+  // ): Promise<{ accessToken: string; refreshToken: string }> {
+  //   const createdSession = await this.securityDevicesRepository.saveSession(
+  //     userId,
+  //     deviceInfo,
+  //   );
+  //
+  //   const deviceId = createdSession[0].id;
+  //
+  //   const { accessToken, refreshToken } =
+  //     await this.authJwtTokenService.generateTokenPair(userId, deviceId);
+  //
+  //   await this.securityDevicesRepository.updateSession(
+  //     userId,
+  //     refreshToken,
+  //     deviceId,
+  //   );
+  //
+  //   return { accessToken, refreshToken };
+  // }
 }

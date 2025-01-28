@@ -1,8 +1,11 @@
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Like, Repository } from 'typeorm';
+import { DataSource, ILike, Like, Repository } from 'typeorm';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { GetUsersDto } from '../dto/get-users.dto';
 import { userMapper } from '../mapper/user.mapper';
 import { User } from '../entity/user.entity';
@@ -24,29 +27,25 @@ export class UserQueryRepository {
       sortBy,
     } = query;
 
-    const whereConditions: any = {};
-
-    if (searchLoginTerm) {
-      whereConditions.login = Like(`%${searchLoginTerm}%`);
-    }
-
-    if (searchEmailTerm) {
-      whereConditions.email = Like(`%${searchEmailTerm}%`);
-    }
-
-    const validSortFields = ['id', 'login', 'email'];
-    const orderByField = validSortFields.includes(sortBy)
+    const validSortFields = ['login', 'email', 'created_at'];
+    const sortByField = validSortFields.includes(sortBy)
       ? sortBy
       : 'created_at';
 
-    const totalCount = await this.usersRepository.count({
-      where: whereConditions,
-    });
+    const whereConditions: any = [];
 
-    const items = await this.usersRepository.find({
-      where: whereConditions,
+    if (searchLoginTerm) {
+      whereConditions.push({ login: ILike(`%${searchLoginTerm}%`) });
+    }
+
+    if (searchEmailTerm) {
+      whereConditions.push({ email: Like(`%${searchEmailTerm}%`) });
+    }
+
+    const [items, totalCount] = await this.usersRepository.findAndCount({
+      where: whereConditions.length > 0 ? whereConditions : undefined,
       order: {
-        [orderByField]: sortDirection.toUpperCase() === 'ASC' ? 'ASC' : 'DESC',
+        [sortByField]: sortDirection.toUpperCase() === 'ASC' ? 'ASC' : 'DESC',
       },
       skip: (pageNumber - 1) * pageSize,
       take: pageSize,
@@ -71,6 +70,17 @@ export class UserQueryRepository {
       });
 
     if (!user) return null;
+    return user;
+  }
+
+  async getUserByConfirmationCode(code: string): Promise<User> {
+    const user = await this.usersRepository
+      .findOneBy({
+        confirmation_code: code,
+      })
+      .catch((err) => {
+        throw new InternalServerErrorException(err.message);
+      });
     return user;
   }
 
@@ -106,39 +116,21 @@ export class UserQueryRepository {
   }
 
   async findUserByLogin(login: string) {
-    if (!login) {
-      throw new BadRequestException('Login is required');
-    }
-    const query = `
-        SELECT *
-        FROM users
-        WHERE COALESCE(login, '') ILIKE $1
-    `;
+    const findUser = await this.usersRepository.findOneBy({
+      login,
+    });
 
-    const findUser = await this.db.query(query, [login]);
-
-    if (findUser.length === 0) {
-      new NotFoundException(`Login ${login} not found`);
-    }
-    return findUser[0];
+    if (!findUser) return null;
+    return findUser;
   }
 
   async findUserByEmail(email: string) {
-    if (!email) {
-      throw new BadRequestException('Email is required');
-    }
+    const findUser = await this.usersRepository.findOneBy({
+      email,
+    });
 
-    const query = `
-        SELECT *
-        FROM users
-        WHERE COALESCE(email, '') ILIKE $1
-    `;
-
-    const findUser = await this.db.query(query, [email]);
-    if (findUser.length === 0) {
-      new NotFoundException(`Login ${email} not found`);
-    }
-    return findUser[0];
+    if (!findUser) return null;
+    return findUser;
   }
 
   isEmailExist(email: string) {

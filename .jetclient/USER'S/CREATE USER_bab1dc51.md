@@ -13,8 +13,8 @@ password = 'qwerty'
 type = 'JSON'
 raw = '''
 {
-  "login": "brobro",
-  "email": "34tre@test.com",
+  "login": "strpe",
+  "email": "sdds@test.com",
   "password": "test12345"
 }'''
 ```

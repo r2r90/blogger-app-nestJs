@@ -70,17 +70,7 @@ export class AuthController {
   ): Promise<{ accessToken: string }> {
     const { userId } = req.user;
 
-    const userAgent = req.headers['user-agent'];
-
-    const deviceInfo = {
-      ip,
-      title: userAgent,
-    };
-
-    const { accessToken, refreshToken } = await this.authService.login(
-      userId,
-      deviceInfo,
-    );
+    const { accessToken, refreshToken } = await this.authService.login(userId);
 
     res.cookie(cookieConfig.refreshToken.name, refreshToken, {
       ...cookieConfig.refreshToken.options,
@@ -142,15 +132,14 @@ export class AuthController {
   @Post('password-recovery')
   async passwordRecovery(@Body() dto: EmailValidationDto) {
     const { email } = dto;
-    const user = await this.userService.getUserByLoginOrEmail(email);
-    if (!user) throw new BadRequestException('User not found');
-    await this.authService.sendRecoveryCode(email);
+    const user = await this.userService.getUserByEmail(email);
+    await this.authService.sendRecoveryCode(user.email);
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('registration-email-resending')
   async registerEmailResend(@Body() email: EmailValidationDto) {
-    return this.authService.resendValidationEmail(email);
+    return this.authService.resendRecoveryCode(email);
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -162,4 +151,59 @@ export class AuthController {
       recoveryCode,
     );
   }
+
+  /*
+   *  With ip restriction
+   */
+
+  // @HttpCode(HttpStatus.OK)
+  // @Post('login')
+  // @UseGuards(PassportLocalGuard)
+  // async login(
+  //   @Req() req: Request,
+  //   @Res({ passthrough: true }) res: Response,
+  //   @Ip() ip: string,
+  // ): Promise<{ accessToken: string }> {
+  //   const { userId } = req.user;
+  //
+  //   const userAgent = req.headers['user-agent'];
+  //
+  //   const deviceInfo = {
+  //     ip,
+  //     title: userAgent,
+  //   };
+  //
+  //   const { accessToken, refreshToken } = await this.authService.login(
+  //     userId,
+  //     deviceInfo,
+  //   );
+  //
+  //   res.cookie(cookieConfig.refreshToken.name, refreshToken, {
+  //     ...cookieConfig.refreshToken.options,
+  //   });
+  //
+  //   return { accessToken };
+  // }
+  // @HttpCode(HttpStatus.OK)
+  // @Post('refresh-token')
+  // @UseGuards(JwtRefreshAuthGuard)
+  // async refreshToken(
+  //   @Req() req: Request,
+  //   @Res({ passthrough: true }) res: Response,
+  // ) {
+  //   const { userId, deviceId } = req.user;
+  //   const currentRefreshToken = req.cookies.refreshToken;
+  //
+  //   const { refreshToken, accessToken } = await this.authService.refreshToken(
+  //     userId,
+  //     deviceId,
+  //     currentRefreshToken,
+  //   );
+  //
+  //   res.cookie(cookieConfig.refreshToken.name, refreshToken, {
+  //     ...cookieConfig.refreshToken.options,
+  //   });
+  //
+  //   return { accessToken };
+  // }
 }
