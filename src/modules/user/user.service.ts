@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserRepository } from './repositories/user.repository';
 import { UserQueryRepository } from './repositories/user.query.repository';
-import { PaginationInputType } from '../../common/pagination/pagination.types';
 import * as bcrypt from 'bcrypt';
+import { GetUsersDto } from './dto/get-users.dto';
 
 @Injectable()
 export class UserService {
@@ -11,12 +11,12 @@ export class UserService {
     private readonly usersQueryRepository: UserQueryRepository,
   ) {}
 
-  async getAllUsers(query: PaginationInputType) {
+  async getAllUsers(query: GetUsersDto) {
     return this.usersQueryRepository.getAll(query);
   }
 
   async getUserById(id: string) {
-    return this.usersQueryRepository.findOne(id);
+    return this.usersQueryRepository.findUserById(id);
   }
 
   async getUserByLoginOrEmail(emailOrLogin: string) {
@@ -28,13 +28,9 @@ export class UserService {
 
   async deleteUser(userId: string) {
     const findUser = await this.getUserById(userId);
-
-    if (findUser.length === 0)
+    if (!findUser)
       throw new NotFoundException(`User with id ${userId} not found`);
-    const isUserDeleted = await this.usersRepository.remove(userId);
-    if (!isUserDeleted)
-      throw new NotFoundException(`Cannot remove user with id $userId}`);
-    return true;
+    await this.usersRepository.remove(userId);
   }
 
   async hashPassword(password: string) {

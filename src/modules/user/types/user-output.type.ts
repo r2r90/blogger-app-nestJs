@@ -1,6 +1,6 @@
-export type UserOutput = {
+export type UserOutputType = {
   id: string;
   login: string;
   email: string;
-  createdAt: string;
+  createdAt: Date;
 };

@@ -2,9 +2,6 @@ import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AuthQueryRepository } from './repositories/auth.query.repository';
-import { UserRepository } from '../user/repositories/user.repository';
-import { UserService } from '../user/user.service';
-import { UserQueryRepository } from '../user/repositories/user.query.repository';
 import { UserModule } from '../user/user.module';
 import { PassportModule } from '@nestjs/passport';
 import { MailService } from '../mail/mail.service';
@@ -33,9 +30,6 @@ import { SecurityDevicesRepository } from '../security-devices/security-devices.
     JwtRefreshStrategy,
     JwtAccessStrategy,
     MailService,
-    UserQueryRepository,
-    UserRepository,
-    UserService,
     LocalStrategy,
     SessionDataRepository,
     SecurityDevicesRepository,

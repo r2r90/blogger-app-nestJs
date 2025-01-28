@@ -29,7 +29,9 @@ export class CommentQueryRepository {
       throw new NotFoundException('Comment not found');
     }
     const likeInfo = await this.getLikesByCommentId(commentId);
-    const commentator = await this.userQueryRepository.findOne(comment.user_id);
+    const commentator = await this.userQueryRepository.findUserById(
+      comment.user_id,
+    );
 
     if (!comment)
       throw new NotFoundException(`Comment with id ${commentId} not found`);

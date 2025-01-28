@@ -12,13 +12,12 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create.user.dto';
-import { PaginationInputType } from '../../common/pagination/pagination.types';
-import { PaginationQueryPipe } from '../../common/pipes/paginationQuery.pipe';
 import { SkipThrottle } from '@nestjs/throttler';
 import { AuthGuard } from '@nestjs/passport';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreateUserCommand } from './commands/impl/create-user.command.';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { GetUsersDto } from './dto/get-users.dto';
 
 @SkipThrottle()
 @UseGuards(AuthGuard('basic'))
@@ -49,6 +48,7 @@ export class UserController {
   create(@Body() createUserDto: CreateUserDto) {
     const { login, password, email } = createUserDto;
     const isAdmin = true;
+
     return this.commandBus.execute(
       new CreateUserCommand(login, password, email, isAdmin),
     );
@@ -100,7 +100,7 @@ export class UserController {
     required: false,
     description: 'pageSize is quantity size per page that should be returned',
   })
-  getAll(@Query(PaginationQueryPipe) query: PaginationInputType) {
+  getAll(@Query() query: GetUsersDto) {
     return this.usersService.getAllUsers(query);
   }
 

@@ -5,33 +5,49 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-@Entity()
+@Entity('users')
 export class User {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({
+    type: 'varchar',
+    length: 96,
+    nullable: false,
+    unique: true,
+  })
   login: string;
 
-  @Column()
+  @Column({
+    type: 'varchar',
+    length: 255,
+    nullable: false,
+    unique: true,
+  })
   email: string;
 
-  @Column()
+  @Column({
+    type: 'varchar',
+    length: 96,
+    nullable: false,
+  })
   password: string;
 
   @CreateDateColumn({
-    name: 'created_at',
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP(6)',
   })
-  createdAt: Date;
+  created_at: Date;
 
-  @Column()
+  @Column({
+    type: 'varchar',
+    nullable: true,
+  })
   confirmation_code: string;
 
   @Column({ default: false })
   is_confirmed: boolean;
 
-  @Column({ type: 'timestamptz' }) // Recommended
+  @Column({ type: 'timestamptz', nullable: true })
   expiration_date: Date;
 }

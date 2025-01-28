@@ -11,14 +11,12 @@ import { BlogRepository } from '../blog/repositories/blog.repository';
 import { PostService } from './post.service';
 import { CreateCommentHandler } from '../comment/commands/handlers/create-comment.handler';
 import { CommentRepository } from '../comment/repositories/comment.repository';
-import { UserQueryRepository } from '../user/repositories/user.query.repository';
 import { PostMapper } from './mapper/post.mapper';
-import { UserService } from '../user/user.service';
-import { UserRepository } from '../user/repositories/user.repository';
 import { JwtService } from '@nestjs/jwt';
 import { BlogIdValidator } from '../../common/validators/custom-validators/blog-id.validator';
 import { CommentMapper } from '../comment/mapper/comment.mapper';
 import { CommentQueryRepository } from '../comment/repositories/comment.query.repository';
+import { UserModule } from '../user/user.module';
 
 export const CommandHandlers = [CreatePostHandler, CreateCommentHandler];
 
@@ -33,14 +31,11 @@ export const CommandHandlers = [CreatePostHandler, CreateCommentHandler];
     BlogRepository,
     CommentRepository,
     CommentQueryRepository,
-    UserQueryRepository,
-    UserService,
-    UserRepository,
     JwtService,
     BlogIdValidator,
     CommentMapper,
     ...CommandHandlers,
   ],
-  imports: [MongooseModule.forFeature(forFeatureDb), CqrsModule],
+  imports: [MongooseModule.forFeature(forFeatureDb), CqrsModule, UserModule],
 })
 export class PostModule {}

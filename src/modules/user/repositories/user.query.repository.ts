@@ -1,18 +1,20 @@
-import { PaginationInputType } from '../../../common/pagination/pagination.types';
-import { userMapper } from '../mapper/user.mapper';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Like, Repository } from 'typeorm';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from '../../../db/db-mongo/schemas';
 import { Model } from 'mongoose';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { IUserQueryRepository } from './interfaces/IUserQueryRepository';
+import { GetUsersDto } from '../dto/get-users.dto';
+import { userMapper } from '../mapper/user.mapper';
+import { User } from '../entity/user.entity';
 
-export class UserQueryRepository implements IUserQueryRepository {
-  @InjectDataSource() protected readonly db: DataSource;
+export class UserQueryRepository {
+  @InjectRepository(User)
+  private readonly usersRepository: Repository<User>;
+  @InjectDataSource()
+  protected readonly db: DataSource;
   @InjectModel(User.name) protected readonly userModel: Model<User>;
 
-  async getAll(query: PaginationInputType) {
+  async getAll(query: GetUsersDto) {
     const {
       searchLoginTerm,
       searchEmailTerm,
@@ -22,63 +24,54 @@ export class UserQueryRepository implements IUserQueryRepository {
       sortBy,
     } = query;
 
-    const offset = (pageNumber - 1) * pageSize;
-    const searchLoginTermNormalized = searchLoginTerm ?? '';
-    const searchEmailTermNormalized = searchEmailTerm ?? '';
+    const whereConditions: any = {};
 
-    const usersQuery = `
-        SELECT *
-        FROM users
-        WHERE (COALESCE($1, '') = '' OR login ILIKE '%' || $1 || '%')
-           OR (COALESCE($2, '') = '' OR email ILIKE '%' || $2 || '%')
-        ORDER BY ${sortBy} ${sortDirection.toLowerCase()}
-        LIMIT $3 OFFSET $4;
-    `;
+    if (searchLoginTerm) {
+      whereConditions.login = Like(`%${searchLoginTerm}%`);
+    }
 
-    // Requête pour le comptage total
-    const countQuery = `
-        SELECT COUNT(*)
-        FROM users
-        WHERE (COALESCE($1, '') = '' OR login ILIKE '%' || $1 || '%')
-           OR (COALESCE($2, '') = '' OR email ILIKE '%' || $2 || '%');
-    `;
+    if (searchEmailTerm) {
+      whereConditions.email = Like(`%${searchEmailTerm}%`);
+    }
 
-    const [users, totalCountResult] = await Promise.all([
-      this.db.query(usersQuery, [
-        searchLoginTermNormalized || '', // $1
-        searchEmailTermNormalized || '', // $2
-        pageSize, // $3
-        offset, // $4
-      ]),
-      this.db.query(countQuery, [
-        searchLoginTermNormalized || '', // $1
-        searchEmailTermNormalized || '', // $2
-      ]),
-    ]);
+    const validSortFields = ['id', 'login', 'email'];
+    const orderByField = validSortFields.includes(sortBy)
+      ? sortBy
+      : 'created_at';
 
-    const totalCount = parseInt(totalCountResult[0].count, 10);
-    const pagesCount = Math.ceil(totalCount / pageSize);
+    const totalCount = await this.usersRepository.count({
+      where: whereConditions,
+    });
 
-    // Возврат данных
+    const items = await this.usersRepository.find({
+      where: whereConditions,
+      order: {
+        [orderByField]: sortDirection.toUpperCase() === 'ASC' ? 'ASC' : 'DESC',
+      },
+      skip: (pageNumber - 1) * pageSize,
+      take: pageSize,
+    });
+
     return {
-      pagesCount,
+      totalCount,
+      pagesCount: Math.ceil(totalCount / pageSize),
       page: pageNumber,
       pageSize,
-      totalCount,
-      items: users.map(userMapper),
+      items: items.map((user) => userMapper(user)),
     };
   }
 
-  async findOne(id: string) {
-    const query = `
-        SELECT *
-        FROM users
-        WHERE user_id = $1
-    `;
+  async findUserById(id: string) {
+    const user = await this.usersRepository
+      .findOne({
+        where: { id },
+      })
+      .catch((err) => {
+        throw new BadRequestException(err.message);
+      });
 
-    const findUser = await this.db.query(query, [id]);
-    if (!findUser) return null;
-    return findUser[0];
+    if (!user) return null;
+    return user;
   }
 
   async findUserByFields(fields: { login?: string; email?: string }) {

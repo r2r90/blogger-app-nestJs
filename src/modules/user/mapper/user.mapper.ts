@@ -4,7 +4,7 @@ export type UserOutputType = {
   id: string;
   login: string;
   email: string;
-  createdAt: string;
+  createdAt: Date;
 };
 
 export const userMapper = (user: User): UserOutputType => {

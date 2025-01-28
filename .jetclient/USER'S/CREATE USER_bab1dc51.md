@@ -1,7 +1,7 @@
 ```toml
-name = 'CREATE BLOG'
+name = 'CREATE USER'
 method = 'POST'
-url = '{{baseUrl}}/blogs'
+url = '{{baseUrl}}/sa/users'
 sortWeight = 3000000
 id = 'bab1dc51-51a3-4305-a227-7a049b56a3da'
 
@@ -13,8 +13,8 @@ password = 'qwerty'
 type = 'JSON'
 raw = '''
 {
-  "name": "new test blog",
-  "description": "qpsldj qsdpkdqskndsq dqskqsdjqsdkjqsdk",
-  "websiteUrl": "https://my-test.com"
+  "login": "brobro",
+  "email": "34tre@test.com",
+  "password": "test12345"
 }'''
 ```

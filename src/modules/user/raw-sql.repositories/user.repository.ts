@@ -2,10 +2,9 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../../../db/db-mongo/schemas';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { IUserRepository } from '../repositories/user.repository';
 
 @Injectable()
-export class UserRepository implements IUserRepository {
+export class UserRepository {
   constructor(@InjectDataSource() protected readonly db: DataSource) {}
 
   async create(data: CreateUserDto) {

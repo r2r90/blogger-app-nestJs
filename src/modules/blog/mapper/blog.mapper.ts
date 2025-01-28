@@ -11,7 +11,7 @@ export type BlogOutputType = {
 
 export const blogMapper = (blog: Blog): BlogOutputType => {
   return {
-    id: blog.blog_id,
+    id: blog.id,
     name: blog.name,
     description: blog.description,
     websiteUrl: blog.website_url,

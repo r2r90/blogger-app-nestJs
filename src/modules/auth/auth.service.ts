@@ -93,7 +93,7 @@ export class AuthService {
     deviceId: string,
     currentRefreshToken: string,
   ) {
-    const user = await this.userQueryRepository.findOne(userId);
+    const user = await this.userQueryRepository.findUserById(userId);
     if (!user) {
       throw new InternalServerErrorException(
         'Something went wrong, please log in...',

@@ -1,30 +1,48 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { CreateUserDto } from '../../../db/db-mongo/schemas';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { User } from '../entity/user.entity';
 
 @Injectable()
-export class UserRepository implements IUserRepository {
-  constructor(@InjectDataSource() protected readonly db: DataSource) {}
+export class UserRepository {
+  constructor(
+    @InjectDataSource() protected readonly db: DataSource,
+    @InjectRepository(User) private readonly usersRepository: Repository<User>,
+  ) {}
 
   async create(data: CreateUserDto) {
-    const { login, email, password, emailConfirmation } = data;
-    const createdAt = new Date().toISOString();
-    return;
+    const isUserExist = await this.usersRepository
+      .findOne({ where: { login: data.login } })
+      .catch((err) => {
+        throw new BadRequestException(err.message);
+      });
+
+    if (isUserExist) {
+      throw new HttpException('User already exists', HttpStatus.BAD_REQUEST);
+    }
+    const user = this.usersRepository.create({ ...data });
+    const savedUser = await this.usersRepository.save(user);
+
+    return {
+      id: user.id,
+      login: savedUser.login,
+      email: user.email,
+      createdAt: user.created_at,
+    };
   }
 
   async remove(id: string) {
-    const query = `
-        DELETE
-        FROM users
-        WHERE user_id = $1;
-    `;
-
-    const result = await this.db.query(query, [id]);
+    const result = await this.usersRepository.delete(id);
 
     return {
       message: `User with id ${id} has been removed`,
-      affectedRows: result.rowCount,
+      affectedRows: result,
     };
   }
 

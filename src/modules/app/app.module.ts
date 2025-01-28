@@ -21,6 +21,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { SecurityDevicesModule } from '../security-devices/security-devices.module';
 import { MongoDatabaseModule } from '../../db/db-mongo/mongo-database.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from '../user/entity/user.entity';
 
 @Module({
   imports: [
@@ -48,10 +49,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      autoLoadEntities: false,
-      synchronize: false,
+      autoLoadEntities: true,
+      synchronize: true,
     }),
-    TypeOrmModule.forFeature([]),
+    TypeOrmModule.forFeature([User]),
     MongoDatabaseModule,
     DatabaseModule,
     BlogModule,
