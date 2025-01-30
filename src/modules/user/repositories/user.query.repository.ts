@@ -84,44 +84,12 @@ export class UserQueryRepository {
     return user;
   }
 
-  async findUserByFields(fields: { login?: string; email?: string }) {
-    const conditions = [];
-    const values = [];
-
-    // Формируем условия на основе переданных полей
-    if (fields.login) {
-      conditions.push(`COALESCE(login, '') ILIKE $${conditions.length + 1}`);
-      values.push(fields.login);
-    }
-    if (fields.email) {
-      conditions.push(`COALESCE(email, '') ILIKE $${conditions.length + 1}`);
-      values.push(fields.email);
-    }
-
-    if (conditions.length === 0) {
-      throw new BadRequestException(
-        'At least one field (login or email) is required',
-      );
-    }
-
-    const query = `
-        SELECT *
-        FROM users
-        WHERE ${conditions.join(' OR ')}
-    `;
-
-    const findUser = await this.db.query(query, values);
-
-    return findUser[0];
-  }
-
-  async findUserByLogin(login: string) {
-    const findUser = await this.usersRepository.findOneBy({
-      login,
+  async findUserByLoginOrEmail(loginOrEmail: string): Promise<User> {
+    const userExist = await this.usersRepository.findOne({
+      where: [{ login: loginOrEmail }, { email: loginOrEmail }],
     });
-
-    if (!findUser) return null;
-    return findUser;
+    if (!userExist) return null;
+    return userExist;
   }
 
   async findUserByEmail(email: string) {

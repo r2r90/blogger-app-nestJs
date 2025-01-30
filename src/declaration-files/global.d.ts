@@ -13,7 +13,7 @@ declare global {
 
     interface User {
       userId: string;
-      deviceId: string;
+      sessionId: string;
       expiresAt: Date;
     }
   }

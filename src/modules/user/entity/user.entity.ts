@@ -2,8 +2,10 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Session } from '../../security-devices/entity/session.entity';
 
 @Entity('users')
 export class User {

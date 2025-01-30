@@ -1,34 +1,36 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { SessionData } from '../../db/db-mongo/schemas';
 import { Model } from 'mongoose';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { SessionInfoDto } from './dto /session-info.dto';
+import { Session } from './entity/session.entity';
 
 @Injectable()
 export class SecurityDevicesRepository {
-  constructor(@InjectDataSource() protected readonly db: DataSource) {}
+  constructor(
+    @InjectRepository(Session)
+    private readonly sessionRepository: Repository<Session>,
+    @InjectDataSource() protected readonly db: DataSource,
+  ) {}
 
   @InjectModel(SessionData.name) private sessionDataModel: Model<SessionData>;
 
-  async saveSession(
-    userId: string,
-    deviceInfo: {
-      ip: string;
-      title: string;
-    },
-  ) {
-    const query = `
-        INSERT INTO sessions (user_id, title, ip)
-        VALUES ($1, $2, $3)
-        RETURNING *;
-    `;
+  async saveSession(sessionInfo: SessionInfoDto) {
+    const createSession: Session = this.sessionRepository.create({
+      user_id: sessionInfo.userId,
+      title: sessionInfo.title,
+      ip: sessionInfo.ip,
+    });
 
-    const values = [userId, deviceInfo.title, deviceInfo.ip];
+    const saveSession = await this.sessionRepository
+      .save(createSession)
+      .catch((err) => {
+        throw new HttpException(err.description, err.message);
+      });
 
-    const result = await this.db.query(query, values);
-
-    return result;
+    return saveSession;
   }
 
   async getAllActiveDevices(userId: string) {
@@ -82,29 +84,20 @@ export class SecurityDevicesRepository {
     return this.sessionDataModel.exists({ _id: deviceId, userId }).lean();
   }
 
-  async logoutFromDevice(userId: string, deviceId: string) {
-    const query = `
-        DELETE
-        FROM sessions
-        WHERE session_id = $1
-          AND user_id = $2;
-    `;
-    return this.db.query(query, [deviceId, userId]);
+  async logoutFromDevice(sessionId: string) {
+    return await this.sessionRepository.delete({ id: sessionId });
   }
 
-  async updateSession(userId: string, refreshToken: string, deviceId: string) {
-    const query = `
-        UPDATE sessions
-        SET refresh_token    = $1,
-            last_active_date = $2
-        WHERE session_id = $3
-          AND user_id = $4
-    `;
+  async updateSession(sessionId: string, refreshToken: string) {
+    const updateSession = await this.sessionRepository.update(
+      { id: sessionId },
+      {
+        refresh_token: refreshToken,
+        last_active_date: new Date().toISOString(),
+      },
+    );
 
-    const lastActiveDate = new Date().toISOString();
-    const values = [refreshToken, lastActiveDate, deviceId, userId];
-    const result = await this.db.query(query, values);
-    if (result.rowCount === 0) {
+    if (updateSession.raw === 0) {
       throw new Error(
         'Session not found or user does not have permission to updateBlog this session',
       );
@@ -121,22 +114,12 @@ export class SecurityDevicesRepository {
   }
 
   async validateRefreshToken(
-    userId: string,
-    deviceId: string,
-    refreshToken: string,
+    sessionId: string,
+    currentRefreshToken: string,
   ): Promise<boolean> {
-    const query = `
-        SELECT *
-        FROM sessions
-        WHERE session_id = $1
-          AND user_id = $2
-          AND refresh_token = $3`;
-
-    const isValidSession = await this.db.query(query, [
-      deviceId,
-      userId,
-      refreshToken,
-    ]);
+    const isValidSession = await this.sessionRepository.find({
+      where: { id: sessionId, refresh_token: currentRefreshToken },
+    });
 
     return isValidSession.length !== 0;
   }

@@ -6,9 +6,9 @@ import configuration from '../../config/configuration';
 export class AuthJwtTokenService {
   constructor(private jwtService: JwtService) {}
 
-  async generateRefreshToken(userId: string) {
+  async generateRefreshToken({ sub, sessionId }) {
     return this.jwtService.sign(
-      { sub: userId },
+      { sub, sessionId: sessionId },
       {
         secret: configuration().refreshJwtSecret,
         expiresIn: configuration().refreshJwtExpiresIn,
@@ -16,16 +16,18 @@ export class AuthJwtTokenService {
     );
   }
 
-  async generateTokenPair(userId: string): Promise<any> {
+  async generateTokenPair(userId: string, sessionId: string): Promise<any> {
     const payload = {
       sub: userId,
+      sessionId: sessionId,
     };
 
     const accessToken = this.jwtService.sign(payload, {
       secret: configuration().accessJwtSecret,
       expiresIn: configuration().accessJwtExpiration,
     });
-    const refreshToken = await this.generateRefreshToken(userId);
+
+    const refreshToken = await this.generateRefreshToken(payload);
 
     return { accessToken, refreshToken };
   }
@@ -46,17 +48,17 @@ export class AuthJwtTokenService {
    *  Ip restriction version
    * */
 
-  // async generateTokenPair(userId: string, deviceId: string): Promise<any> {
+  // async generateTokenPair(userId: string, sessionId: string): Promise<any> {
   //   const payload = {
   //     sub: userId,
-  //     deviceId: deviceId,
+  //     sessionId: sessionId,
   //   };
   //
   //   const accessToken = this.jwtService.sign(payload, {
   //     secret: configuration().accessJwtSecret,
   //     expiresIn: configuration().accessJwtExpiration,
   //   });
-  //   const refreshToken = await this.generateRefreshToken(userId, deviceId);
+  //   const refreshToken = await this.generateRefreshToken(userId, sessionId);
   //
   //   return { accessToken, refreshToken };
   // }

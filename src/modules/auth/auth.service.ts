@@ -20,6 +20,8 @@ import { SecurityDevicesRepository } from '../security-devices/security-devices.
 import { TokenRepository } from './repositories/token.repository';
 import { SessionData } from '../../db/db-mongo/schemas';
 import { User } from '../user/entity/user.entity';
+import { SecurityDevicesService } from '../security-devices/security-devices.service';
+import { SessionInfoDto } from '../security-devices/dto /session-info.dto';
 
 @Injectable()
 export class AuthService {
@@ -27,6 +29,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
     private readonly userService: UserService,
+    private readonly securityDevicesService: SecurityDevicesService,
     private readonly userQueryRepository: UserQueryRepository,
     private readonly userRepository: UserRepository,
     private readonly authRepository: AuthRepository,
@@ -57,30 +60,42 @@ export class AuthService {
   async validateUser(dto: LoginUserDto) {
     const { loginOrEmail, password } = dto;
 
-    const user = await this.userQueryRepository.findUserByFields({
-      login: loginOrEmail,
-      email: loginOrEmail,
-    });
+    const user =
+      await this.userQueryRepository.findUserByLoginOrEmail(loginOrEmail);
 
-    if (!user) return null;
+    if (!user) {
+      throw new BadRequestException('Invalid Login Or Password !');
+    }
 
     const isMatch = await this.userService.compareHash(password, user.password);
+
     if (isMatch) return user;
     return null;
   }
 
   async login(
-    userId: string,
+    sessionInfo: SessionInfoDto,
   ): Promise<{ accessToken: string; refreshToken: string }> {
+    const createdSession =
+      await this.securityDevicesService.saveSession(sessionInfo);
+
     const { accessToken, refreshToken } =
-      await this.authJwtTokenService.generateTokenPair(userId);
+      await this.authJwtTokenService.generateTokenPair(
+        sessionInfo.userId,
+        createdSession.id,
+      );
+
+    await this.securityDevicesRepository.updateSession(
+      createdSession.id,
+      refreshToken,
+    );
 
     return { accessToken, refreshToken };
   }
 
   async refreshToken(
     userId: string,
-    deviceId: string,
+    sessionId: string,
     currentRefreshToken: string,
   ) {
     const user = await this.userQueryRepository.findUserById(userId);
@@ -92,8 +107,7 @@ export class AuthService {
 
     const isValidToken: boolean =
       await this.securityDevicesRepository.validateRefreshToken(
-        userId,
-        deviceId,
+        sessionId,
         currentRefreshToken,
       );
 
@@ -102,41 +116,29 @@ export class AuthService {
     }
 
     const { accessToken, refreshToken } =
-      await this.authJwtTokenService.generateTokenPair(userId, deviceId);
+      await this.authJwtTokenService.generateTokenPair(userId, sessionId);
 
-    await this.securityDevicesRepository.updateSession(
-      userId,
-      refreshToken,
-      deviceId,
-    );
+    await this.securityDevicesRepository.updateSession(sessionId, refreshToken);
 
     return { accessToken, refreshToken };
   }
 
-  async logoutFromDevice(
-    userId: string,
-    deviceId: string,
-    refreshToken: string,
-  ) {
+  async logoutFromDevice(sessionId: string, currentRefreshToken: string) {
     const isValidToken: boolean =
       await this.securityDevicesRepository.validateRefreshToken(
-        userId,
-        deviceId,
-        refreshToken,
+        sessionId,
+        currentRefreshToken,
       );
 
     if (!isValidToken) {
       throw new UnauthorizedException('Token not valid to logout');
     }
 
-    return await this.securityDevicesRepository.logoutFromDevice(
-      userId,
-      deviceId,
-    );
+    return await this.securityDevicesRepository.logoutFromDevice(sessionId);
   }
 
   async sendRecoveryCode(email: string): Promise<boolean> {
-    const user = await this.userQueryRepository.findUserByFields({ email });
+    const user = await this.userQueryRepository.findUserByEmail(email);
     if (!user) {
       throw new NotFoundException('User with email does not exist');
     }
@@ -227,26 +229,4 @@ export class AuthService {
   /*
    *  Ip restriction version
    */
-  // async login(
-  //   userId: string,
-  //   deviceInfo: { ip: string; title: string },
-  // ): Promise<{ accessToken: string; refreshToken: string }> {
-  //   const createdSession = await this.securityDevicesRepository.saveSession(
-  //     userId,
-  //     deviceInfo,
-  //   );
-  //
-  //   const deviceId = createdSession[0].id;
-  //
-  //   const { accessToken, refreshToken } =
-  //     await this.authJwtTokenService.generateTokenPair(userId, deviceId);
-  //
-  //   await this.securityDevicesRepository.updateSession(
-  //     userId,
-  //     refreshToken,
-  //     deviceId,
-  //   );
-  //
-  //   return { accessToken, refreshToken };
-  // }
 }

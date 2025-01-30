@@ -70,7 +70,16 @@ export class AuthController {
   ): Promise<{ accessToken: string }> {
     const { userId } = req.user;
 
-    const { accessToken, refreshToken } = await this.authService.login(userId);
+    const userAgent = req.headers['user-agent'];
+
+    const sessionInfo = {
+      ip,
+      title: userAgent,
+      userId,
+    };
+
+    const { accessToken, refreshToken } =
+      await this.authService.login(sessionInfo);
 
     res.cookie(cookieConfig.refreshToken.name, refreshToken, {
       ...cookieConfig.refreshToken.options,
@@ -86,12 +95,12 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { userId, deviceId } = req.user;
+    const { userId, sessionId } = req.user;
     const currentRefreshToken = req.cookies.refreshToken;
 
     const { refreshToken, accessToken } = await this.authService.refreshToken(
       userId,
-      deviceId,
+      sessionId,
       currentRefreshToken,
     );
 
@@ -106,14 +115,9 @@ export class AuthController {
   @Post('logout')
   @UseGuards(JwtRefreshAuthGuard)
   async logout(@Req() req: Request, @Res() res: Response) {
-    const userId = req.user.userId;
-    const deviceId = req.user.deviceId;
+    const sessionId = req.user.sessionId;
     const currentRefreshToken = req.cookies.refreshToken;
-    await this.authService.logoutFromDevice(
-      userId,
-      deviceId,
-      currentRefreshToken,
-    );
+    await this.authService.logoutFromDevice(sessionId, currentRefreshToken);
     res.clearCookie(cookieConfig.refreshToken.name);
     res.status(HttpStatus.NO_CONTENT).send();
   }
@@ -157,46 +161,18 @@ export class AuthController {
    */
 
   // @HttpCode(HttpStatus.OK)
-  // @Post('login')
-  // @UseGuards(PassportLocalGuard)
-  // async login(
-  //   @Req() req: Request,
-  //   @Res({ passthrough: true }) res: Response,
-  //   @Ip() ip: string,
-  // ): Promise<{ accessToken: string }> {
-  //   const { userId } = req.user;
-  //
-  //   const userAgent = req.headers['user-agent'];
-  //
-  //   const deviceInfo = {
-  //     ip,
-  //     title: userAgent,
-  //   };
-  //
-  //   const { accessToken, refreshToken } = await this.authService.login(
-  //     userId,
-  //     deviceInfo,
-  //   );
-  //
-  //   res.cookie(cookieConfig.refreshToken.name, refreshToken, {
-  //     ...cookieConfig.refreshToken.options,
-  //   });
-  //
-  //   return { accessToken };
-  // }
-  // @HttpCode(HttpStatus.OK)
   // @Post('refresh-token')
   // @UseGuards(JwtRefreshAuthGuard)
   // async refreshToken(
   //   @Req() req: Request,
   //   @Res({ passthrough: true }) res: Response,
   // ) {
-  //   const { userId, deviceId } = req.user;
+  //   const { userId, sessionId } = req.user;
   //   const currentRefreshToken = req.cookies.refreshToken;
   //
   //   const { refreshToken, accessToken } = await this.authService.refreshToken(
   //     userId,
-  //     deviceId,
+  //     sessionId,
   //     currentRefreshToken,
   //   );
   //

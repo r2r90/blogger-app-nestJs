@@ -15,8 +15,7 @@ import { AuthJwtTokenService } from './auth-jwt-token.service';
 import { TokenRepository } from './repositories/token.repository';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh-strategy';
 import { JwtAccessStrategy } from './strategies/jwt-access-strategy';
-import { SessionDataRepository } from './repositories/session-data.repository';
-import { SecurityDevicesRepository } from '../security-devices/security-devices.repository';
+import { SecurityDevicesModule } from '../security-devices/security-devices.module';
 
 @Module({
   controllers: [AuthController],
@@ -31,21 +30,14 @@ import { SecurityDevicesRepository } from '../security-devices/security-devices.
     JwtAccessStrategy,
     MailService,
     LocalStrategy,
-    SessionDataRepository,
-    SecurityDevicesRepository,
   ],
   imports: [
     PassportModule,
+    SecurityDevicesModule,
     UserModule,
     JwtModule.registerAsync(options()),
     CqrsModule,
   ],
   exports: [JwtModule],
 })
-export class AuthModule {
-  // configure(consumer: MiddlewareConsumer) {
-  //   consumer
-  //     .apply(SessionDataMiddlu eware)
-  //     .forRoutes('auth/login', 'auth/logout');
-  // }
-}
+export class AuthModule {}

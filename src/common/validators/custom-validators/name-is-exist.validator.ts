@@ -16,10 +16,8 @@ export class UserAlreadyExistConstraint
   constructor(private readonly usersQueryRepository: UserQueryRepository) {}
 
   async validate(value: any, args: ValidationArguments) {
-    const isUserExist = await this.usersQueryRepository.findUserByFields({
-      login: value,
-      email: value,
-    });
+    const isUserExist =
+      await this.usersQueryRepository.findUserByLoginOrEmail(value);
     return !isUserExist;
   }
 

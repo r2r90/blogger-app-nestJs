@@ -22,6 +22,7 @@ import { SecurityDevicesModule } from '../security-devices/security-devices.modu
 import { MongoDatabaseModule } from '../../db/db-mongo/mongo-database.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../user/entity/user.entity';
+import { Session } from '../security-devices/entity/session.entity';
 
 @Module({
   imports: [
@@ -52,7 +53,7 @@ import { User } from '../user/entity/user.entity';
       autoLoadEntities: true,
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Session]),
     MongoDatabaseModule,
     DatabaseModule,
     BlogModule,

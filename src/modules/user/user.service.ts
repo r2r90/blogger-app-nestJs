@@ -29,13 +29,6 @@ export class UserService {
     return user;
   }
 
-  async getUserByLoginOrEmail(emailOrLogin: string) {
-    return this.usersQueryRepository.findUserByFields({
-      login: emailOrLogin,
-      email: emailOrLogin,
-    });
-  }
-
   async deleteUser(userId: string) {
     const findUser = await this.getUserById(userId);
     if (!findUser)
