@@ -19,6 +19,6 @@ export class AppService {
 
   async deleteAllData() {
     await this.usersRepository.delete({});
-    await this.sessionRepository.clear();
+    await this.sessionRepository.delete({});
   }
 }

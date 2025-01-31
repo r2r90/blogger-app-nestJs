@@ -27,9 +27,8 @@ import { JwtAccessAuthGuard } from './guards/jwt-access-auth.guard';
 import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
 import { AuthJwtTokenService } from './auth-jwt-token.service';
 import { cookieConfig } from './config/cookie-config';
-import { SkipThrottle } from '@nestjs/throttler';
+import { Throttle } from '@nestjs/throttler';
 
-@SkipThrottle()
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -39,6 +38,7 @@ export class AuthController {
     private readonly commandBus: CommandBus,
   ) {}
 
+  @Throttle({ default: { limit: 5, ttl: 10000 } })
   @Post('registration')
   @HttpCode(204)
   async register(@Body() dto: RegisterUserDto) {
@@ -54,12 +54,14 @@ export class AuthController {
     return user;
   }
 
+  @Throttle({ default: { limit: 5, ttl: 10000 } })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('registration-confirmation')
   async confirmRegisterCode(@Body() code: ConfirmCodeDto) {
     return await this.authService.confirmCode(code);
   }
 
+  @Throttle({ default: { limit: 5, ttl: 10000 } })
   @HttpCode(HttpStatus.OK)
   @Post('login')
   @UseGuards(PassportLocalGuard)
@@ -69,22 +71,17 @@ export class AuthController {
     @Ip() ip: string,
   ): Promise<{ accessToken: string }> {
     const { userId } = req.user;
-
     const userAgent = req.headers['user-agent'];
-
     const sessionInfo = {
       ip,
       title: userAgent,
       userId,
     };
-
     const { accessToken, refreshToken } =
       await this.authService.login(sessionInfo);
-
     res.cookie(cookieConfig.refreshToken.name, refreshToken, {
       ...cookieConfig.refreshToken.options,
     });
-
     return { accessToken };
   }
 
@@ -95,12 +92,12 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { userId, sessionId } = req.user;
+    const { userId, deviceId } = req.user;
     const currentRefreshToken = req.cookies.refreshToken;
 
     const { refreshToken, accessToken } = await this.authService.refreshToken(
       userId,
-      sessionId,
+      deviceId,
       currentRefreshToken,
     );
 
@@ -115,7 +112,7 @@ export class AuthController {
   @Post('logout')
   @UseGuards(JwtRefreshAuthGuard)
   async logout(@Req() req: Request, @Res() res: Response) {
-    const sessionId = req.user.sessionId;
+    const sessionId = req.user.deviceId;
     const currentRefreshToken = req.cookies.refreshToken;
     await this.authService.logoutFromDevice(sessionId, currentRefreshToken);
     res.clearCookie(cookieConfig.refreshToken.name);
@@ -140,6 +137,7 @@ export class AuthController {
     await this.authService.sendRecoveryCode(user.email);
   }
 
+  @Throttle({ default: { limit: 5, ttl: 10000 } })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('registration-email-resending')
   async registerEmailResend(@Body() email: EmailValidationDto) {
@@ -167,12 +165,12 @@ export class AuthController {
   //   @Req() req: Request,
   //   @Res({ passthrough: true }) res: Response,
   // ) {
-  //   const { userId, sessionId } = req.user;
+  //   const { userId, deviceId } = req.user;
   //   const currentRefreshToken = req.cookies.refreshToken;
   //
   //   const { refreshToken, accessToken } = await this.authService.refreshToken(
   //     userId,
-  //     sessionId,
+  //     deviceId,
   //     currentRefreshToken,
   //   );
   //

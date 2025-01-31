@@ -25,7 +25,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
     const randomConfirmationCode = uuidv4();
 
     if (!command.isAdmin) {
-      await this.mailService.sendRegistrationConfirmationCode(
+      this.mailService.sendRegistrationConfirmationCode(
         command.email,
         randomConfirmationCode,
       );

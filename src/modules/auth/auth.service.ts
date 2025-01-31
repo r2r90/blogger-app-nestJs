@@ -64,7 +64,7 @@ export class AuthService {
       await this.userQueryRepository.findUserByLoginOrEmail(loginOrEmail);
 
     if (!user) {
-      throw new BadRequestException('Invalid Login Or Password !');
+      throw new UnauthorizedException('Invalid Login Or Password !');
     }
 
     const isMatch = await this.userService.compareHash(password, user.password);

@@ -1,9 +1,9 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { SessionData } from '../../db/db-mongo/schemas';
 import { Model } from 'mongoose';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Not, Repository } from 'typeorm';
 import { SessionInfoDto } from './dto /session-info.dto';
 import { Session } from './entity/session.entity';
 
@@ -34,22 +34,11 @@ export class SecurityDevicesRepository {
   }
 
   async getAllActiveDevices(userId: string) {
-    const query = `SELECT *
-                   FROM sessions
-                   WHERE user_id = $1`;
-    const sessions = await this.db.query(query, [userId]);
-    return sessions;
+    return await this.sessionRepository.find({ where: { user_id: userId } });
   }
 
   async getDeviceById(deviceId: string) {
-    const query = `
-        SELECT *
-        FROM sessions
-        WHERE session_id = $1;
-    `;
-
-    const device = await this.db.query(query, [deviceId]);
-    return device[0];
+    return await this.sessionRepository.findOneBy({ id: deviceId });
   }
 
   async findByUserAndDevice(userId: string, deviceId: string) {
@@ -63,18 +52,12 @@ export class SecurityDevicesRepository {
     return res[0];
   }
 
-  async deleteAllDevicesByUserId(
-    userId: string,
-    deviceId: string,
-  ): Promise<boolean> {
-    const query = `DELETE
-                   FROM sessions
-                   WHERE user_id = $1
-                     AND session_id != $2`;
-
-    const res = await this.db.query(query, [userId, deviceId]);
-
-    return res.deletedCount > 0;
+  async deleteAllDevicesByUserId(userId: string, deviceId: string) {
+    return await this.sessionRepository
+      .delete({ user_id: userId, id: Not(deviceId) })
+      .catch((err) => {
+        throw new BadRequestException(err);
+      });
   }
 
   async isLoggedDevice(
@@ -104,13 +87,8 @@ export class SecurityDevicesRepository {
     }
   }
 
-  async deleteSession(deviceId: string, userId: string) {
-    const query = `DELETE
-                   FROM sessions
-                   WHERE session_id = $1
-                     AND user_id = $2`;
-
-    return await this.db.query(query, [deviceId, userId]);
+  async deleteSession(deviceId: string) {
+    return await this.sessionRepository.delete({ id: deviceId });
   }
 
   async validateRefreshToken(

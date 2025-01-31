@@ -37,8 +37,8 @@ import { Session } from '../security-devices/entity/session.entity';
     }),
     ThrottlerModule.forRoot([
       {
-        ttl: 20000,
-        limit: 6,
+        ttl: 9000,
+        limit: 5,
       },
     ]),
 
