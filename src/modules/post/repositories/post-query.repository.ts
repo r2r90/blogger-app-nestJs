@@ -291,7 +291,7 @@ export class PostQueryRepository {
       throw new NotFoundException(`Post with id ${postId} not found`);
     }
 
-    const blog = await this.blogQueryRepository.findOne(post.blog_id);
+    const blog = await this.blogQueryRepository.findOneBlog(post.blog_id);
 
     const postWithBlogName: PostWithBlogName = {
       ...post,

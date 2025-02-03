@@ -1,3 +1,4 @@
+import { Blog } from 'src/modules/blog/entity/blog.entity';
 import {
   Column,
   CreateDateColumn,
@@ -36,7 +37,7 @@ export class User {
   password: string;
 
   @CreateDateColumn({
-    type: 'timestamp',
+    type: 'timestamp with time zone',
     default: () => 'CURRENT_TIMESTAMP(6)',
   })
   created_at: Date;
@@ -64,4 +65,10 @@ export class User {
 
   @Column({ type: 'timestamptz', nullable: true })
   expiration_date: Date;
+
+  @OneToMany(() => Blog, (blog) => blog.user, { onDelete: 'CASCADE' })
+  blogs: Blog[];
+
+  @OneToMany(() => Session, (session) => session.user, { onDelete: 'CASCADE' })
+  sessions: Session[];
 }

@@ -19,7 +19,7 @@ export class CreateCommentHandler
   async execute(command: CreateCommentCommand) {
     const { userId, postId, content } = command;
     const post = await this.postQueryRepository.getPostById(postId);
-    if (!post) throw new BadRequestException("Post doesn't exist");
+    if (!post) throw new BadRequestException("PostInterface doesn't exist");
     const user: User = await this.userQueryRepository.findUserById(userId);
     if (!user) throw new BadRequestException('User not found');
     return await this.commentRepository.createComment({

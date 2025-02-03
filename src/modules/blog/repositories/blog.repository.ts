@@ -1,23 +1,23 @@
 import {
-  BadRequestException,
-  HttpException,
-  HttpStatus,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateBlogDto } from '../dto/create-blog.dto';
 import { BlogQueryRepository } from './blog.query.repository';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { Blog } from '../../../db/db-mongo/schemas';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { CreatePostDataType } from '../../post/dto/create.post.dto';
 import { BlogOutputType } from '../types';
+import { Blog } from '../entity/blog.entity';
 
 @Injectable()
 export class BlogRepository {
   constructor(
+    @InjectRepository(Blog)
+    private readonly blogsRepository: Repository<Blog>,
     @InjectDataSource() protected readonly db: DataSource,
     private readonly blogQueryRepository: BlogQueryRepository,
   ) {}
@@ -25,95 +25,47 @@ export class BlogRepository {
   @InjectModel(Blog.name) private blogModel: Model<Blog>;
 
   async create(data: CreateBlogDto): Promise<BlogOutputType> {
-    const createdAt = new Date().toISOString();
-    const query = `
-        INSERT INTO blogs (name, description, website_url, created_at)
-        VALUES ($1, $2, $3, $4)
-        RETURNING *;
-    `;
+    const blog = this.blogsRepository.create({
+      name: data.name,
+      description: data.description,
+      website_url: data.websiteUrl,
+    });
+    await this.blogsRepository.save(blog).catch((err) => {
+      throw new InternalServerErrorException('Cannot create blog', err);
+    });
 
-    const values = [data.name, data.description, data.websiteUrl, createdAt];
-
-    try {
-      const res = await this.db.query(query, values);
-      if (!res || res.length === 0) {
-        new HttpException(
-          'Blog creation failed: no data returned from the database',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
-      const blog = res[0];
-
-      return {
-        id: blog.blog_id,
-        name: blog.name,
-        description: blog.description,
-        websiteUrl: blog.website_url,
-        createdAt: blog.created_at,
-        isMembership: blog.is_membership,
-      };
-    } catch (e) {
-      throw new BadRequestException(e);
-    }
+    return {
+      id: blog.id,
+      name: blog.name,
+      description: blog.description,
+      websiteUrl: blog.website_url,
+      createdAt: blog.created_at,
+      isMembership: blog.is_membership,
+    };
   }
 
   async updateBlog(id: string, updateBlogDto: CreateBlogDto): Promise<any> {
-    const { name, description, websiteUrl } = updateBlogDto;
-    const isBlogExist = await this.blogQueryRepository.findOne(id);
+    const isBlogExist = await this.blogQueryRepository.findOneBlog(id);
     if (!isBlogExist)
       throw new NotFoundException(
         "Can't updateBlog the Blog - Blog does not exist",
       );
-    const fields: string[] = [];
-    const values: any[] = [];
-    let index = 1;
 
-    if (name) {
-      fields.push(`name = $${index++}`);
-      values.push(name);
-    }
-    if (description) {
-      fields.push(`description = $${index++}`);
-      values.push(description);
-    }
-    if (websiteUrl) {
-      fields.push(`website_url = $${index++}`);
-      values.push(websiteUrl);
-    }
+    const updateBlog = await this.blogsRepository
+      .update(id, {
+        name: updateBlogDto.name,
+        description: updateBlogDto.description,
+        website_url: updateBlogDto.websiteUrl,
+      })
+      .catch((err) => {
+        throw new InternalServerErrorException(err);
+      });
 
-    // Если нет полей для обновления
-    if (fields.length === 0) {
-      throw new BadRequestException('No fields to updateBlog');
-    }
-
-    // Добавляем id в список параметров
-    values.push(id);
-
-    const query = `
-        UPDATE blogs
-        SET ${fields.join(', ')}
-        WHERE blog_id = $${index}`;
-
-    try {
-      const res = await this.db.query(query, values);
-      return res.rows;
-    } catch (e) {
-      throw new BadRequestException(e);
-    }
+    return !!updateBlog;
   }
 
   async removeBlog(id: string): Promise<any> {
-    const blogToDelete = await this.blogQueryRepository.findOne(id);
-    if (!blogToDelete) throw new NotFoundException('Cannot delete blog id');
-    const query = `
-        DELETE
-        FROM blogs
-        WHERE blog_id = $1
-    `;
-    const res = await this.db.query(query, [id]);
-
-    if (!res.rows) return null;
-    return res;
+    return await this.blogsRepository.delete(id);
   }
 
   async createPost(createPostData: CreatePostDataType) {
@@ -149,7 +101,7 @@ export class BlogRepository {
     const data = await this.db.query(postOutputQuery, [createdPost[0].post_id]);
     const post = data[0];
 
-    const blog = await this.blogQueryRepository.findOne(post.blog_id);
+    const blog = await this.blogQueryRepository.findOneBlog(post.blog_id);
 
     return {
       id: post.post_id,

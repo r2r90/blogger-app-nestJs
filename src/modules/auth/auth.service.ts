@@ -11,13 +11,11 @@ import { JwtService } from '@nestjs/jwt';
 import { add } from 'date-fns';
 import { MailService } from '../mail/mail.service';
 import { UserQueryRepository } from '../user/repositories/user.query.repository';
-import { AuthRepository } from './repositories/auth.repository';
 import { v4 as uuidv4 } from 'uuid';
 import { UserRepository } from '../user/repositories/user.repository';
 import { UserService } from '../user/user.service';
 import { AuthJwtTokenService } from './auth-jwt-token.service';
 import { SecurityDevicesRepository } from '../security-devices/security-devices.repository';
-import { TokenRepository } from './repositories/token.repository';
 import { SessionData } from '../../db/db-mongo/schemas';
 import { User } from '../user/entity/user.entity';
 import { SecurityDevicesService } from '../security-devices/security-devices.service';
@@ -32,10 +30,8 @@ export class AuthService {
     private readonly securityDevicesService: SecurityDevicesService,
     private readonly userQueryRepository: UserQueryRepository,
     private readonly userRepository: UserRepository,
-    private readonly authRepository: AuthRepository,
     private readonly authJwtTokenService: AuthJwtTokenService,
     private readonly securityDevicesRepository: SecurityDevicesRepository,
-    private readonly tokenRepository: TokenRepository,
   ) {}
 
   async confirmCode(confirmCodeDto: ConfirmCodeDto) {

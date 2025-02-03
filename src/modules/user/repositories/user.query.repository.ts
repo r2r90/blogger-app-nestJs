@@ -56,7 +56,7 @@ export class UserQueryRepository {
       pagesCount: Math.ceil(totalCount / pageSize),
       page: pageNumber,
       pageSize,
-      items: items.map((user) => userMapper(user)),
+      items: items.map((user: User) => userMapper(user)),
     };
   }
 

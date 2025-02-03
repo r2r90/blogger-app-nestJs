@@ -8,6 +8,7 @@ import { Injectable } from '@nestjs/common';
 @CommandHandler(CreateBlogCommand)
 export class CreateBlogHandler implements ICommandHandler<CreateBlogCommand> {
   constructor(private readonly blogRepository: BlogRepository) {}
+
   async execute(command: CreateBlogCommand): Promise<BlogOutputType> {
     const { name, description, websiteUrl } = command;
 

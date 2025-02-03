@@ -159,7 +159,7 @@ export class AuthController {
    */
 
   // @HttpCode(HttpStatus.OK)
-  // @Post('refresh-token')
+  // @PostInterface('refresh-token')
   // @UseGuards(JwtRefreshAuthGuard)
   // async refreshToken(
   //   @Req() req: Request,

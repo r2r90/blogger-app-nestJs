@@ -34,11 +34,14 @@ export class UserRepository {
       expiration_date: data.emailConfirmation.expirationDate,
       confirmation_code: data.emailConfirmation.confirmationCode,
     });
-    const savedUser = await this.usersRepository.save(user);
+
+    await this.usersRepository.save(user).catch((err) => {
+      throw new InternalServerErrorException(err.message);
+    });
 
     return {
       id: user.id,
-      login: savedUser.login,
+      login: user.login,
       email: user.email,
       createdAt: user.created_at,
     };

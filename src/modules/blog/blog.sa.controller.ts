@@ -24,6 +24,7 @@ import { UserDecorator } from '../../common/decorators/user.decorator';
 import { PostService } from '../post/post.service';
 import { CreateBlogDto, UpdateBlogDto } from './dto';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { GetBlogsDto } from './dto/get-blogs.dto';
 
 @SkipThrottle()
 @UseGuards(AuthGuard('basic'))
@@ -82,7 +83,7 @@ export class SuperAdminBlogController {
     required: false,
     description: 'pageSize is quantity size per page that should be returned',
   })
-  getAll(@Query(PaginationQueryPipe) query: PaginationInputType) {
+  getAll(@Query() query: GetBlogsDto) {
     return this.blogService.getAllBlogs(query);
   }
 

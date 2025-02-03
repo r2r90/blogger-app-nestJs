@@ -23,6 +23,9 @@ import { MongoDatabaseModule } from '../../db/db-mongo/mongo-database.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../user/entity/user.entity';
 import { Session } from '../security-devices/entity/session.entity';
+import { Blog } from '../blog/entity/blog.entity';
+import { Post } from '../post/entity/post.entity';
+import { PostLike } from '../post/entity/post-likes.entity';
 
 @Module({
   imports: [
@@ -53,12 +56,12 @@ import { Session } from '../security-devices/entity/session.entity';
       autoLoadEntities: true,
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([User, Session]),
+    TypeOrmModule.forFeature([User, Session, Blog, Post, PostLike]),
+    UserModule,
     MongoDatabaseModule,
     DatabaseModule,
     BlogModule,
     PostModule,
-    UserModule,
     AuthModule,
     CommentModule,
     SecurityDevicesModule,

@@ -16,6 +16,7 @@ import { SkipThrottle } from '@nestjs/throttler';
 import { BlogService } from './blog.service';
 import { UserDecorator } from '../../common/decorators/user.decorator';
 import { JwtGuard } from '../auth/guards/jwt-guard';
+import { GetBlogsDto } from './dto/get-blogs.dto';
 
 @SkipThrottle()
 @Controller('/blogs')
@@ -26,7 +27,7 @@ export class BlogController {
   ) {}
 
   @Get()
-  getAll(@Query(PaginationQueryPipe) query: PaginationInputType) {
+  getAll(@Query() query: GetBlogsDto) {
     return this.blogService.getAllBlogs(query);
   }
 

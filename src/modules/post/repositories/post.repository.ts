@@ -5,15 +5,17 @@ import { CreatePostDto } from '../dto/create.post.dto';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { PostQueryRepository } from './post-query.repository';
 import { LikePostStatusInputDataType } from '../dto/like-status.dto';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { CreatePostFromBlogDto } from '../dto/create.post.from.blog.dto';
-import { PostLike } from '../entity/post-likes.entity';
+import { IPostLike } from '../entity/post-likes.entity';
 
 export class PostRepository {
   constructor(
     @InjectDataSource() protected readonly db: DataSource,
     @InjectModel(Post.name) private readonly postModel: Model<Post>,
+    @InjectRepository(Post)
+    protected readonly postsRepository: Repository<Post>,
     private readonly postQueryRepository: PostQueryRepository,
   ) {}
 
@@ -57,7 +59,7 @@ export class PostRepository {
     }
 
     if (fields.length === 0) {
-      throw new BadRequestException('No fields to update Post');
+      throw new BadRequestException('No fields to update PostInterface');
     }
 
     values.push(postId);
@@ -98,7 +100,7 @@ export class PostRepository {
     `;
     const { userId, postId, likeStatus } = data;
 
-    const isAlreadyLiked: PostLike =
+    const isAlreadyLiked: IPostLike =
       await this.postQueryRepository.userAlreadyLikedPost(postId, userId);
 
     const createdAt = new Date().toISOString();

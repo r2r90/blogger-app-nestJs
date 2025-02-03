@@ -13,7 +13,7 @@ export class CreatePostHandler implements ICommandHandler<CreatePostCommand> {
 
   async execute(command: CreatePostCommand) {
     const { title, shortDescription, content, blogId } = command;
-    const blog = await this.blogQueryRepository.findOne(blogId);
+    const blog = await this.blogQueryRepository.findOneBlog(blogId);
     if (!blog) throw new NotFoundException("Blog doesn't exist");
     return await this.blogRepository.createPost({
       title,

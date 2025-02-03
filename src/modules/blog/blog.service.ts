@@ -9,6 +9,7 @@ import {
 import { PostQueryRepository } from '../post/repositories/post-query.repository';
 import { CreatePostFromBlogDto } from '../post/dto/create.post.from.blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
+import { GetBlogsDto } from './dto/get-blogs.dto';
 
 @Injectable()
 export class BlogService {
@@ -19,13 +20,13 @@ export class BlogService {
   ) {}
 
   async getAllBlogs(
-    query: PaginationInputType,
+    query: GetBlogsDto,
   ): Promise<PaginationType<BlogOutputType>> {
     return this.blogQueryRepository.getAll(query);
   }
 
   async findBlogById(id: string): Promise<BlogOutputType> {
-    const blog = await this.blogQueryRepository.findOne(id);
+    const blog = await this.blogQueryRepository.findOneBlog(id);
     if (!blog) {
       throw new NotFoundException(`Blog with id -  ${id} not found`);
     }
@@ -33,6 +34,10 @@ export class BlogService {
   }
 
   async removeBlog(id: string) {
+    const blog = await this.findBlogById(id);
+    if (!blog) {
+      throw new NotFoundException(`Blog with id ${id} not found`);
+    }
     return this.blogRepository.removeBlog(id);
   }
 
@@ -53,7 +58,7 @@ export class BlogService {
     blogId: string,
     userId?: string,
   ) {
-    const blog = await this.blogQueryRepository.findOne(blogId);
+    const blog = await this.blogQueryRepository.findOneBlog(blogId);
     if (!blog)
       throw new NotFoundException(`Blog with id -  ${blogId} not found`);
     return await this.postQueryRepository.getPostsByBlogId(
