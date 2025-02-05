@@ -34,7 +34,9 @@ export class SecurityDevicesRepository {
   }
 
   async getAllActiveDevices(userId: string) {
-    return await this.sessionRepository.find({ where: { user_id: userId } });
+    return await this.sessionRepository.find({
+      where: { user_id: userId },
+    });
   }
 
   async getDeviceById(deviceId: string) {

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
   PaginationInputType,
   PaginationType,
@@ -8,19 +8,24 @@ import {
   CommentMapper,
   CommentOutputType,
 } from '../../comment/mapper/comment.mapper';
-import { LikeStatus } from '../../../db/db-mongo/schemas';
-import { PostWithBlogName } from '../entity/post.entity';
+import { Post } from '../entity/post.entity';
 import { CommentRepository } from '../../comment/repositories/comment.repository';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, ILike, Repository } from 'typeorm';
 import { BlogQueryRepository } from '../../blog/repositories/blog.query.repository';
 import { CommentQueryRepository } from '../../comment/repositories/comment.query.repository';
 import { Comment } from '../../comment/entity/comment.entity';
 import { UserService } from '../../user/user.service';
+import { GetPostsByBlogIdDto } from '../dto/get-posts-by-blog-id.dto';
+import { LikeStatus } from '../../../db/db-mongo/schemas';
+
+class PostWithBlogName {}
 
 @Injectable()
 export class PostQueryRepository {
   constructor(
+    @InjectRepository(Post)
+    private readonly postsRepository: Repository<Post>,
     private readonly blogQueryRepository: BlogQueryRepository,
     private readonly userService: UserService,
     private readonly postMapper: PostMapper,
@@ -108,82 +113,39 @@ export class PostQueryRepository {
   }
 
   async getPostsByBlogId(
-    query: PaginationInputType,
-    blogId: string,
+    query: GetPostsByBlogIdDto,
     userId: string,
   ): Promise<PaginationType<PostOutputType>> {
     const { pageNumber = 1, pageSize = 10, sortDirection, sortBy } = query;
 
-    const offset = (pageNumber - 1) * pageSize;
+    const validSortFields = ['created_at', 'blogId'];
+    const sortByField = validSortFields.includes(sortBy)
+      ? sortBy
+      : 'created_at';
 
-    const orderByColumn = sortBy === 'blogName' ? 'b.name' : `p.${sortBy}`;
+    const whereConditions: any = [];
 
-    const queryResult = await this.db.query(
-      `
-          WITH found_posts AS (SELECT p.post_id                                                                    AS "id",
-                                      b.name                                                                  AS "blogName",
-                                      p.blog_id                                                               AS "blogId",
-                                      p.content                                                               AS "content",
-                                      to_char(p.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MSZ') AS "createdAt",
-                                      p.short_description                                                     AS "shortDescription",
-                                      p.title                                                                 AS "title"
-                               FROM posts p
-                                        INNER JOIN blogs b ON b.blog_id = p.blog_id
-                               WHERE p.blog_id = $2
-                               ORDER BY ${orderByColumn} ${sortDirection}),
-               paginated_found_posts AS (SELECT *
-                                         FROM found_posts fp
-                                         LIMIT ${pageSize} OFFSET ${offset})
-          SELECT (SELECT COUNT(*)::INTEGER FROM found_posts) AS "totalCount",
-                 json_agg(fpm)                               AS items
-          FROM (SELECT fp.*,
-                       json_build_object(
-                               'likesCount', (SELECT COUNT(*)
-                                              FROM post_likes pl
-                                              WHERE pl.like_status = 'Like'
-                                                AND fp.id = pl.post_id),
-                               'dislikesCount', (SELECT COUNT(*)
-                                                 FROM post_likes pl
-                                                 WHERE pl.like_status = 'Dislike'
-                                                   AND fp.id = pl.post_id),
-                               'myStatus', CASE
-                                               WHEN $1::uuid IS NOT NULL THEN COALESCE(
-                                                       (SELECT pl.like_status
-                                                        FROM post_likes pl
-                                                        WHERE pl.user_id = $1::uuid
-                                                          AND fp.id = pl.post_id),
-                                                       'None'
-                                                                              )
-                                               ELSE 'None'
-                                   END,
-                               'newestLikes', (SELECT COALESCE(json_agg(nl), '[]'::json)
-                                               FROM (SELECT to_char(pl.created_at AT TIME ZONE 'UTC',
-                                                                    'YYYY-MM-DD"T"HH24:MI:SS.MSZ') AS "addedAt",
-                                                            u.login                                AS "login",
-                                                            u.user_id                                   AS "userId"
-                                                     FROM post_likes pl
-                                                              INNER JOIN users u ON pl.user_id = u.user_id
-                                                     WHERE pl.post_id = fp.id
-                                                       AND pl.like_status = 'Like'
-                                                     ORDER BY pl.created_at DESC
-                                                     LIMIT 3 OFFSET 0) AS nl)
-                       ) AS "extendedLikesInfo"
-                FROM paginated_found_posts fp) AS fpm;
+    if (query.blogId) {
+      whereConditions.push({ blog_id: ILike(`%${query.blogId}%`) });
+    }
 
-      `,
-      [userId, blogId],
-    );
-
-    const { totalCount, items } = queryResult[0];
-
-    const pagesCount = Math.ceil(totalCount / pageSize);
+    const [items, totalCount] = await this.postsRepository.findAndCount({
+      where: whereConditions.push({ blog_id: query.blogId }),
+      order: {
+        [sortByField]: sortDirection.toUpperCase() === 'ASC' ? 'ASC' : 'DESC',
+      },
+      skip: (pageNumber - 1) * pageSize,
+      take: pageSize,
+    });
 
     return {
-      pagesCount,
+      totalCount,
+      pagesCount: Math.ceil(totalCount / pageSize),
       page: pageNumber,
       pageSize,
-      totalCount,
-      items,
+      items: await Promise.all(
+        items.map((post: Post) => this.postMapper.mapPost(post, userId)),
+      ),
     };
   }
 
@@ -263,41 +225,11 @@ export class PostQueryRepository {
   }
 
   async getPostById(postId: string, userId?: string) {
-    const findPostByIdQuery = `
-        SELECT posts.*,
-               blogs.name AS blog_name
-        FROM posts
-                 JOIN blogs ON posts.blog_id = blogs.blog_id
-        WHERE posts.post_id = $1;
-    `;
-
-    const likesQuery = `
-        SELECT pl.post_id,
-               pl.user_id,
-               pl.like_status,
-               pl.created_at,
-               u.login
-        FROM post_likes pl
-                 INNER JOIN users u
-                            ON pl.user_id = u.user_id
-        WHERE pl.post_id = $1;
-
-    `;
-
-    const findPost = await this.db.query(findPostByIdQuery, [postId]);
-    const likes = await this.db.query(likesQuery, [postId]);
-    const post = findPost[0];
+    const post = await this.postsRepository.findOneBy({ id: postId });
     if (!post) {
-      throw new NotFoundException(`Post with id ${postId} not found`);
+      return null;
     }
-
-    const blog = await this.blogQueryRepository.findOneBlog(post.blog_id);
-
-    const postWithBlogName: PostWithBlogName = {
-      ...post,
-      blog_name: blog.name,
-    };
-    return this.postMapper.mapPost(postWithBlogName, likes, userId);
+    return this.postMapper.mapPost(post, userId);
   }
 
   async likesCounter(postId: string, likeStatus: LikeStatus): Promise<number> {

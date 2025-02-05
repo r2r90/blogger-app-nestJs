@@ -18,6 +18,8 @@ import { UserModule } from '../user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Blog } from './entity/blog.entity';
 import { PostModule } from '../post/post.module';
+import { PostLike } from '../post/entity/post-likes.entity';
+import { Post } from '../post/entity/post.entity';
 
 export const CommandHandlers = [CreateBlogHandler, CreatePostHandler];
 
@@ -36,7 +38,7 @@ export const CommandHandlers = [CreateBlogHandler, CreatePostHandler];
   ],
   imports: [
     MongooseModule.forFeature(forFeatureDb),
-    TypeOrmModule.forFeature([Blog]),
+    TypeOrmModule.forFeature([Blog, PostLike, Post]),
     CqrsModule,
     UserModule,
     PostModule,

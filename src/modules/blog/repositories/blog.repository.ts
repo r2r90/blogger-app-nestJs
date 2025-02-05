@@ -1,4 +1,5 @@
 import {
+  HttpException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -21,8 +22,7 @@ export class BlogRepository {
     @InjectDataSource() protected readonly db: DataSource,
     private readonly blogQueryRepository: BlogQueryRepository,
   ) {}
-
-  @InjectModel(Blog.name) private blogModel: Model<Blog>;
+  // @InjectModel(Blog.name) private blogModel: Model<Blog>;
 
   async create(data: CreateBlogDto): Promise<BlogOutputType> {
     const blog = this.blogsRepository.create({
@@ -30,8 +30,9 @@ export class BlogRepository {
       description: data.description,
       website_url: data.websiteUrl,
     });
+
     await this.blogsRepository.save(blog).catch((err) => {
-      throw new InternalServerErrorException('Cannot create blog', err);
+      throw new HttpException('Cannot create blog', err);
     });
 
     return {

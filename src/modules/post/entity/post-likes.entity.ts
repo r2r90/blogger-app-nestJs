@@ -15,7 +15,7 @@ export interface IPostLike {
   post_id: string;
   user_id: string;
   like_status: string;
-  created_at: string;
+  created_at: Date;
 }
 
 @Entity('post-likes')
@@ -37,16 +37,17 @@ export class PostLike {
   })
   created_at: Date;
 
+  @Column('uuid')
+  post_id: string;
+
   @ManyToOne(() => Post, (post) => post.postLikes, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'post_id' })
   post: Post;
 
-  @Column('uuid')
-  post_id: string;
+  @Column({ type: 'uuid', nullable: false })
+  user_id: string;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
   user: User;
-
-  @Column('uuid')
-  user_id: string;
 }

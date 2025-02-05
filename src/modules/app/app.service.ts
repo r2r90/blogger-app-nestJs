@@ -4,6 +4,8 @@ import { User } from '../user/entity/user.entity';
 import { Repository } from 'typeorm';
 import { Session } from '../security-devices/entity/session.entity';
 import { Blog } from '../../db/db-mongo/schemas';
+import { Post } from '../post/entity/post.entity';
+import { PostLike } from '../post/entity/post-likes.entity';
 
 @Injectable()
 export class AppService {
@@ -14,6 +16,10 @@ export class AppService {
     protected readonly sessionRepository: Repository<Session>,
     @InjectRepository(Blog)
     protected readonly blogsDataRepository: Repository<Blog>,
+    @InjectRepository(Post)
+    protected readonly postRepository: Repository<Post>,
+    @InjectRepository(PostLike)
+    protected readonly postLikeRepository: Repository<PostLike>,
   ) {}
 
   getHello(): string {
@@ -24,5 +30,7 @@ export class AppService {
     await this.usersRepository.delete({});
     await this.sessionRepository.delete({});
     await this.blogsDataRepository.delete({});
+    await this.postRepository.delete({});
+    await this.postLikeRepository.delete({});
   }
 }

@@ -11,19 +11,6 @@ import {
 import { PostLike } from './post-likes.entity';
 import { Blog } from '../../blog/entity/blog.entity';
 
-export interface PostInterface {
-  post_id: string;
-  title: string;
-  short_description: string;
-  content: string;
-  blog_id: string;
-  created_at: string;
-}
-
-export interface PostWithBlogName extends PostInterface {
-  blog_name: string;
-}
-
 @Entity('posts')
 export class Post {
   @PrimaryGeneratedColumn('uuid')
@@ -44,13 +31,20 @@ export class Post {
   })
   created_at: Date;
 
-  @ManyToOne(() => Blog, (blog) => blog.posts)
-  @JoinColumn({ name: 'blog_id' })
-  blog: Blog;
-
   @Column('uuid')
   blog_id: string;
 
-  @OneToMany(() => PostLike, (postLike) => postLike.post)
+  @ManyToOne(() => Blog, (blog) => blog.posts, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'blog_id' })
+  blog: Blog;
+
+  @Column({ type: 'varchar', nullable: false })
+  blog_name: string;
+
+  @OneToMany(() => PostLike, (postLike) => postLike.post, {
+    onDelete: 'CASCADE',
+  })
   postLikes: PostLike[];
 }

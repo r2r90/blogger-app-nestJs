@@ -20,12 +20,12 @@ export class Session {
   @Column({ type: 'varchar', nullable: false })
   title: string;
 
-  @ManyToOne(() => User, (user) => user.sessions)
+  @Column({ type: 'uuid', nullable: false })
+  user_id: string;
+
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
-
-  @Column()
-  user_id: string;
 
   @Column({ type: 'varchar', nullable: true })
   refresh_token: string;

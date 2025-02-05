@@ -31,7 +31,7 @@ export class BlogQueryRepository {
     const whereConditions: any = [];
 
     if (searchNameTerm) {
-      whereConditions.push({ login: ILike(`%${searchNameTerm}%`) });
+      whereConditions.push({ name: ILike(`%${searchNameTerm}%`) });
     }
 
     const [items, totalCount] = await this.blogsRepository.findAndCount({

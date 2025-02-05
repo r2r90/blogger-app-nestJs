@@ -2,13 +2,10 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
-  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Post } from '../../post/entity/post.entity';
-import { User } from '../../user/entity/user.entity';
 
 @Entity('blogs')
 export class Blog {
@@ -47,13 +44,6 @@ export class Blog {
   })
   created_at: Date;
 
-  @OneToMany(() => Post, (post) => post.blog)
+  @OneToMany(() => Post, (post) => post.blog, { cascade: true })
   posts: Post[];
-
-  @ManyToOne(() => User, (user) => user.blogs)
-  @JoinColumn({ name: 'user_id' })
-  user: User;
-
-  @Column('uuid')
-  user_id: string;
 }

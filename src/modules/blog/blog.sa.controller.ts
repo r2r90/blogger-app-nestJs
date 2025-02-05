@@ -11,8 +11,6 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { PaginationQueryPipe } from '../../common/pipes/paginationQuery.pipe';
-import { PaginationInputType } from '../../common/pagination/pagination.types';
 import { CreatePostFromBlogDto } from '../post/dto/create.post.from.blog.dto';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreateBlogCommand } from './commands/impl/create-blog.command';
@@ -25,6 +23,7 @@ import { PostService } from '../post/post.service';
 import { CreateBlogDto, UpdateBlogDto } from './dto';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GetBlogsDto } from './dto/get-blogs.dto';
+import { GetPostsDto } from '../post/dto/get-posts.dto';
 
 @SkipThrottle()
 @UseGuards(AuthGuard('basic'))
@@ -185,9 +184,9 @@ export class SuperAdminBlogController {
   async getPostsByBlogId(
     @UserDecorator('id') userId: string,
     @Param('blogId') blogId: string,
-    @Query(PaginationQueryPipe) query: PaginationInputType,
+    @Query() query: GetPostsDto,
   ) {
-    return this.blogService.getPostsByBlogId(query, blogId, userId);
+    return this.blogService.getPostsByBlogId({ ...query, blogId }, userId);
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)

@@ -1,4 +1,3 @@
-import { Blog } from 'src/modules/blog/entity/blog.entity';
 import {
   Column,
   CreateDateColumn,
@@ -7,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Session } from '../../security-devices/entity/session.entity';
+import { PostLike } from '../../post/entity/post-likes.entity';
 
 @Entity('users')
 export class User {
@@ -66,9 +66,11 @@ export class User {
   @Column({ type: 'timestamptz', nullable: true })
   expiration_date: Date;
 
-  @OneToMany(() => Blog, (blog) => blog.user, { onDelete: 'CASCADE' })
-  blogs: Blog[];
-
   @OneToMany(() => Session, (session) => session.user, { onDelete: 'CASCADE' })
   sessions: Session[];
+
+  @OneToMany(() => PostLike, (postLike) => postLike.user, {
+    onDelete: 'CASCADE',
+  })
+  postLikes: PostLike[];
 }

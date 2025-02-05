@@ -1,30 +1,47 @@
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { LikeStatus, Post } from '../../../db/db-mongo/schemas';
-import { CreatePostDto } from '../dto/create.post.dto';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { CreatePostDataType, CreatePostDto } from '../dto/create.post.dto';
+import { BadRequestException } from '@nestjs/common';
 import { PostQueryRepository } from './post-query.repository';
 import { LikePostStatusInputDataType } from '../dto/like-status.dto';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { CreatePostFromBlogDto } from '../dto/create.post.from.blog.dto';
 import { IPostLike } from '../entity/post-likes.entity';
+import { LikeStatus } from '../../../db/db-mongo/schemas';
+import { Post } from '../entity/post.entity';
+import { PostMapper } from '../mapper/post.mapper';
 
 export class PostRepository {
   constructor(
     @InjectDataSource() protected readonly db: DataSource,
-    @InjectModel(Post.name) private readonly postModel: Model<Post>,
     @InjectRepository(Post)
     protected readonly postsRepository: Repository<Post>,
     private readonly postQueryRepository: PostQueryRepository,
+    private readonly postMapper: PostMapper,
   ) {}
 
-  async update(id: string, data: CreatePostDto) {
-    const res = await this.postModel.findOneAndUpdate({ _id: id }, data, {
-      new: true,
+  async createPost(createPostData: CreatePostDataType) {
+    const { title, blogId, content, shortDescription, blogName } =
+      createPostData;
+
+    const post = this.postsRepository.create({
+      title,
+      short_description: shortDescription,
+      content,
+      blog_id: blogId,
+      blog_name: blogName,
     });
-    if (!res) throw new NotFoundException();
-    return res;
+
+    const savedPost = await this.postsRepository.save(post);
+
+    return await this.postMapper.mapPost(savedPost);
+  }
+
+  async update(id: string, data: CreatePostDto) {
+    // const res = await this.postsRepository.findOneBy({ _id: id }, data, {
+    //   new: true,
+    // });
+    // if (!res) throw new NotFoundException();
+    // return res;
   }
 
   async removePost(id: string) {
