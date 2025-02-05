@@ -6,6 +6,7 @@ import { PostQueryRepository } from './repositories/post-query.repository';
 import { LikeStatus } from '../../db/db-mongo/schemas';
 import { CreatePostFromBlogDto } from './dto/create.post.from.blog.dto';
 import { UserService } from '../user/user.service';
+import { GetPostsByBlogIdDto } from './dto/get-posts-by-blog-id.dto';
 
 @Injectable()
 export class PostService {
@@ -16,12 +17,14 @@ export class PostService {
   ) {}
 
   async getAllPosts(query: PaginationInputType, userId?: string) {
-    return this.postQueryRepository.getAllPosts(query, userId);
+    return this.postQueryRepository.getAllPosts(
+      query as GetPostsByBlogIdDto,
+      userId,
+    );
   }
 
   async getOnePost(id: string, userId?: string) {
     const found = await this.postQueryRepository.getPostById(id, userId);
-
     if (!found) throw new NotFoundException('Cannot find blog id');
     return found;
   }

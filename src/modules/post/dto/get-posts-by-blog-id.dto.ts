@@ -18,7 +18,7 @@ export class GetPostsByBlogIdDto {
   })
   @IsOptional()
   @IsString()
-  sortBy: string = 'createdAt'; // Default value: 'createdAt'
+  sortBy: string | null;
 
   @ApiPropertyOptional({
     description: 'Sort direction',

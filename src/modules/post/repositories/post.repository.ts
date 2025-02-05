@@ -1,5 +1,4 @@
 import { CreatePostDataType, CreatePostDto } from '../dto/create.post.dto';
-import { BadRequestException } from '@nestjs/common';
 import { PostQueryRepository } from './post-query.repository';
 import { LikePostStatusInputDataType } from '../dto/like-status.dto';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
@@ -9,6 +8,7 @@ import { IPostLike } from '../entity/post-likes.entity';
 import { LikeStatus } from '../../../db/db-mongo/schemas';
 import { Post } from '../entity/post.entity';
 import { PostMapper } from '../mapper/post.mapper';
+import { BadRequestException } from '@nestjs/common';
 
 export class PostRepository {
   constructor(
@@ -45,53 +45,25 @@ export class PostRepository {
   }
 
   async removePost(id: string) {
-    const deletePostQuery = `
-        DELETE
-        FROM posts
-        WHERE post_id = $1
-    `;
-    const res = await this.db.query(deletePostQuery, [id]);
-
-    if (!res.rows) return null;
-    return res;
+    return await this.postsRepository.delete(id);
   }
 
   async updatePost(postId: string, updateData: CreatePostFromBlogDto) {
     const { title, shortDescription, content } = updateData;
-    const fields: string[] = [];
-    const values: any[] = [];
-    let index = 1;
+    const updatePost = await this.postsRepository
+      .update(
+        { id: postId },
+        {
+          title,
+          short_description: shortDescription,
+          content,
+        },
+      )
+      .catch((err) => {
+        throw new BadRequestException(err);
+      });
 
-    if (title) {
-      fields.push(`title = $${index++}`);
-      values.push(title);
-    }
-    if (shortDescription) {
-      fields.push(`short_description = $${index++}`);
-      values.push(shortDescription);
-    }
-    if (content) {
-      fields.push(`content = $${index++}`);
-      values.push(content);
-    }
-
-    if (fields.length === 0) {
-      throw new BadRequestException('No fields to update PostInterface');
-    }
-
-    values.push(postId);
-
-    const query = `
-        UPDATE posts
-        SET ${fields.join(', ')}
-        WHERE post_id = $${index}`;
-
-    try {
-      const res = await this.db.query(query, values);
-      return res.rows;
-    } catch (e) {
-      throw new BadRequestException(e);
-    }
+    return !!updatePost;
   }
 
   async likePost(data: LikePostStatusInputDataType): Promise<any> {

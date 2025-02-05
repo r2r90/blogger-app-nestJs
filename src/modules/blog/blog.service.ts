@@ -55,7 +55,6 @@ export class BlogService {
     const blog = await this.blogQueryRepository.findOneBlog(query.blogId);
     if (!blog)
       throw new NotFoundException(`Blog with id -  ${query.blogId} not found`);
-    return await this.postQueryRepository.getPostsByBlogId(query, userId);
+    return await this.postQueryRepository.getAllPosts(query, userId);
   }
-  x;
 }

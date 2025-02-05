@@ -1,4 +1,10 @@
-import { IsOptional, IsString, Matches, MaxLength } from 'class-validator';
+import {
+  IsDefined,
+  IsOptional,
+  IsString,
+  Matches,
+  MaxLength,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotBlank } from '../../../common/validators/custom-validators/is-not-blank.validator.';
 
@@ -8,6 +14,7 @@ export class UpdateBlogDto {
     example: 'MyBlog',
   })
   @IsString()
+  @IsDefined({ message: 'Поле name обязательно' })
   @MaxLength(15)
   @IsOptional()
   @IsNotBlank({ message: 'Name cannot be empty or contain only whitespace' })
