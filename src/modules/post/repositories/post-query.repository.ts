@@ -11,7 +11,7 @@ import {
 import { Post } from '../entity/post.entity';
 import { CommentRepository } from '../../comment/repositories/comment.repository';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, ILike, Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { BlogQueryRepository } from '../../blog/repositories/blog.query.repository';
 import { CommentQueryRepository } from '../../comment/repositories/comment.query.repository';
 import { Comment } from '../../comment/entity/comment.entity';
@@ -41,25 +41,29 @@ export class PostQueryRepository {
   ): Promise<PaginationType<PostOutputType>> {
     const { pageNumber = 1, pageSize = 10, sortDirection, sortBy } = query;
 
-    const validSortFields = ['created_at', 'blogId'];
+    const validSortFields = ['createdAt', 'blogName'];
     const sortByField = validSortFields.includes(sortBy)
       ? sortBy
       : 'created_at';
 
-    const whereConditions: any = [];
+    const orderDirection =
+      sortDirection.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+
+    const queryBuilder = this.postsRepository
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.blog', 'blog') // Connecting blog table
+      .orderBy(
+        sortByField === 'blogName' ? 'blog.name' : `post.${sortByField}`,
+        orderDirection as 'ASC' | 'DESC',
+      )
+      .skip((pageNumber - 1) * pageSize)
+      .take(pageSize);
 
     if (query.blogId) {
-      whereConditions.push({ blog_id: ILike(`%${query.blogId}%`) });
+      queryBuilder.where('post.blog_id = :blogId', { blogId: query.blogId });
     }
 
-    const [items, totalCount] = await this.postsRepository.findAndCount({
-      where: whereConditions.push({ blog_id: query.blogId }),
-      order: {
-        [sortByField]: sortDirection.toUpperCase() === 'ASC' ? 'ASC' : 'DESC',
-      },
-      skip: (pageNumber - 1) * pageSize,
-      take: pageSize,
-    });
+    const [items, totalCount] = await queryBuilder.getManyAndCount();
 
     return {
       totalCount,
@@ -148,10 +152,15 @@ export class PostQueryRepository {
   }
 
   async getPostById(postId: string, userId?: string) {
-    const post = await this.postsRepository.findOneBy({ id: postId });
+    const post = await this.postsRepository.findOne({
+      where: { id: postId },
+      relations: ['blog'],
+    });
+
     if (!post) {
       return null;
     }
+
     return this.postMapper.mapPost(post, userId);
   }
 

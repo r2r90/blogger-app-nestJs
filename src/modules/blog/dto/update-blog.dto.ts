@@ -1,5 +1,6 @@
 import {
   IsDefined,
+  IsNotEmpty,
   IsOptional,
   IsString,
   Matches,
@@ -14,10 +15,10 @@ export class UpdateBlogDto {
     example: 'MyBlog',
   })
   @IsString()
-  @IsDefined({ message: 'Поле name обязательно' })
   @MaxLength(15)
-  @IsOptional()
+  @IsNotEmpty()
   @IsNotBlank({ message: 'Name cannot be empty or contain only whitespace' })
+  @IsDefined()
   name: string;
 
   @ApiProperty({

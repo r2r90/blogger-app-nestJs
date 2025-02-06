@@ -64,8 +64,8 @@ export class PostMapper {
       shortDescription: post.short_description,
       content: post.content,
       createdAt: post.created_at,
-      blogName: post.blog_name,
-      blogId: post.blog_id,
+      blogName: post.blog.name,
+      blogId: post.blog.id,
       extendedLikesInfo: {
         likesCount: postLikes.filter(
           (like) =>

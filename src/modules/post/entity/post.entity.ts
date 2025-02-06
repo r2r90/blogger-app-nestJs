@@ -40,9 +40,6 @@ export class Post {
   @JoinColumn({ name: 'blog_id' })
   blog: Blog;
 
-  @Column({ type: 'varchar', nullable: false })
-  blog_name: string;
-
   @OneToMany(() => PostLike, (postLike) => postLike.post, {
     onDelete: 'CASCADE',
   })

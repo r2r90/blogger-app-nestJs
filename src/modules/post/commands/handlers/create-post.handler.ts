@@ -20,7 +20,6 @@ export class CreatePostHandler implements ICommandHandler<CreatePostCommand> {
       shortDescription,
       content,
       blogId,
-      blogName: blog.name,
     });
   }
 }

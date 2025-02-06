@@ -16,7 +16,6 @@ export type CreatePostDataType = {
   shortDescription: string;
   content: string;
   blogId: string;
-  blogName?: string;
 };
 
 export class CreatePostDto extends CreatePostFromBlogDto {

@@ -20,20 +20,23 @@ export class PostRepository {
   ) {}
 
   async createPost(createPostData: CreatePostDataType) {
-    const { title, blogId, content, shortDescription, blogName } =
-      createPostData;
+    const { title, blogId, content, shortDescription } = createPostData;
 
     const post = this.postsRepository.create({
       title,
       short_description: shortDescription,
       content,
       blog_id: blogId,
-      blog_name: blogName,
     });
 
     const savedPost = await this.postsRepository.save(post);
 
-    return await this.postMapper.mapPost(savedPost);
+    const postWithBlog = await this.postsRepository.findOne({
+      where: { id: savedPost.id },
+      relations: ['blog'],
+    });
+
+    return await this.postMapper.mapPost(postWithBlog);
   }
 
   async update(id: string, data: CreatePostDto) {
