@@ -26,6 +26,8 @@ import { Session } from '../security-devices/entity/session.entity';
 import { Blog } from '../blog/entity/blog.entity';
 import { Post } from '../post/entity/post.entity';
 import { PostLike } from '../post/entity/post-likes.entity';
+import { Comment } from '../comment/entity/comment.entity';
+import { CommentLike } from '../comment/entity/comment-likes.entity';
 
 @Module({
   imports: [
@@ -56,7 +58,15 @@ import { PostLike } from '../post/entity/post-likes.entity';
       autoLoadEntities: true,
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([User, Session, Blog, Post, PostLike]),
+    TypeOrmModule.forFeature([
+      User,
+      Session,
+      Blog,
+      Post,
+      PostLike,
+      Comment,
+      CommentLike,
+    ]),
     UserModule,
     MongoDatabaseModule,
     DatabaseModule,

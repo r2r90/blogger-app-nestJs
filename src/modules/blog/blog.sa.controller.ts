@@ -213,12 +213,4 @@ export class SuperAdminBlogController {
   ) {
     return this.postService.deletePostByBlogId(blogId, postId);
   }
-
-  // @Get(':id')
-  // @ApiOperation({
-  //   summary: 'Find Blog by ID',
-  // })
-  // async getOne(@Param('id') id: string) {
-  //   return await this.blogService.findBlogById(id);
-  // }
 }

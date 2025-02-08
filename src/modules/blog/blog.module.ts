@@ -9,10 +9,7 @@ import { CreateBlogHandler } from './commands/handlers/create-blog.handler';
 import { CreatePostHandler } from '../post/commands/handlers/create-post.handler';
 import { BlogService } from './blog.service';
 import { JwtService } from '@nestjs/jwt';
-import { CommentMapper } from '../comment/mapper/comment.mapper';
-import { CommentRepository } from '../comment/repositories/comment.repository';
 import { SuperAdminBlogController } from './blog.sa.controller';
-import { CommentQueryRepository } from '../comment/repositories/comment.query.repository';
 import { PostMapper } from '../post/mapper/post.mapper';
 import { UserModule } from '../user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -20,6 +17,7 @@ import { Blog } from './entity/blog.entity';
 import { PostModule } from '../post/post.module';
 import { PostLike } from '../post/entity/post-likes.entity';
 import { Post } from '../post/entity/post.entity';
+import { CommentModule } from '../comment/comment.module';
 
 export const CommandHandlers = [CreateBlogHandler, CreatePostHandler];
 
@@ -31,9 +29,6 @@ export const CommandHandlers = [CreateBlogHandler, CreatePostHandler];
     BlogService,
     PostMapper,
     JwtService,
-    CommentMapper,
-    CommentRepository,
-    CommentQueryRepository,
     ...CommandHandlers,
   ],
   imports: [
@@ -43,6 +38,7 @@ export const CommandHandlers = [CreateBlogHandler, CreatePostHandler];
     UserModule,
     PostModule,
     BlogModule,
+    CommentModule,
   ],
   exports: [BlogService, BlogRepository, BlogQueryRepository],
 })

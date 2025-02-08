@@ -7,6 +7,7 @@ import { LikeStatus } from '../../db/db-mongo/schemas';
 import { CreatePostFromBlogDto } from './dto/create.post.from.blog.dto';
 import { UserService } from '../user/user.service';
 import { GetPostsByBlogIdDto } from './dto/get-posts-by-blog-id.dto';
+import { CommentQueryRepository } from '../comment/repositories/comment.query.repository';
 
 @Injectable()
 export class PostService {
@@ -14,6 +15,7 @@ export class PostService {
     private readonly postRepository: PostRepository,
     private readonly userService: UserService,
     private readonly postQueryRepository: PostQueryRepository,
+    private readonly commentQueryRepository: CommentQueryRepository,
   ) {}
 
   async getAllPosts(query: PaginationInputType, userId?: string) {
@@ -57,9 +59,9 @@ export class PostService {
     query: PaginationInputType,
     userId?: string,
   ) {
-    const post = await this.postQueryRepository.getPostById(postId);
+    const post = await this.getOnePost(postId);
     if (!post) throw new NotFoundException();
-    return await this.postQueryRepository.getCommentsByPostId(
+    return await this.commentQueryRepository.getCommentsByPostId(
       postId,
       query,
       userId,

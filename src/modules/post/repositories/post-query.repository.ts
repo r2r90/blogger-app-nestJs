@@ -14,12 +14,9 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { BlogQueryRepository } from '../../blog/repositories/blog.query.repository';
 import { CommentQueryRepository } from '../../comment/repositories/comment.query.repository';
-import { Comment } from '../../comment/entity/comment.entity';
 import { UserService } from '../../user/user.service';
 import { GetPostsByBlogIdDto } from '../dto/get-posts-by-blog-id.dto';
 import { LikeStatus } from '../../../db/db-mongo/schemas';
-
-class PostWithBlogName {}
 
 @Injectable()
 export class PostQueryRepository {
@@ -87,68 +84,6 @@ export class PostQueryRepository {
     const isAlreadyLiked = await this.db.query(query, [postId, userId]);
     if (!isAlreadyLiked[0]) return null;
     return isAlreadyLiked[0];
-  }
-
-  async getCommentsByPostId(
-    postId: string,
-    query: PaginationInputType,
-    userId?: string,
-  ): Promise<PaginationType<CommentOutputType>> {
-    const { pageNumber, pageSize, sortDirection, sortBy } = query;
-    const offset = (pageNumber - 1) * pageSize;
-    const getCommentsQuery = `
-        SELECT *
-        FROM comments
-        WHERE post_id = $1
-        ORDER BY ${sortBy} ${sortDirection.toLowerCase()}
-        LIMIT $2 OFFSET $3;
-    `;
-
-    const countQuery = `
-        SELECT COUNT(*)
-        FROM comments
-        WHERE post_id = $1
-    `;
-
-    const comments = await this.db.query(getCommentsQuery, [
-      postId,
-      pageSize,
-      offset,
-    ]);
-
-    const likesQuery = `
-        SELECT *
-        FROM comment_likes;
-    `;
-    const countResult = await this.db.query(countQuery, [postId]);
-
-    const totalCount = parseInt(countResult[0].count, 10);
-    const pagesCount = Math.ceil(totalCount / pageSize);
-
-    const commentOutput = await Promise.all(
-      comments.map(async (comment: Comment) => {
-        const likeInfo = await this.commentQueryRepository.getLikesByCommentId(
-          comment.comment_id,
-        );
-
-        const commentator = await this.userService.getUserById(comment.user_id);
-
-        return this.commentMapper.mapComments(
-          comment,
-          likeInfo,
-          commentator.login,
-          userId,
-        );
-      }),
-    );
-
-    return {
-      pagesCount,
-      page: pageNumber,
-      pageSize: pageSize,
-      totalCount,
-      items: commentOutput,
-    };
   }
 
   async getPostById(postId: string, userId?: string) {

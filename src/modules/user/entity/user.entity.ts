@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { Session } from '../../security-devices/entity/session.entity';
 import { PostLike } from '../../post/entity/post-likes.entity';
+import { Comment } from '../../comment/entity/comment.entity';
 
 @Entity('users')
 export class User {
@@ -73,4 +74,9 @@ export class User {
     onDelete: 'CASCADE',
   })
   postLikes: PostLike[];
+
+  @OneToMany(() => Comment, (comment) => comment.user, {
+    onDelete: 'CASCADE',
+  })
+  comments: Comment[];
 }

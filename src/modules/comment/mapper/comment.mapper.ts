@@ -1,7 +1,5 @@
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { Comment } from '../entity/comment.entity';
-import { CommentLike } from '../entity/comment_like.entity';
+import { IComment } from '../entity/comment.entity';
+import { CommentLike } from '../entity/comment-likes.entity';
 import { LikeStatus } from '../../../db/db-mongo/schemas';
 
 export type LikesInfo = {
@@ -19,27 +17,25 @@ export type CommentOutputType = {
   id: string;
   content: string;
   commentatorInfo: CommentatorInfo;
-  createdAt: string;
+  createdAt: Date;
   likesInfo: LikesInfo;
 };
 
 export class CommentMapper {
-  constructor(@InjectDataSource() protected readonly db: DataSource) {}
-
-  public mapComments(
-    comment: Comment,
-    commentLikeInfo: CommentLike[],
+  public async mapComments(
+    comment: IComment,
     userLogin: string,
     userId?: string,
-  ): CommentOutputType {
+  ): Promise<CommentOutputType> {
+    const commentLikes = comment.commentLikes;
     const myStatus: LikeStatus =
-      !userId || commentLikeInfo.length === 0
+      !userId || commentLikes.length === 0
         ? LikeStatus.None
-        : (commentLikeInfo.find((like) => like.user_id === userId)
+        : (commentLikes.find((like) => like.user_id === userId)
             ?.like_status as LikeStatus) || LikeStatus.None;
 
     return {
-      id: comment.comment_id,
+      id: comment.id,
       content: comment.content,
       createdAt: comment.created_at,
       commentatorInfo: {
@@ -47,11 +43,11 @@ export class CommentMapper {
         userLogin,
       },
       likesInfo: {
-        likesCount: commentLikeInfo.filter(
-          (like) => like.like_status === LikeStatus.Like,
+        likesCount: commentLikes.filter(
+          (like: CommentLike) => like.like_status === LikeStatus.Like,
         ).length,
-        dislikesCount: commentLikeInfo.filter(
-          (like) => like.like_status === LikeStatus.Dislike,
+        dislikesCount: commentLikes.filter(
+          (like: CommentLike) => like.like_status === LikeStatus.Dislike,
         ).length,
         myStatus,
       },

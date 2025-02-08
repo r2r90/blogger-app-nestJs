@@ -10,6 +10,7 @@ import {
 
 import { PostLike } from './post-likes.entity';
 import { Blog } from '../../blog/entity/blog.entity';
+import { Comment } from '../../comment/entity/comment.entity';
 
 @Entity('posts')
 export class Post {
@@ -44,4 +45,9 @@ export class Post {
     onDelete: 'CASCADE',
   })
   postLikes: PostLike[];
+
+  @OneToMany(() => Comment, (comment) => comment.post, {
+    onDelete: 'CASCADE',
+  })
+  comments: Comment[];
 }

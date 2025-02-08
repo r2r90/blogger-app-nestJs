@@ -8,17 +8,15 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { CreatePostHandler } from './commands/handlers/create-post.handler';
 import { PostService } from './post.service';
 import { CreateCommentHandler } from '../comment/commands/handlers/create-comment.handler';
-import { CommentRepository } from '../comment/repositories/comment.repository';
 import { PostMapper } from './mapper/post.mapper';
 import { JwtService } from '@nestjs/jwt';
 import { BlogIdValidator } from '../../common/validators/custom-validators/blog-id.validator';
-import { CommentMapper } from '../comment/mapper/comment.mapper';
-import { CommentQueryRepository } from '../comment/repositories/comment.query.repository';
 import { UserModule } from '../user/user.module';
 import { BlogModule } from '../blog/blog.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Post } from './entity/post.entity';
 import { PostLike } from './entity/post-likes.entity';
+import { CommentModule } from '../comment/comment.module';
 
 export const CommandHandlers = [CreatePostHandler, CreateCommentHandler];
 
@@ -29,11 +27,8 @@ export const CommandHandlers = [CreatePostHandler, CreateCommentHandler];
     PostRepository,
     PostQueryRepository,
     PostMapper,
-    CommentRepository,
-    CommentQueryRepository,
     JwtService,
     BlogIdValidator,
-    CommentMapper,
     ...CommandHandlers,
   ],
   imports: [
@@ -41,6 +36,7 @@ export const CommandHandlers = [CreatePostHandler, CreateCommentHandler];
     TypeOrmModule.forFeature([Post, PostLike]),
     CqrsModule,
     UserModule,
+    CommentModule,
     forwardRef(() => BlogModule),
   ],
   exports: [PostRepository, PostQueryRepository, PostService],
