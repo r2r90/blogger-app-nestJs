@@ -2,14 +2,10 @@ import { PaginationInputType } from '../../../common/pagination/pagination.types
 import { userMapper } from '../mapper/user.mapper';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { InjectModel } from '@nestjs/mongoose';
-import { User } from '../../../db/db-mongo/schemas';
-import { Model } from 'mongoose';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 export class UserQueryRepository {
   @InjectDataSource() protected readonly db: DataSource;
-  @InjectModel(User.name) protected readonly userModel: Model<User>;
 
   async getAll(query: PaginationInputType) {
     const {
@@ -145,20 +141,6 @@ export class UserQueryRepository {
       new NotFoundException(`Login ${email} not found`);
     }
     return findUser[0];
-  }
-
-  isEmailExist(email: string) {
-    return this.userModel.findOne({
-      email: email,
-    });
-  }
-
-  async getUserByRecoveryCode(code: string) {
-    const user = await this.userModel.findOne({
-      recoveryCode: code,
-    });
-    if (!user) return null;
-    return user;
   }
 
   async getUserLoginByPostLikeId(userId: string): Promise<string | null> {

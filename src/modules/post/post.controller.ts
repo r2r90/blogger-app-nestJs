@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Post,
   Put,
   Query,
@@ -25,7 +26,6 @@ import { JwtGuard } from '../auth/guards/jwt-guard';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateCommentDto } from '../comment/dto/create-comment.dto';
 import { CreateCommentCommand } from '../comment/commands/impl/create-comment.command';
-import { ApiTags } from '@nestjs/swagger';
 
 @SkipThrottle()
 @Controller('posts')
@@ -77,18 +77,18 @@ export class PostController {
   @UseGuards(JwtAccessAuthGuard)
   likesStatus(
     @Param('postId') postId: string,
-    @UserDecorator('userId') userId: string,
+    @UserDecorator() user: { userId: string; login: string },
     @Body()
     dto: LikeStatusDto,
   ) {
-    return this.postService.likeStatus(userId, postId, dto.likeStatus);
+    return this.postService.likeStatus(user.userId, postId, dto.likeStatus);
   }
 
   @Post(':postId/comments')
   @UseGuards(JwtAccessAuthGuard)
   createComment(
     @UserDecorator('userId') userId: string,
-    @Param('postId') postId: string,
+    @Param('postId', new ParseUUIDPipe()) postId: string,
     @Body() dto: CreateCommentDto,
   ) {
     return this.commandBus.execute(
@@ -99,7 +99,7 @@ export class PostController {
   @Get(':postId/comments')
   @UseGuards(JwtGuard)
   getPostsComments(
-    @Param('postId') postId: string,
+    @Param('postId', new ParseUUIDPipe()) postId: string,
     @Query(PaginationQueryPipe) query: PaginationInputType,
     @UserDecorator('userId') userId: string,
   ) {

@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { CommentMapper, CommentOutputType } from '../mapper/comment.mapper';
 import { UserQueryRepository } from '../../user/repositories/user.query.repository';
-import { ICommentLike } from '../entity/comment-likes.entity';
+import { CommentLike, ICommentLike } from '../entity/comment-likes.entity';
 import { Comment } from '../entity/comment.entity';
 import {
   PaginationInputType,
@@ -15,7 +15,8 @@ export class CommentQueryRepository {
   constructor(
     @InjectRepository(Comment)
     private readonly commentsRepository: Repository<Comment>,
-    @InjectDataSource()
+    @InjectRepository(CommentLike)
+    private readonly commentLikesRepository: Repository<CommentLike>,
     protected readonly db: DataSource,
     private readonly userQueryRepository: UserQueryRepository,
     private readonly commentMapper: CommentMapper,
@@ -32,14 +33,15 @@ export class CommentQueryRepository {
 
     const queryBuilder = this.commentsRepository
       .createQueryBuilder('comment')
-      .leftJoinAndSelect('comment.user', 'user')
+      .leftJoin('comment.user', 'user')
+      .leftJoinAndSelect('comment.commentLikes', 'commentLikes')
+      .addSelect(['user.id', 'user.login'])
+      .where('comment.post_id = :postId', { postId })
       .orderBy(`comment.${sortBy}`, orderDirection)
       .skip((pageNumber - 1) * pageSize)
       .take(pageSize);
 
     const [items, totalCount] = await queryBuilder.getManyAndCount();
-
-    console.log(items);
 
     return {
       pagesCount: Math.ceil(totalCount / pageSize),
@@ -56,20 +58,24 @@ export class CommentQueryRepository {
     commentId: string,
     userId?: string,
   ): Promise<CommentOutputType> {
-    const findComment = await this.commentsRepository.findOne({
-      where: { id: commentId },
-      relations: ['commentLikes'],
-    });
+    const findComment = await this.commentsRepository
+      .createQueryBuilder('comment')
+      .leftJoin('comment.user', 'user')
+      .leftJoin('comment.commentLikes', 'commentLikes')
+      .addSelect([
+        'comment.id',
+        'comment.content',
+        'user.id',
+        'user.login',
+        'commentLikes',
+      ])
+      .where('comment.id = :commentId', { commentId })
+      .getOne();
 
     if (!findComment)
       throw new NotFoundException(`Comment with id ${commentId} not found`);
-    const author = await this.userQueryRepository.findUserById(
-      findComment.user_id,
-    );
 
-    if (!author) throw new NotFoundException(`Comment author not found!`);
-
-    return this.commentMapper.mapComments(findComment, author.login, userId);
+    return this.commentMapper.mapComments(findComment, userId);
   }
 
   async getLikesByCommentId(commentId: string): Promise<ICommentLike[]> {
@@ -85,20 +91,11 @@ export class CommentQueryRepository {
   async isUserAlreadyLiked(
     commentId: string,
     userId: string,
-  ): Promise<ICommentLike | null> {
-    const ifAlreadyLikedQuery = `
-        SELECT *
-        FROM comment_likes
-        WHERE comment_id = $1
-          AND user_id = $2;
-    `;
-    const checkIsAlreadyLiked = await this.db.query(ifAlreadyLikedQuery, [
-      commentId,
-      userId,
-    ]);
-
-    if (checkIsAlreadyLiked.length === 0) return null;
-    return checkIsAlreadyLiked[0];
+  ): Promise<CommentLike> {
+    return await this.commentLikesRepository.findOneBy({
+      comment_id: commentId,
+      user_id: userId,
+    });
   }
 
   async countLikesByCommentId(commentId: string): Promise<number> {

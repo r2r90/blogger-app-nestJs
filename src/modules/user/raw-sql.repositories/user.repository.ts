@@ -1,5 +1,4 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreateUserDto } from '../../../db/db-mongo/schemas';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 
@@ -7,7 +6,7 @@ import { DataSource } from 'typeorm';
 export class UserRepository {
   constructor(@InjectDataSource() protected readonly db: DataSource) {}
 
-  async create(data: CreateUserDto) {
+  async create(data) {
     const { login, email, password, emailConfirmation } = data;
     const createdAt = new Date().toISOString();
 
@@ -61,24 +60,5 @@ export class UserRepository {
       message: `User with id ${id} has been removed`,
       affectedRows: result.rowCount,
     };
-  }
-
-  async updateConfirmationCode(email: string, recoveryCode: string) {
-    //   const updateCode = await this.userModel.findOneAndUpdate(
-    //     { email },
-    //     { $set: { recoveryCode: recoveryCode } },
-    //     { new: true },
-    //   );
-    //
-    //   return !!updateCode;
-    // }
-    //
-    // async updatePassword(id: string, newPassword: string) {
-    //   const updatePassword = await this.userModel.findByIdAndUpdate(
-    //     { _id: id },
-    //     { $set: { password: newPassword, recoveryCode: null } },
-    //     { new: true },
-    //   );
-    return true;
   }
 }

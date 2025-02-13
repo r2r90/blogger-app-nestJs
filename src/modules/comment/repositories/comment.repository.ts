@@ -2,19 +2,23 @@ import { Injectable } from '@nestjs/common';
 
 import { CreateCommentDataType } from '../dto/create-comment.dto';
 
-import { LikeCommentStatusInputDataType } from '../../post/dto/like-status.dto';
-import { LikeStatus } from '../../../db/db-mongo/schemas';
-import { ICommentLike } from '../entity/comment-likes.entity';
+import {
+  LikeCommentStatusInputDataType,
+  LikeStatus,
+} from '../../post/dto/like-status.dto';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { CommentQueryRepository } from './comment.query.repository';
 import { Comment } from '../entity/comment.entity';
+import { CommentLike } from '../entity/comment-likes.entity';
 
 @Injectable()
 export class CommentRepository {
   constructor(
     @InjectRepository(Comment)
     private readonly commentsRepository: Repository<Comment>,
+    @InjectRepository(CommentLike)
+    private readonly commentLikesRepository: Repository<CommentLike>,
     @InjectDataSource() protected readonly db: DataSource,
     private readonly commentQueryRepository: CommentQueryRepository,
   ) {}
@@ -65,41 +69,24 @@ export class CommentRepository {
   async likeComment(data: LikeCommentStatusInputDataType): Promise<any> {
     const { userId, commentId, likeStatus } = data;
 
-    const isAlreadyLiked: ICommentLike =
+    const isAlreadyLiked: CommentLike =
       await this.commentQueryRepository.isUserAlreadyLiked(commentId, userId);
 
-    const likeQuery = `
-        INSERT INTO comment_likes (comment_id, user_id, like_status, created_at)
-        VALUES ($1, $2, $3, $4)
-        RETURNING *
-    `;
-
-    const updateLikeQuery = `
-        UPDATE comment_likes
-        SET like_status = $1,
-            created_at  = $2
-        WHERE comment_like_id = $3
-          AND user_id = $4
-    `;
-
-    const createdAt = new Date().toISOString();
-
     if (isAlreadyLiked && isAlreadyLiked.like_status !== likeStatus) {
-      await this.db.query(updateLikeQuery, [
-        likeStatus,
-        createdAt,
-        isAlreadyLiked.id,
-        userId,
-      ]);
+      await this.commentLikesRepository.update(isAlreadyLiked.id, {
+        like_status: likeStatus,
+        created_at: new Date(),
+      });
     }
 
     if (!isAlreadyLiked && likeStatus !== LikeStatus.None) {
-      await this.db.query(likeQuery, [
-        commentId,
-        userId,
-        likeStatus,
-        createdAt,
-      ]);
+      const likeComment = this.commentLikesRepository.create({
+        user_id: userId,
+        comment_id: commentId,
+        like_status: likeStatus,
+      });
+
+      await this.commentLikesRepository.save(likeComment);
     }
 
     return null;

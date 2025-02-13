@@ -3,11 +3,11 @@ import { CreatePostDto } from './dto/create.post.dto';
 import { PostRepository } from './repositories/post.repository';
 import { PaginationInputType } from '../../common/pagination/pagination.types';
 import { PostQueryRepository } from './repositories/post-query.repository';
-import { LikeStatus } from '../../db/db-mongo/schemas';
 import { CreatePostFromBlogDto } from './dto/create.post.from.blog.dto';
 import { UserService } from '../user/user.service';
 import { GetPostsByBlogIdDto } from './dto/get-posts-by-blog-id.dto';
 import { CommentQueryRepository } from '../comment/repositories/comment.query.repository';
+import { LikeStatus } from './dto/like-status.dto';
 
 @Injectable()
 export class PostService {
@@ -27,7 +27,7 @@ export class PostService {
 
   async getOnePost(id: string, userId?: string) {
     const found = await this.postQueryRepository.getPostById(id, userId);
-    if (!found) throw new NotFoundException('Cannot find blog id');
+    if (!found) throw new NotFoundException('Cannot find post id');
     return found;
   }
 
@@ -48,8 +48,9 @@ export class PostService {
     if (!post) throw new NotFoundException();
 
     const user = await this.userService.getUserById(userId);
+    if (!user) throw new NotFoundException('Cannot find user');
 
-    const data = { userId, login: user.login, postId, likeStatus };
+    const data = { userId, postId, likeStatus };
 
     return await this.postRepository.likePost(data);
   }
@@ -60,7 +61,11 @@ export class PostService {
     userId?: string,
   ) {
     const post = await this.getOnePost(postId);
+
     if (!post) throw new NotFoundException();
+
+    console.log('hello');
+
     return await this.commentQueryRepository.getCommentsByPostId(
       postId,
       query,

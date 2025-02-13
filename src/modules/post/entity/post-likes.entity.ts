@@ -6,12 +6,12 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { LikeStatus } from '../../../db/db-mongo/schemas';
 import { Post } from './post.entity';
 import { User } from '../../user/entity/user.entity';
+import { LikeStatus } from '../dto/like-status.dto';
 
 export interface IPostLike {
-  post_like_id: string;
+  id: string;
   post_id: string;
   user_id: string;
   like_status: string;

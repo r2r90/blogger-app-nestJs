@@ -1,8 +1,7 @@
-import { LikeStatus } from '../../../db/db-mongo/schemas';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PostLike } from '../entity/post-likes.entity';
 import { Repository } from 'typeorm';
-import { Post } from '../entity/post.entity';
+import { LikeStatus } from '../dto/like-status.dto';
 
 export type NewestLikesOutput = {
   userId: string;
@@ -34,18 +33,14 @@ export class PostMapper {
     private readonly postLikeRepository: Repository<PostLike>,
   ) {}
 
-  public async mapPost(post: Post, userId?: string): Promise<PostOutputType> {
-    const postLikes = await this.postLikeRepository.findBy({
-      post_id: post.id,
-    });
-
+  public async mapPost(post, userId?: string): Promise<PostOutputType> {
     const myStatus: LikeStatus =
-      !userId || postLikes.length === 0
+      !userId || post.postLikes.length === 0
         ? LikeStatus.None
-        : (postLikes.find((like) => like.user_id === userId)
+        : (post.postLikes.find((like) => like.user_id === userId)
             ?.like_status as LikeStatus) || LikeStatus.None;
 
-    const newestLikes: NewestLikesOutput[] = postLikes
+    const newestLikes: NewestLikesOutput[] = post.postLikes
       .filter((like) => like.like_status === LikeStatus.Like)
       .sort(
         (a, b) =>
@@ -67,11 +62,11 @@ export class PostMapper {
       blogName: post.blog.name,
       blogId: post.blog.id,
       extendedLikesInfo: {
-        likesCount: postLikes.filter(
+        likesCount: post.postLikes.filter(
           (like) =>
             like.like_status === LikeStatus.Like && like.post_id === post.id,
         ).length,
-        dislikesCount: postLikes.filter(
+        dislikesCount: post.postLikes.filter(
           (like) =>
             like.like_status === LikeStatus.Dislike && like.post_id === post.id,
         ).length,

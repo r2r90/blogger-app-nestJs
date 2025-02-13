@@ -8,7 +8,6 @@ import {
 import { ConfirmCodeDto, EmailValidationDto, LoginUserDto } from './dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { add } from 'date-fns';
 import { MailService } from '../mail/mail.service';
 import { UserQueryRepository } from '../user/repositories/user.query.repository';
 import { v4 as uuidv4 } from 'uuid';
@@ -16,7 +15,6 @@ import { UserRepository } from '../user/repositories/user.repository';
 import { UserService } from '../user/user.service';
 import { AuthJwtTokenService } from './auth-jwt-token.service';
 import { SecurityDevicesRepository } from '../security-devices/security-devices.repository';
-import { SessionData } from '../../db/db-mongo/schemas';
 import { User } from '../user/entity/user.entity';
 import { SecurityDevicesService } from '../security-devices/security-devices.service';
 import { SessionInfoDto } from '../security-devices/dto /session-info.dto';
@@ -184,45 +182,8 @@ export class AuthService {
     return true;
   }
 
-  async updatePasswordWithRecoveryCode(password: string, code: string) {
-    // const userWithRecoveryCode =
-    //   await this.userQueryRepository.getUserByRecoveryCode(code);
-    // if (!userWithRecoveryCode) {
-    //   throw new NotFoundException('Recovery Code is invalid');
-    // }
-    //
-    // const hashedPassword = await this.hashPassword(password);
-    // const updatePassword = await this.userRepository.updatePassword(
-    //   userWithRecoveryCode._id,
-    //   hashedPassword,
-    // );
-    // if (!updatePassword) {
-    //   throw new BadRequestException('Cannot updateBlog password');
-    // }
-    //
-    // return updatePassword;
-  }
-
-  async checkRefreshCodeWithDevice(
-    userId: string,
-    deviceId: string,
-  ): Promise<SessionData | null> {
-    return this.securityDevicesRepository.isLoggedDevice(userId, deviceId);
-  }
-
-  private async getRefreshToken(userId: string): Promise<string> {
-    return this.jwtService.sign({
-      id: userId,
-      exp: add(new Date(), { minutes: 5 }),
-    });
-  }
-
   private async hashPassword(password: string) {
     const salt = await bcrypt.genSalt(10);
     return bcrypt.hash(password, salt);
   }
-
-  /*
-   *  Ip restriction version
-   */
 }

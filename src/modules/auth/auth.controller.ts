@@ -11,12 +11,7 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ConfirmCodeDto,
-  EmailValidationDto,
-  NewPasswordDto,
-  RegisterUserDto,
-} from './dto';
+import { ConfirmCodeDto, EmailValidationDto, RegisterUserDto } from './dto';
 import { AuthService } from './auth.service';
 import { PassportLocalGuard } from './guards/passport.local.guard';
 import { CommandBus } from '@nestjs/cqrs';
@@ -25,7 +20,6 @@ import { Request, Response } from 'express';
 import { UserService } from '../user/user.service';
 import { JwtAccessAuthGuard } from './guards/jwt-access-auth.guard';
 import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
-import { AuthJwtTokenService } from './auth-jwt-token.service';
 import { cookieConfig } from './config/cookie-config';
 import { Throttle } from '@nestjs/throttler';
 
@@ -34,7 +28,6 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UserService,
-    private readonly jwtTokenService: AuthJwtTokenService,
     private readonly commandBus: CommandBus,
   ) {}
 
@@ -143,41 +136,4 @@ export class AuthController {
   async registerEmailResend(@Body() email: EmailValidationDto) {
     return this.authService.resendRecoveryCode(email);
   }
-
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Post('new-password')
-  async newPasswordUpdate(@Body() dto: NewPasswordDto) {
-    const { newPassword, recoveryCode } = dto;
-    await this.authService.updatePasswordWithRecoveryCode(
-      newPassword,
-      recoveryCode,
-    );
-  }
-
-  /*
-   *  With ip restriction
-   */
-
-  // @HttpCode(HttpStatus.OK)
-  // @PostInterface('refresh-token')
-  // @UseGuards(JwtRefreshAuthGuard)
-  // async refreshToken(
-  //   @Req() req: Request,
-  //   @Res({ passthrough: true }) res: Response,
-  // ) {
-  //   const { userId, deviceId } = req.user;
-  //   const currentRefreshToken = req.cookies.refreshToken;
-  //
-  //   const { refreshToken, accessToken } = await this.authService.refreshToken(
-  //     userId,
-  //     deviceId,
-  //     currentRefreshToken,
-  //   );
-  //
-  //   res.cookie(cookieConfig.refreshToken.name, refreshToken, {
-  //     ...cookieConfig.refreshToken.options,
-  //   });
-  //
-  //   return { accessToken };
-  // }
 }

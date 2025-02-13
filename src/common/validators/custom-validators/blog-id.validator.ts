@@ -4,20 +4,19 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Blog, BlogDocument } from '../../../db/db-mongo/schemas/blog.schema';
-import { Model } from 'mongoose';
+import { BlogQueryRepository } from '../../../modules/blog/repositories/blog.query.repository';
 
 @ValidatorConstraint({ name: 'blogId', async: true })
 @Injectable()
 export class BlogIdValidator implements ValidatorConstraintInterface {
-  constructor(
-    @InjectModel(Blog.name) private readonly blogModel: Model<BlogDocument>,
-  ) {}
+  constructor(private readonly blogQueryRepository: BlogQueryRepository) {}
 
   async validate(blogId: string): Promise<boolean> {
     if (blogId && blogId.match(/^[0-9a-fA-F]{24}$/)) {
-      return this.blogModel.findById(blogId);
+      const isValidBLog = await this.blogQueryRepository.findOneBlog(blogId);
+      if (isValidBLog) {
+        return true;
+      }
     }
   }
 

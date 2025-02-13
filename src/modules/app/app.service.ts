@@ -3,11 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entity/user.entity';
 import { Repository } from 'typeorm';
 import { Session } from '../security-devices/entity/session.entity';
-import { Blog } from '../../db/db-mongo/schemas';
 import { Post } from '../post/entity/post.entity';
 import { PostLike } from '../post/entity/post-likes.entity';
 import { Comment } from '../comment/entity/comment.entity';
 import { CommentLike } from '../comment/entity/comment-likes.entity';
+import { Blog } from '../blog/entity/blog.entity';
 
 @Injectable()
 export class AppService {

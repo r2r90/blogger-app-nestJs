@@ -1,19 +1,22 @@
 import { IsEnum, IsNotEmpty } from 'class-validator';
-import { LikeStatus } from '../../../db/db-mongo/schemas';
 
 export type LikePostStatusInputDataType = {
   userId: string;
-  login: string;
   postId: string;
   likeStatus: LikeStatus;
 };
 
 export type LikeCommentStatusInputDataType = {
   userId: string;
-  login: string;
   commentId: string;
   likeStatus: LikeStatus;
 };
+
+export enum LikeStatus {
+  Like = 'Like',
+  Dislike = 'Dislike',
+  None = 'None',
+}
 
 export class LikeStatusDto {
   @IsNotEmpty()

@@ -1,34 +1,21 @@
 import { Injectable } from '@nestjs/common';
-import {
-  PaginationInputType,
-  PaginationType,
-} from '../../../common/pagination/pagination.types';
+import { PaginationType } from '../../../common/pagination/pagination.types';
 import { PostMapper, PostOutputType } from '../mapper/post.mapper';
-import {
-  CommentMapper,
-  CommentOutputType,
-} from '../../comment/mapper/comment.mapper';
 import { Post } from '../entity/post.entity';
-import { CommentRepository } from '../../comment/repositories/comment.repository';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import { BlogQueryRepository } from '../../blog/repositories/blog.query.repository';
-import { CommentQueryRepository } from '../../comment/repositories/comment.query.repository';
-import { UserService } from '../../user/user.service';
 import { GetPostsByBlogIdDto } from '../dto/get-posts-by-blog-id.dto';
-import { LikeStatus } from '../../../db/db-mongo/schemas';
+import { LikeStatus } from '../dto/like-status.dto';
+import { PostLike } from '../entity/post-likes.entity';
 
 @Injectable()
 export class PostQueryRepository {
   constructor(
     @InjectRepository(Post)
     private readonly postsRepository: Repository<Post>,
-    private readonly blogQueryRepository: BlogQueryRepository,
-    private readonly userService: UserService,
+    @InjectRepository(PostLike)
+    private readonly postsLikeRepository: Repository<PostLike>,
     private readonly postMapper: PostMapper,
-    private readonly commentMapper: CommentMapper,
-    private readonly commentRepository: CommentRepository,
-    private readonly commentQueryRepository: CommentQueryRepository,
     @InjectDataSource() protected readonly db: DataSource,
   ) {}
 
@@ -48,7 +35,9 @@ export class PostQueryRepository {
 
     const queryBuilder = this.postsRepository
       .createQueryBuilder('post')
-      .leftJoinAndSelect('post.blog', 'blog') // Connecting blog table
+      .leftJoinAndSelect('post.blog', 'blog')
+      .leftJoinAndSelect('post.postLikes', 'postLikes')
+      .leftJoinAndSelect('postLikes.user', 'user')
       .orderBy(
         sortByField === 'blogName' ? 'blog.name' : `post.${sortByField}`,
         orderDirection as 'ASC' | 'DESC',
@@ -74,23 +63,21 @@ export class PostQueryRepository {
   }
 
   async userAlreadyLikedPost(postId: string, userId: string) {
-    const query = `
-        SELECT *
-        FROM post_likes
-        WHERE post_id = $1
-          AND user_id = $2;
-    `;
-
-    const isAlreadyLiked = await this.db.query(query, [postId, userId]);
-    if (!isAlreadyLiked[0]) return null;
-    return isAlreadyLiked[0];
+    return await this.postsLikeRepository.findOneBy({
+      post_id: postId,
+      user_id: userId,
+    });
   }
 
   async getPostById(postId: string, userId?: string) {
-    const post = await this.postsRepository.findOne({
-      where: { id: postId },
-      relations: ['blog'],
-    });
+    const post = await this.postsRepository
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.blog', 'blog')
+      .leftJoinAndSelect('post.postLikes', 'postLikes')
+      .leftJoinAndSelect('postLikes.user', 'user')
+      .addSelect(['user.id', 'user.login'])
+      .where('post.id = :postId', { postId })
+      .getOne();
 
     if (!post) {
       return null;

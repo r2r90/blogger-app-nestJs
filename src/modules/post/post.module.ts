@@ -1,6 +1,4 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
-import forFeatureDb from '../../db/db-mongo/for-feature.db';
 import { PostController } from './post.controller';
 import { PostRepository } from './repositories/post.repository';
 import { PostQueryRepository } from './repositories/post-query.repository';
@@ -10,7 +8,6 @@ import { PostService } from './post.service';
 import { CreateCommentHandler } from '../comment/commands/handlers/create-comment.handler';
 import { PostMapper } from './mapper/post.mapper';
 import { JwtService } from '@nestjs/jwt';
-import { BlogIdValidator } from '../../common/validators/custom-validators/blog-id.validator';
 import { UserModule } from '../user/user.module';
 import { BlogModule } from '../blog/blog.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -28,11 +25,9 @@ export const CommandHandlers = [CreatePostHandler, CreateCommentHandler];
     PostQueryRepository,
     PostMapper,
     JwtService,
-    BlogIdValidator,
     ...CommandHandlers,
   ],
   imports: [
-    MongooseModule.forFeature(forFeatureDb),
     TypeOrmModule.forFeature([Post, PostLike]),
     CqrsModule,
     UserModule,

@@ -1,7 +1,5 @@
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, ILike, Like, Repository } from 'typeorm';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import {
   BadRequestException,
   InternalServerErrorException,
@@ -15,7 +13,6 @@ export class UserQueryRepository {
   private readonly usersRepository: Repository<User>;
   @InjectDataSource()
   protected readonly db: DataSource;
-  @InjectModel(User.name) protected readonly userModel: Model<User>;
 
   async getAll(query: GetUsersDto) {
     const {
@@ -99,30 +96,5 @@ export class UserQueryRepository {
 
     if (!findUser) return null;
     return findUser;
-  }
-
-  isEmailExist(email: string) {
-    return this.userModel.findOne({
-      email: email,
-    });
-  }
-
-  async getUserByRecoveryCode(code: string) {
-    const user = await this.userModel.findOne({
-      recoveryCode: code,
-    });
-    if (!user) return null;
-    return user;
-  }
-
-  async getUserLoginByPostLikeId(userId: string): Promise<string | null> {
-    const getUserQuery = `
-        SELECT *
-        FROM post_likes
-        WHERE user_id = $1
-    `;
-
-    const findUser = await this.db.query(getUserQuery, [userId]);
-    return findUser[0];
   }
 }

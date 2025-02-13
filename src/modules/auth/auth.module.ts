@@ -12,7 +12,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { options } from './config';
 import { CqrsModule } from '@nestjs/cqrs';
 import { AuthJwtTokenService } from './auth-jwt-token.service';
-import { TokenRepository } from './repositories/token.repository';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh-strategy';
 import { JwtAccessStrategy } from './strategies/jwt-access-strategy';
 import { SecurityDevicesModule } from '../security-devices/security-devices.module';
@@ -24,7 +23,6 @@ import { SecurityDevicesModule } from '../security-devices/security-devices.modu
     AuthRepository,
     AuthQueryRepository,
     AuthJwtTokenService,
-    TokenRepository,
     BasicStrategy,
     JwtRefreshStrategy,
     JwtAccessStrategy,

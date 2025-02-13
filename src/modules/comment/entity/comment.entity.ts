@@ -17,6 +17,7 @@ export interface IComment {
   user_id: string;
   post_id: string;
   created_at: Date;
+  user: User;
   commentLikes: CommentLike[];
 }
 

@@ -75,13 +75,4 @@ export class UserRepository {
       });
     return !!updateCode;
   }
-
-  async updatePassword(id: string, newPassword: string) {
-    // const updatePassword = await this.userModel.findByIdAndUpdate(
-    //   { _id: id },
-    //   { $set: { password: newPassword, recoveryCode: null } },
-    //   { new: true },
-    // );
-    return true;
-  }
 }

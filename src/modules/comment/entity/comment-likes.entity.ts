@@ -6,17 +6,16 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { LikeStatus } from '../../../db/db-mongo/schemas';
-import { Post } from '../../post/entity/post.entity';
 import { User } from '../../user/entity/user.entity';
 import { Comment } from './comment.entity';
+import { LikeStatus } from '../../post/dto/like-status.dto';
 
 export interface ICommentLike {
   id: string;
   comment_id: string;
   user_id: string;
   like_status: string;
-  created_at: string;
+  created_at: Date;
 }
 
 @Entity('comment-likes')

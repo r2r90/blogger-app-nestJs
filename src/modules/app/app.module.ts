@@ -4,7 +4,6 @@ import { AppService } from './app.service';
 import { BlogModule } from '../blog/blog.module';
 import configuration from '../../config/configuration';
 import { ConfigModule } from '@nestjs/config';
-import { DatabaseModule } from '../../db/database.module';
 import { PostModule } from '../post/post.module';
 import { UserModule } from '../user/user.module';
 import { AuthModule } from '../auth/auth.module';
@@ -19,7 +18,6 @@ import { UserAlreadyExistConstraint } from '../../common/validators/custom-valid
 import { CommentModule } from '../comment/comment.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { SecurityDevicesModule } from '../security-devices/security-devices.module';
-import { MongoDatabaseModule } from '../../db/db-mongo/mongo-database.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../user/entity/user.entity';
 import { Session } from '../security-devices/entity/session.entity';
@@ -68,8 +66,6 @@ import { CommentLike } from '../comment/entity/comment-likes.entity';
       CommentLike,
     ]),
     UserModule,
-    MongoDatabaseModule,
-    DatabaseModule,
     BlogModule,
     PostModule,
     AuthModule,

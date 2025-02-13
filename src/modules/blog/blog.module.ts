@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { BlogController } from './blog.controller';
 import { MongooseModule } from '@nestjs/mongoose';
-import forFeatureDb from '../../db/db-mongo/for-feature.db';
 import { BlogRepository } from './repositories/blog.repository';
 import { BlogQueryRepository } from './repositories/blog.query.repository';
 import { CqrsModule } from '@nestjs/cqrs';
@@ -32,7 +31,6 @@ export const CommandHandlers = [CreateBlogHandler, CreatePostHandler];
     ...CommandHandlers,
   ],
   imports: [
-    MongooseModule.forFeature(forFeatureDb),
     TypeOrmModule.forFeature([Blog, PostLike, Post]),
     CqrsModule,
     UserModule,

@@ -1,7 +1,4 @@
 import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { SessionData } from '../../db/db-mongo/schemas';
-import { Model } from 'mongoose';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Not, Repository } from 'typeorm';
 import { SessionInfoDto } from './dto /session-info.dto';
@@ -14,8 +11,6 @@ export class SecurityDevicesRepository {
     private readonly sessionRepository: Repository<Session>,
     @InjectDataSource() protected readonly db: DataSource,
   ) {}
-
-  @InjectModel(SessionData.name) private sessionDataModel: Model<SessionData>;
 
   async saveSession(sessionInfo: SessionInfoDto) {
     const createSession: Session = this.sessionRepository.create({
@@ -60,13 +55,6 @@ export class SecurityDevicesRepository {
       .catch((err) => {
         throw new BadRequestException(err);
       });
-  }
-
-  async isLoggedDevice(
-    deviceId: string,
-    userId: string,
-  ): Promise<SessionData | null> {
-    return this.sessionDataModel.exists({ _id: deviceId, userId }).lean();
   }
 
   async logoutFromDevice(sessionId: string) {
