@@ -35,10 +35,13 @@ export class PostRepository {
 
     const savedPost = await this.postsRepository.save(post);
 
-    const postWithBlog = await this.postsRepository.findOne({
-      where: { id: savedPost.id },
-      relations: ['blog'],
-    });
+    const postWithBlog = await this.postsRepository
+      .createQueryBuilder('post')
+      .leftJoin('post.blog', 'blog')
+      .leftJoinAndSelect('post.post_likes', 'post_likes')
+      .addSelect(['blog.id', 'blog.name'])
+      .where('post.id = :id', { id: savedPost.id })
+      .getOne();
 
     return await this.postMapper.mapPost(postWithBlog);
   }

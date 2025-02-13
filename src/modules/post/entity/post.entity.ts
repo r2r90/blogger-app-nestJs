@@ -44,7 +44,7 @@ export class Post {
   @OneToMany(() => PostLike, (postLike) => postLike.post, {
     onDelete: 'CASCADE',
   })
-  postLikes: PostLike[];
+  post_likes: PostLike[];
 
   @OneToMany(() => Comment, (comment) => comment.post, {
     onDelete: 'CASCADE',

@@ -1,7 +1,5 @@
-import { InjectRepository } from '@nestjs/typeorm';
-import { PostLike } from '../entity/post-likes.entity';
-import { Repository } from 'typeorm';
 import { LikeStatus } from '../dto/like-status.dto';
+import { PostLike } from '../entity/post-likes.entity';
 
 export type NewestLikesOutput = {
   userId: string;
@@ -28,26 +26,21 @@ export type PostOutputType = {
 };
 
 export class PostMapper {
-  constructor(
-    @InjectRepository(PostLike)
-    private readonly postLikeRepository: Repository<PostLike>,
-  ) {}
-
   public async mapPost(post, userId?: string): Promise<PostOutputType> {
     const myStatus: LikeStatus =
-      !userId || post.postLikes.length === 0
+      !userId || !post.post_likes
         ? LikeStatus.None
         : (post.postLikes.find((like) => like.user_id === userId)
             ?.like_status as LikeStatus) || LikeStatus.None;
 
-    const newestLikes: NewestLikesOutput[] = post.postLikes
-      .filter((like) => like.like_status === LikeStatus.Like)
+    const newestLikes: NewestLikesOutput[] = post.post_likes
+      .filter((like: PostLike) => like.like_status === LikeStatus.Like)
       .sort(
         (a, b) =>
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
       )
       .slice(0, 3)
-      .map((like) => ({
+      .map((like: PostLike) => ({
         addedAt: like.created_at,
         userId: like.user_id,
         login: like.user.login,
@@ -62,12 +55,12 @@ export class PostMapper {
       blogName: post.blog.name,
       blogId: post.blog.id,
       extendedLikesInfo: {
-        likesCount: post.postLikes.filter(
-          (like) =>
+        likesCount: post.post_likes.filter(
+          (like: PostLike) =>
             like.like_status === LikeStatus.Like && like.post_id === post.id,
         ).length,
-        dislikesCount: post.postLikes.filter(
-          (like) =>
+        dislikesCount: post.post_likes.filter(
+          (like: PostLike) =>
             like.like_status === LikeStatus.Dislike && like.post_id === post.id,
         ).length,
         myStatus,
