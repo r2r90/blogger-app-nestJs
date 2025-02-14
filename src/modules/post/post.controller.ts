@@ -85,6 +85,7 @@ export class PostController {
   }
 
   @Post(':postId/comments')
+  @SkipThrottle()
   @UseGuards(JwtAccessAuthGuard)
   createComment(
     @UserDecorator('userId') userId: string,

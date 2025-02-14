@@ -59,7 +59,7 @@ export class Comment {
   @OneToMany(() => CommentLike, (commentLike) => commentLike.comment, {
     onDelete: 'CASCADE',
   })
-  commentLikes: CommentLike[];
+  comment_likes: CommentLike[];
 
   @CreateDateColumn({
     type: 'timestamp with time zone',

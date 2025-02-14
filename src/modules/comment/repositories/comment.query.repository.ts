@@ -34,7 +34,7 @@ export class CommentQueryRepository {
     const queryBuilder = this.commentsRepository
       .createQueryBuilder('comment')
       .leftJoin('comment.user', 'user')
-      .leftJoinAndSelect('comment.commentLikes', 'commentLikes')
+      .leftJoinAndSelect('comment.comment_likes', 'comment_likes')
       .addSelect(['user.id', 'user.login'])
       .where('comment.post_id = :postId', { postId })
       .orderBy(`comment.${sortBy}`, orderDirection)
@@ -61,13 +61,13 @@ export class CommentQueryRepository {
     const findComment = await this.commentsRepository
       .createQueryBuilder('comment')
       .leftJoin('comment.user', 'user')
-      .leftJoin('comment.commentLikes', 'commentLikes')
+      .leftJoin('comment.comment_likes', 'comment_likes')
       .addSelect([
         'comment.id',
         'comment.content',
         'user.id',
         'user.login',
-        'commentLikes',
+        'comment_likes',
       ])
       .where('comment.id = :commentId', { commentId })
       .getOne();

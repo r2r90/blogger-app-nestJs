@@ -64,8 +64,6 @@ export class PostService {
 
     if (!post) throw new NotFoundException();
 
-    console.log('hello');
-
     return await this.commentQueryRepository.getCommentsByPostId(
       postId,
       query,

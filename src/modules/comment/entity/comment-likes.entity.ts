@@ -40,7 +40,7 @@ export class CommentLike {
   @Column('uuid')
   comment_id: string;
 
-  @ManyToOne(() => Comment, (comment) => comment.commentLikes, {
+  @ManyToOne(() => Comment, (comment) => comment.comment_likes, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'comment_id' })

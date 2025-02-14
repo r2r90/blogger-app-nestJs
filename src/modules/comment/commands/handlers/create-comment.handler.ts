@@ -18,7 +18,6 @@ export class CreateCommentHandler
 
   async execute(command: CreateCommentCommand) {
     const { userId, postId, content } = command;
-
     const post = await this.postQueryRepository.getPostById(postId);
 
     if (!post) throw new NotFoundException(`Post with ${postId} doesn't exist`);

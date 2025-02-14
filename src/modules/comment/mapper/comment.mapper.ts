@@ -1,5 +1,3 @@
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
 import { Comment } from '../entity/comment.entity';
 import { LikeStatus } from '../../post/dto/like-status.dto';
 
@@ -23,13 +21,11 @@ export type CommentOutputType = {
 };
 
 export class CommentMapper {
-  constructor(@InjectDataSource() protected readonly db: DataSource) {}
-
   public mapComments(comment: Comment, userId?: string): CommentOutputType {
     const myStatus: LikeStatus =
-      !userId || comment.commentLikes.length === 0
+      !userId || comment.comment_likes.length === 0
         ? LikeStatus.None
-        : (comment.commentLikes.find((like) => like.user_id === userId)
+        : (comment.comment_likes.find((like) => like.user_id === userId)
             ?.like_status as LikeStatus) || LikeStatus.None;
 
     return {
@@ -41,10 +37,10 @@ export class CommentMapper {
         userLogin: comment.user.login,
       },
       likesInfo: {
-        likesCount: comment.commentLikes.filter(
+        likesCount: comment.comment_likes.filter(
           (like) => like.like_status === LikeStatus.Like,
         ).length,
-        dislikesCount: comment.commentLikes.filter(
+        dislikesCount: comment.comment_likes.filter(
           (like) => like.like_status === LikeStatus.Dislike,
         ).length,
         myStatus,

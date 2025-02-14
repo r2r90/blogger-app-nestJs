@@ -7,6 +7,17 @@ export type NewestLikesOutput = {
   addedAt: Date;
 };
 
+interface PostWithBlog {
+  id: string;
+  title: string;
+  short_description: string;
+  content: string;
+  created_at: Date;
+  blog_id: string;
+  blog: { id: string; name: string };
+  post_likes: PostLike[];
+}
+
 export type ExtendedLikesInfo = {
   likesCount: number;
   dislikesCount: number;
@@ -26,11 +37,14 @@ export type PostOutputType = {
 };
 
 export class PostMapper {
-  public async mapPost(post, userId?: string): Promise<PostOutputType> {
+  public async mapPost(
+    post: PostWithBlog,
+    userId?: string,
+  ): Promise<PostOutputType> {
     const myStatus: LikeStatus =
       !userId || !post.post_likes
         ? LikeStatus.None
-        : (post.postLikes.find((like) => like.user_id === userId)
+        : (post.post_likes.find((like: PostLike) => like.user_id === userId)
             ?.like_status as LikeStatus) || LikeStatus.None;
 
     const newestLikes: NewestLikesOutput[] = post.post_likes

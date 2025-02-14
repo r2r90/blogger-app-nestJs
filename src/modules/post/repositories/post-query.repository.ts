@@ -36,8 +36,8 @@ export class PostQueryRepository {
     const queryBuilder = this.postsRepository
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.blog', 'blog')
-      .leftJoinAndSelect('post.postLikes', 'postLikes')
-      .leftJoinAndSelect('postLikes.user', 'user')
+      .leftJoinAndSelect('post.post_likes', 'post_likes')
+      .leftJoinAndSelect('post_likes.user', 'user')
       .orderBy(
         sortByField === 'blogName' ? 'blog.name' : `post.${sortByField}`,
         orderDirection as 'ASC' | 'DESC',
@@ -73,8 +73,8 @@ export class PostQueryRepository {
     const post = await this.postsRepository
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.blog', 'blog')
-      .leftJoinAndSelect('post.postLikes', 'postLikes')
-      .leftJoinAndSelect('postLikes.user', 'user')
+      .leftJoinAndSelect('post.post_likes', 'post_likes')
+      .leftJoinAndSelect('post_likes.user', 'user')
       .addSelect(['user.id', 'user.login'])
       .where('post.id = :postId', { postId })
       .getOne();
