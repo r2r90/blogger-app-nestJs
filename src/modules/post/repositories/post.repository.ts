@@ -1,4 +1,4 @@
-import { CreatePostDataType, CreatePostDto } from '../dto/create.post.dto';
+import { CreatePostDataType } from '../dto/create.post.dto';
 import { PostQueryRepository } from './post-query.repository';
 import {
   LikePostStatusInputDataType,
@@ -44,14 +44,6 @@ export class PostRepository {
       .getOne();
 
     return await this.postMapper.mapPost(postWithBlog);
-  }
-
-  async update(id: string, data: CreatePostDto) {
-    // const res = await this.postsRepository.findOneBy({ _id: id }, data, {
-    //   new: true,
-    // });
-    // if (!res) throw new NotFoundException();
-    // return res;
   }
 
   async removePost(id: string) {

@@ -38,17 +38,6 @@ export class SecurityDevicesRepository {
     return await this.sessionRepository.findOneBy({ id: deviceId });
   }
 
-  async findByUserAndDevice(userId: string, deviceId: string) {
-    const query = `SELECT *
-                   FROM sessions
-                   WHERE user_id = $1
-                     AND session_id = $2`;
-
-    const res = await this.db.query(query, [userId, deviceId]);
-
-    return res[0];
-  }
-
   async deleteAllDevicesByUserId(userId: string, deviceId: string) {
     return await this.sessionRepository
       .delete({ user_id: userId, id: Not(deviceId) })

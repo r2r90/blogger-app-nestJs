@@ -75,4 +75,14 @@ export class UserRepository {
       });
     return !!updateCode;
   }
+
+  async updatePassword(id: string, newPassword: string) {
+    return await this.usersRepository
+      .update(id, {
+        password: newPassword,
+      })
+      .catch((err) => {
+        throw new BadRequestException(err.message);
+      });
+  }
 }

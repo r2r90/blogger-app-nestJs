@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreatePostDto } from './dto/create.post.dto';
 import { PostRepository } from './repositories/post.repository';
 import { PaginationInputType } from '../../common/pagination/pagination.types';
 import { PostQueryRepository } from './repositories/post-query.repository';
@@ -37,10 +36,6 @@ export class PostService {
     const isDeleted = await this.postRepository.removePost(id);
     if (!isDeleted) throw new NotFoundException('Cannot delete blog id');
     return true;
-  }
-
-  async updatePost(id: string, updatePostData: CreatePostDto) {
-    return this.postRepository.update(id, updatePostData);
   }
 
   async likeStatus(userId: string, postId: string, likeStatus: LikeStatus) {

@@ -11,7 +11,12 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ConfirmCodeDto, EmailValidationDto, RegisterUserDto } from './dto';
+import {
+  ConfirmCodeDto,
+  EmailValidationDto,
+  NewPasswordDto,
+  RegisterUserDto,
+} from './dto';
 import { AuthService } from './auth.service';
 import { PassportLocalGuard } from './guards/passport.local.guard';
 import { CommandBus } from '@nestjs/cqrs';
@@ -31,32 +36,9 @@ export class AuthController {
     private readonly commandBus: CommandBus,
   ) {}
 
-  @Throttle({ default: { limit: 5, ttl: 10000 } })
-  @Post('registration')
-  @HttpCode(204)
-  async register(@Body() dto: RegisterUserDto) {
-    const isAdmin = false;
-    const { login, email, password } = dto;
-    const user = await this.commandBus.execute(
-      new CreateUserCommand(login, password, email, isAdmin),
-    );
-    if (!user)
-      throw new BadRequestException(
-        `Can't register user with data: ${JSON.stringify(dto)}`,
-      );
-    return user;
-  }
-
-  @Throttle({ default: { limit: 5, ttl: 10000 } })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Post('registration-confirmation')
-  async confirmRegisterCode(@Body() code: ConfirmCodeDto) {
-    return await this.authService.confirmCode(code);
-  }
-
+  @Post('login')
   @Throttle({ default: { limit: 5, ttl: 10000 } })
   @HttpCode(HttpStatus.OK)
-  @Post('login')
   @UseGuards(PassportLocalGuard)
   async login(
     @Req() req: Request,
@@ -78,8 +60,20 @@ export class AuthController {
     return { accessToken };
   }
 
-  @HttpCode(HttpStatus.OK)
+  @Post('password-recovery')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async passwordRecovery(@Body() dto: EmailValidationDto) {
+    const { email } = dto;
+    const user = await this.userService.getUserByEmail(email);
+    return await this.authService.sendRecoveryCode(user.email);
+  }
+
+  @Post('new-password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async newPassword(@Body() dto: NewPasswordDto) {}
+
   @Post('refresh-token')
+  @HttpCode(HttpStatus.OK)
   @UseGuards(JwtRefreshAuthGuard)
   async refreshToken(
     @Req() req: Request,
@@ -101,8 +95,38 @@ export class AuthController {
     return { accessToken };
   }
 
+  @Post('registration-confirmation')
+  @Throttle({ default: { limit: 5, ttl: 10000 } })
   @HttpCode(HttpStatus.NO_CONTENT)
+  async confirmRegisterCode(@Body() code: ConfirmCodeDto) {
+    return await this.authService.confirmCode(code);
+  }
+
+  @Post('registration')
+  @Throttle({ default: { limit: 5, ttl: 10000 } })
+  @HttpCode(204)
+  async register(@Body() dto: RegisterUserDto) {
+    const isAdmin = false;
+    const { login, email, password } = dto;
+    const user = await this.commandBus.execute(
+      new CreateUserCommand(login, password, email, isAdmin),
+    );
+    if (!user)
+      throw new BadRequestException(
+        `Can't register user with data: ${JSON.stringify(dto)}`,
+      );
+    return user;
+  }
+
+  @Post('registration-email-resending')
+  @Throttle({ default: { limit: 5, ttl: 10000 } })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async registerEmailResend(@Body() email: EmailValidationDto) {
+    return this.authService.resendRecoveryCode(email);
+  }
+
   @Post('logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtRefreshAuthGuard)
   async logout(@Req() req: Request, @Res() res: Response) {
     const sessionId = req.user.deviceId;
@@ -112,28 +136,13 @@ export class AuthController {
     res.status(HttpStatus.NO_CONTENT).send();
   }
 
-  @HttpCode(HttpStatus.OK)
   @Get('me')
+  @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAccessAuthGuard)
   async getMe(@Req() req: Request) {
     const userId = req.user.userId;
     const user = await this.userService.getUserById(userId);
     if (!user) throw new BadRequestException('User not found');
     return { email: user.email, login: user.login, userId };
-  }
-
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Post('password-recovery')
-  async passwordRecovery(@Body() dto: EmailValidationDto) {
-    const { email } = dto;
-    const user = await this.userService.getUserByEmail(email);
-    await this.authService.sendRecoveryCode(user.email);
-  }
-
-  @Throttle({ default: { limit: 5, ttl: 10000 } })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Post('registration-email-resending')
-  async registerEmailResend(@Body() email: EmailValidationDto) {
-    return this.authService.resendRecoveryCode(email);
   }
 }

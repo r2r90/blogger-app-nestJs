@@ -15,7 +15,6 @@ import { CommandBus } from '@nestjs/cqrs';
 import { CreatePostDto } from './dto/create.post.dto';
 import { PaginationQueryPipe } from '../../common/pipes/paginationQuery.pipe';
 import { PaginationInputType } from '../../common/pagination/pagination.types';
-import { IsObjectIdPipe } from 'nestjs-object-id';
 import { SkipThrottle } from '@nestjs/throttler';
 import { CreatePostCommand } from './commands/impl/create-post.command';
 import { PostService } from './post.service';
@@ -60,16 +59,6 @@ export class PostController {
     return this.commandBus.execute(
       new CreatePostCommand(title, shortDescription, content, blogId),
     );
-  }
-
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(AuthGuard('basic'))
-  @Put(':id')
-  update(
-    @Param('id', IsObjectIdPipe) id: string,
-    @Body() updatePostData: CreatePostDto,
-  ) {
-    return this.postService.updatePost(id, updatePostData);
   }
 
   @Put(':postId/like-status')

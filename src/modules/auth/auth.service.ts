@@ -5,7 +5,12 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfirmCodeDto, EmailValidationDto, LoginUserDto } from './dto';
+import {
+  ConfirmCodeDto,
+  EmailValidationDto,
+  LoginUserDto,
+  NewPasswordDto,
+} from './dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from '../mail/mail.service';
@@ -138,10 +143,7 @@ export class AuthService {
     }
 
     const recoveryCode = uuidv4();
-    const updateRecoveryCode = await this.userRepository.updateConfirmationCode(
-      email,
-      recoveryCode,
-    );
+    await this.userRepository.updateConfirmationCode(email, recoveryCode);
 
     const sendCodeToUser = await this.mailService.sendRecoveryCodeToUser(
       email,
@@ -180,6 +182,20 @@ export class AuthService {
       newConfirmationCode,
     );
     return true;
+  }
+
+  private async updatePassword(dto: NewPasswordDto) {
+    const { recoveryCode, newPassword } = dto;
+
+    const user =
+      await this.userQueryRepository.findUserByRecoveryCode(recoveryCode);
+
+    if (!user) {
+      throw new BadRequestException();
+    }
+
+    const newPasswordHashed = await this.userService.hashPassword(newPassword);
+    return await this.userRepository.updatePassword(user.id, newPasswordHashed);
   }
 
   private async hashPassword(password: string) {

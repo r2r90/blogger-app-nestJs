@@ -97,4 +97,15 @@ export class UserQueryRepository {
     if (!findUser) return null;
     return findUser;
   }
+
+  async findUserByRecoveryCode(code: string): Promise<User> {
+    const user = await this.usersRepository
+      .findOneBy({
+        recovery_code: code,
+      })
+      .catch((err) => {
+        throw new InternalServerErrorException(err.message);
+      });
+    return user;
+  }
 }

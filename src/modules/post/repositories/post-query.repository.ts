@@ -5,7 +5,6 @@ import { Post } from '../entity/post.entity';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { GetPostsByBlogIdDto } from '../dto/get-posts-by-blog-id.dto';
-import { LikeStatus } from '../dto/like-status.dto';
 import { PostLike } from '../entity/post-likes.entity';
 
 @Injectable()
@@ -83,22 +82,8 @@ export class PostQueryRepository {
       return null;
     }
 
+    console.log(post);
+
     return this.postMapper.mapPost(post, userId);
-  }
-
-  async likesCounter(postId: string, likeStatus: LikeStatus): Promise<number> {
-    const countLikesQuery = `
-        SELECT COUNT(*) AS count
-        FROM post_likes
-        WHERE post_id = $1
-          AND like_status = $2;
-    `;
-
-    const countLikes = await this.db.query(countLikesQuery, [
-      postId,
-      likeStatus,
-    ]);
-
-    return countLikes[0].count;
   }
 }
