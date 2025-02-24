@@ -17,7 +17,7 @@ export class Question {
   })
   body: string;
 
-  @Column({ type: 'json' })
+  @Column({ type: 'json', nullable: false })
   correct_answers: string[];
 
   @Column({

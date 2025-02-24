@@ -49,7 +49,7 @@ export class PostQueryRepository {
     }
 
     const [items, totalCount] = await queryBuilder.getManyAndCount();
-
+    console.log(items);
     return {
       totalCount,
       pagesCount: Math.ceil(totalCount / pageSize),

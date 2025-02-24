@@ -26,6 +26,7 @@ import { Post } from '../post/entity/post.entity';
 import { PostLike } from '../post/entity/post-likes.entity';
 import { Comment } from '../comment/entity/comment.entity';
 import { CommentLike } from '../comment/entity/comment-likes.entity';
+import { QuestionsModule } from '../questions/questions.module';
 
 @Module({
   imports: [
@@ -72,6 +73,7 @@ import { CommentLike } from '../comment/entity/comment-likes.entity';
     CommentModule,
     SecurityDevicesModule,
     MailModule,
+    QuestionsModule,
   ],
   controllers: [AppController],
   providers: [
