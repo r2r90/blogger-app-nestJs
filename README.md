@@ -1,25 +1,27 @@
 
-About the Project
+# Blogger App (NestJS)
 
-Blogger App (NestJS) is a backend blogging platform built using the NestJS framework and designed with modular architecture and scalability in mind. This application offers a comprehensive API for managing blogs, users, posts, likes, and comments, following clean code principles and best practices for RESTful API development.
+Blogger App is a backend blogging platform built with [NestJS](https://nestjs.com/) and PostgreSQL. It features a clean, modular architecture with full REST API support and user authentication. The application includes blog and post management, comment systems, likes, admin controls, and API documentation.
 
-🔧 Functionality
-	•	User Management: Registration, login, authentication (via JWT), and token refresh logic.
-	•	Blog Management: Create, update, delete, and retrieve blogs with pagination and filtering.
-	•	Post Management: Add posts to specific blogs, update or delete them, and view post details.
-	•	Commenting System: Users can comment on posts; comments support pagination and moderation.
-	•	Like System: Users can like both posts and comments. Like counts and user-specific status are returned with API responses.
-	•	Ban & Block Features: Admin-level banning of users or blogs.
-	•	API Documentation: Auto-generated Swagger documentation at /api.
+## 🚀 Features
 
-🗃️ Technology Stack
-	•	Framework: NestJS (with RESTful architecture)
-	•	Language: TypeScript
-	•	Database: PostgreSQL with TypeORM
-	•	Authentication: JWT (access and refresh tokens)
-	•	Containerization: Docker and Docker Compose
-	•	Validation & Guards: Uses NestJS pipes and guards for request validation and access control
+- 🔐 **User Authentication** (JWT access/refresh tokens)
+- 📝 **Blog & Post Management** (CRUD + pagination, filtering)
+- 💬 **Comment System** (add, edit, delete, moderate)
+- ❤️ **Likes** on posts and comments (with status tracking)
+- ⛔ **Ban/Block System** for blogs and users
+- 📄 **Swagger API Docs** at `/api`
+- 🐳 **Dockerized** for easy local dev and deployment
 
+## 🧰 Tech Stack
+
+- **NestJS** (TypeScript)
+- **PostgreSQL** (via TypeORM)
+- **JWT** for authentication
+- **Docker & Docker Compose**
+- **Swagger** for API docs
+
+## 🛠️ Getting Started
 
 
 
