@@ -1,3 +1,29 @@
+
+About the Project
+
+Blogger App (NestJS) is a backend blogging platform built using the NestJS framework and designed with modular architecture and scalability in mind. This application offers a comprehensive API for managing blogs, users, posts, likes, and comments, following clean code principles and best practices for RESTful API development.
+
+🔧 Functionality
+	•	User Management: Registration, login, authentication (via JWT), and token refresh logic.
+	•	Blog Management: Create, update, delete, and retrieve blogs with pagination and filtering.
+	•	Post Management: Add posts to specific blogs, update or delete them, and view post details.
+	•	Commenting System: Users can comment on posts; comments support pagination and moderation.
+	•	Like System: Users can like both posts and comments. Like counts and user-specific status are returned with API responses.
+	•	Ban & Block Features: Admin-level banning of users or blogs.
+	•	API Documentation: Auto-generated Swagger documentation at /api.
+
+🗃️ Technology Stack
+	•	Framework: NestJS (with RESTful architecture)
+	•	Language: TypeScript
+	•	Database: PostgreSQL with TypeORM
+	•	Authentication: JWT (access and refresh tokens)
+	•	Containerization: Docker and Docker Compose
+	•	Validation & Guards: Uses NestJS pipes and guards for request validation and access control
+
+
+
+
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
 </p>
